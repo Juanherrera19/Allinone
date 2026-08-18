@@ -31,7 +31,6 @@
   <body>
     <header>
       <div class="brand">All-in-One — Monitor Precio de Bolsa</div>
-      <div class="muted">Visor público — datos: <strong>/docs/data/precio_actual.json</strong></div>
     </header>
     <div class="layout">
       <nav>
@@ -39,10 +38,7 @@
         <button id="btn-despacho">Despacho Nal_Ties</button>
         <button id="btn-indicadores">Indicadores</button>
         <a id="btn-resumen" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank">Resumen operativo</a>
-        <hr style="border:none;height:1px;background:#081827;margin:12px 0">
-        <div class="muted">Acciones</div>
-        <button id="btn-run">Ejecutar ahora (Actions)</button>
-        <button id="btn-telegram">Enviar a Telegram</button>
+        <hr style="border:none;height:1px;background:#e6e9ed;margin:12px 0">
       </nav>
 
       <main>
@@ -74,6 +70,7 @@
           </div>
         </div>
 
+        <div id="kpis-container">
         <div class="kpis">
           <div class="kpi card"><div class="muted">Promedio</div><div id="k-prom" style="font-size:20px">—</div></div>
           <div class="kpi card"><div class="muted">Máximo</div><div id="k-max" style="font-size:20px">—</div></div>
@@ -91,9 +88,18 @@
         </div>
 
         <div class="card" style="margin-top:12px">
-          <h3>Instrucciones</h3>
-          <p class="muted">Para ejecutar el flujo desde GitHub sin usar la consola: 1) Añade Secrets (TELEGRAM_TOKEN, TELEGRAM_CHAT_ID), 2) Actions → selecciona el workflow 'Precio de Bolsa (XM)' → Run workflow.</p>
+          <h3>Pegar manualmente (texto o JSON)</h3>
+          <div class="muted">Si el scrapping falla, pega aquí el contenido del .txt o un JSON con {"serie": [...]}</div>
+          <textarea id="manual-text" placeholder="Pega aquí 24 valores separados por comas o JSON válido" style="width:100%;height:120px;margin-top:8px;padding:8px;border:1px solid #e6e9ed;border-radius:6px"></textarea>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+            <button id="btn-exec-manual" class="btn">Ejecutar manualmente</button>
+            <label style="margin-left:8px"><input id="manual-send-telegram-cb" type="checkbox" /> Enviar a Telegram al ejecutar</label>
+            <button id="btn-send-manual" class="btn" style="background:#2d9c6b;margin-left:8px">Enviar a Telegram</button>
+          </div>
+          <div id="manual-status" class="muted" style="margin-top:8px">Estado: inactivo</div>
         </div>
+
+        <!-- Instrucciones removidas por petición del usuario -->
 
       </main>
     </div>
@@ -106,10 +112,22 @@
           const r = await fetch('data/precio_actual.json');
           if(!r.ok) throw new Error('No data');
           const d = await r.json();
+          // Validate structure: must have serie array with 24 numeric values
+          if(!d || !Array.isArray(d.serie) || d.serie.length !== 24 || d.serie.some(v=>typeof v !== 'number')){
+            throw new Error('Datos inválidos o incompletos (se esperan 24 valores en "serie").');
+          }
           globalData = d;
           render(d);
         }catch(e){
-          document.getElementById('title-date').innerText = 'No hay datos en data/precio_actual.json';
+          globalData = null;
+          document.getElementById('title-date').innerText = 'No hay datos válidos en data/precio_actual.json';
+          document.getElementById('meta-source').innerText = '';
+          document.getElementById('k-prom').innerText = '—';
+          document.getElementById('k-max').innerText = '—';
+          document.getElementById('k-min').innerText = '—';
+          document.getElementById('k-horas').innerText = '—';
+          if(window._chart){ window._chart.destroy(); window._chart = null; }
+          console.warn('loadData error:', e.message);
         }
       }
 
@@ -145,8 +163,9 @@
       }
 
       document.getElementById('save-json').addEventListener('click', ()=>{
-        if(!globalData) return alert('No hay datos');
+        if(!globalData) return alert('No hay datos válidos para descargar');
         const newPrecio = parseFloat(document.getElementById('precio-input').value);
+        if (isNaN(newPrecio)) return alert('Introduce un valor numérico válido para Precio de Escasez');
         globalData.precio_escasez = newPrecio; globalData.meta = globalData.meta||{}; globalData.meta.editable_precio_escasez = newPrecio;
         const blob = new Blob([JSON.stringify(globalData,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='precio_actual.json'; a.click(); URL.revokeObjectURL(url);
       });
@@ -155,14 +174,19 @@
         const statusEl = document.getElementById('scrap-status');
         statusEl.innerText = 'Estado: ejecutando...';
         try{
-          const resp = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram})});
-          if(!resp.ok) throw new Error('No response from backend');
+          // POST only to explicit local endpoint; do not fake results.
+          const url = (location.protocol.startsWith('file') ? 'http://localhost:5000' : '') + '/api/run';
+          const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram})});
+          if(!resp.ok) {
+            const text = await resp.text().catch(()=>resp.statusText||'error');
+            throw new Error(text || 'Respuesta no OK');
+          }
           const j = await resp.json();
           statusEl.innerText = 'Última ejecución: ' + new Date().toLocaleString();
-          alert('Ejecución completada. Resultado:\n' + (j.message || JSON.stringify(j)));
+          alert('Ejecución iniciada correctamente. Respuesta: ' + (j.status || JSON.stringify(j)));
         }catch(e){
           statusEl.innerText = 'Estado: error';
-          alert('Error al ejecutar scrapping: '+e.message+'\nSi trabajas localmente, asegúrate de tener el backend corriendo.');
+          alert('No se pudo iniciar el scrapping. Motivo: '+e.message+'\nAsegúrate de ejecutar el backend (python src/api_runner.py) y de servir esta página desde HTTP (python -m http.server 8000).');
         }
       }
 
@@ -183,13 +207,77 @@
         if(scheduleId) { clearInterval(scheduleId); scheduleId = null; document.getElementById('scrap-status').innerText = 'Estado: detenido'; }
       });
 
-      document.getElementById('btn-run').addEventListener('click', ()=>{
-        alert('Para ejecutar desde GitHub Actions: Actions → Precio de Bolsa (XM) → Run workflow.');
+      function parseManualInput(text){
+        text = (text||'').trim();
+        if(!text) throw new Error('Entrada vacía');
+        // Try JSON parse first
+        try{
+          const obj = JSON.parse(text);
+          if(obj && Array.isArray(obj.serie)) return obj;
+        }catch(e){}
+        // Otherwise try to extract numbers
+        // Accept comma/newline/space separated values
+        const nums = text.split(/[\s,;|]+/).map(s=>s.replace(/[^0-9+\-.,eE]/g,'')).filter(Boolean).map(Number).filter(n=>!Number.isNaN(n));
+        if(nums.length===0) throw new Error('No se encontraron números en la entrada');
+        return { serie: nums };
+      }
+
+      function buildDataFromSerie(obj){
+        const serie = obj.serie.map(Number);
+        if(!Array.isArray(serie) || serie.length!==24) throw new Error('Se esperan exactamente 24 valores en la serie');
+        const sum = serie.reduce((a,b)=>a+b,0);
+        const prom = sum/serie.length;
+        const max = Math.max(...serie);
+        const min = Math.min(...serie);
+        const precioEsc = parseFloat(document.getElementById('precio-input').value) || null;
+        const umbral = precioEsc? precioEsc*0.95 : null;
+        return {
+          date: new Date().toISOString().slice(0,10),
+          serie: serie,
+          promedio: prom,
+          maximo: max,
+          minimo: min,
+          precio_escasez: precioEsc,
+          umbral: umbral,
+          meta: { source: { metric_id: 'manual_paste' }, editable_precio_escasez: precioEsc }
+        };
+      }
+
+      document.getElementById('btn-exec-manual').addEventListener('click', ()=>{
+        const txt = document.getElementById('manual-text').value;
+        const status = document.getElementById('manual-status');
+        try{
+          const parsed = parseManualInput(txt);
+          const data = buildDataFromSerie(parsed);
+          globalData = data; render(data);
+          status.innerText = 'Estado: datos cargados localmente';
+          if(document.getElementById('manual-send-telegram-cb').checked){
+            // try to send automatically
+            sendManualToBackend(true);
+          }
+        }catch(e){
+          status.innerText = 'Estado: error';
+          alert('Error al procesar entrada manual: '+e.message);
+        }
       });
 
-      document.getElementById('btn-telegram').addEventListener('click', ()=>{
-        alert('Enviar a Telegram: activa "Enviar a Telegram" antes de ejecutar el scrapping, o ejecuta el workflow en Actions.');
-      });
+      async function sendManualToBackend(sendTelegram){
+        const status = document.getElementById('manual-status');
+        if(!globalData) return alert('No hay datos cargados para enviar');
+        status.innerText = 'Estado: enviando...';
+        try{
+          const url = (location.protocol.startsWith('file') ? 'http://localhost:5000' : '') + '/api/run';
+          const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram, manual_data: globalData, manual:true})});
+          if(!resp.ok){ const t = await resp.text().catch(()=>resp.statusText||'error'); throw new Error(t||'Error en backend'); }
+          const j = await resp.json();
+          status.innerText = 'Estado: enviado';
+          alert('Enviado al backend. Respuesta: '+(j.status||JSON.stringify(j)));
+        }catch(e){ status.innerText = 'Estado: error'; alert('No se pudo enviar al backend: '+e.message+'\nAsegúrate de tener el backend corriendo (python src/api_runner.py)'); }
+      }
+
+      document.getElementById('btn-send-manual').addEventListener('click', ()=>sendManualToBackend(true));
+
+      // Removed 'Ejecutar ahora' and 'Enviar a Telegram' buttons as requested.
 
       // navigation buttons (visual only)
       ['price','despacho','indicadores'].forEach(id=>{
