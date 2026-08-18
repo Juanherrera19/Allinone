@@ -24,6 +24,7 @@
       table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
       table td,table th{padding:8px;border-bottom:1px solid #f1f3f5}
       .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+      .chart-shell{position:relative;height:420px}
       footer{padding:12px;color:var(--muted);text-align:center}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -79,7 +80,12 @@
           <div class="kpi card"><div class="muted">Horas > Umbral</div><div id="k-horas" style="font-size:20px">—</div></div>
         </div>
 
-        <div class="card"><canvas id="chart" height="120"></canvas></div>
+        <div class="card">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+            <button id="download-auto-chart" class="btn">Descargar gráfica PNG</button>
+          </div>
+          <div class="chart-shell"><canvas id="chart"></canvas></div>
+        </div>
 
         <div class="card" style="margin-top:12px">
           <h3>Texto original para Telegram</h3>
@@ -117,6 +123,27 @@
           </div>
           <div id="manual-status" class="muted" style="margin-top:8px">Estado: inactivo</div>
         </div>
+
+        <div id="manual-results" hidden>
+          <div class="kpis" style="margin-top:12px">
+            <div class="kpi card"><div class="muted">Promedio</div><div id="manual-k-prom" style="font-size:20px">—</div></div>
+            <div class="kpi card"><div class="muted">Máximo</div><div id="manual-k-max" style="font-size:20px">—</div></div>
+            <div class="kpi card"><div class="muted">Mínimo</div><div id="manual-k-min" style="font-size:20px">—</div></div>
+            <div class="kpi card"><div class="muted">Horas > Umbral</div><div id="manual-k-horas" style="font-size:20px">—</div></div>
+          </div>
+
+          <div class="card">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+              <button id="download-manual-chart" class="btn">Descargar gráfica PNG</button>
+            </div>
+            <div class="chart-shell"><canvas id="manual-chart"></canvas></div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Texto original para Telegram</h3>
+            <pre id="manual-original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
+          </div>
+        </div>
         </section>
 
         <!-- El texto original se muestra en el módulo AUTO. -->
@@ -138,7 +165,7 @@
           }
           d.serie = normalizeSerie(d.serie);
           globalData = d;
-          render(d);
+          render(d, 'auto');
         }catch(e){
           globalData = null;
           document.getElementById('title-date').innerText = 'No hay datos válidos en data/precio_actual.json';
@@ -152,28 +179,24 @@
         }
       }
 
-      function render(d){
+      function render(d, mode='auto'){
+        const manual = mode === 'manual';
+        const prefix = manual ? 'manual-' : '';
         document.getElementById('title-date').innerText = d.date;
         document.getElementById('meta-source').innerText = 'Fuente: ' + (d.meta && d.meta.source && d.meta.source.metric_id ? d.meta.source.metric_id : 'pydataxm');
-        document.getElementById('k-prom').innerText = `$${Number(d.promedio).toFixed(2)}`;
-        document.getElementById('k-max').innerText = `$${Number(d.maximo).toFixed(2)}`;
-        document.getElementById('k-min').innerText = `$${Number(d.minimo).toFixed(2)}`;
+        document.getElementById(prefix + 'k-prom').innerText = `$${Number(d.promedio).toFixed(2)}`;
+        document.getElementById(prefix + 'k-max').innerText = `$${Number(d.maximo).toFixed(2)}`;
+        document.getElementById(prefix + 'k-min').innerText = `$${Number(d.minimo).toFixed(2)}`;
         const umbral = d.umbral || (d.precio_escasez*0.95);
         const horas = d.serie.filter(x=>x>=umbral).length;
-        document.getElementById('k-horas').innerText = horas;
-        document.getElementById('original-text').innerText = buildOriginalText(d);
-        document.getElementById('precio-input').value = d.meta&&d.meta.editable_precio_escasez?d.meta.editable_precio_escasez:d.precio_escasez;
-
-        // chart
-        const ctx = document.getElementById('chart').getContext('2d');
-        if(window._chart) window._chart.destroy();
-        window._chart = new Chart(ctx, {
-          type:'line',
-          data:{labels:d.serie.map((_,i)=>i.toString().padStart(2,'0')),datasets:[{label:'Costo Marginal',data:d.serie,borderColor:'#00a3ff',backgroundColor:'rgba(0,163,255,0.08)',pointRadius:4}]},
-          options:{scales:{y:{beginAtZero:false}}}
-        });
+        document.getElementById(prefix + 'k-horas').innerText = horas;
+        document.getElementById(manual ? 'manual-original-text' : 'original-text').innerText = buildOriginalText(d);
+        if(!manual) document.getElementById('precio-input').value = d.meta&&d.meta.editable_precio_escasez?d.meta.editable_precio_escasez:d.precio_escasez;
+        if(manual) document.getElementById('manual-results').hidden = false;
+        drawPriceChart(manual ? 'manual-chart' : 'chart', d, manual ? 'manualChart' : 'autoChart');
 
         // history
+        if(manual) return;
         try{
           fetch('data/historico.json').then(r=>r.json()).then(hist=>{
             const tb = document.querySelector('#history-table tbody');tb.innerHTML='';
@@ -182,6 +205,78 @@
             });
           }).catch(()=>{});
         }catch(e){}
+      }
+
+      const priceLabelsPlugin = {
+        id: 'priceLabels',
+        afterDatasetsDraw(chart){
+          const dataset = chart.data.datasets[0];
+          const meta = chart.getDatasetMeta(0);
+          const ctx = chart.ctx;
+          ctx.save();
+          ctx.fillStyle = '#222';
+          ctx.font = '12px Segoe UI, Arial, sans-serif';
+          ctx.textAlign = 'center';
+          meta.data.forEach((point, index) => {
+            const value = dataset.data[index];
+            const offset = index % 2 === 0 ? -12 : 18;
+            ctx.fillText(money(value), point.x, point.y + offset);
+          });
+          ctx.restore();
+        }
+      };
+
+      function drawPriceChart(canvasId, d, chartKey){
+        const canvas = document.getElementById(canvasId);
+        if(!canvas) return;
+        if(window[chartKey]) window[chartKey].destroy();
+        const maximo = Math.max(...d.serie);
+        const minimo = Math.min(...d.serie);
+        const umbral = Number(d.umbral || d.precio_escasez * 0.95);
+        const significant = d.serie.map((value, index) => index === 0 || Math.abs(value - d.serie[index - 1]) >= 20 ? value : null);
+        const labels = d.serie.map((_, index) => String(index).padStart(2, '0'));
+        const reference = (value, label, color) => ({
+          label: `${label}: $${money(value)}`,
+          data: labels.map(() => value),
+          borderColor: color,
+          borderDash: [6, 4],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          fill: false
+        });
+        window[chartKey] = new Chart(canvas.getContext('2d'), {
+          type: 'line',
+          plugins: [priceLabelsPlugin],
+          data: {
+            labels,
+            datasets: [
+              {label:'Costo Marginal', data:d.serie, borderColor:'#999999', backgroundColor:'#999999', borderWidth:2, pointRadius:5, pointBackgroundColor:'#999999', pointBorderColor:'#999999', tension:0},
+              {label:'Cambios Significativos', data:significant, borderColor:'transparent', backgroundColor:'#f2a007', pointRadius:6, pointBackgroundColor:'#f2a007', pointBorderColor:'#f2a007', showLine:false},
+              reference(maximo, 'Máximo', '#c43d3d'),
+              reference(minimo, 'Mínimo', '#4b9b5f'),
+              reference(umbral, 'Umbral de Escasez', '#3159ad')
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {padding: {top: 18, right: 12, bottom: 4, left: 8}},
+            scales: {
+              y: {min: Math.max(0, minimo - 50), max: maximo + 50, title:{display:true, text:'($) Costo Marginal'}},
+              x: {title:{display:true, text:'Horas'}, grid:{display:false}}
+            },
+            plugins: {legend:{position:'right', labels:{usePointStyle:true, boxWidth:28}}}
+          }
+        });
+      }
+
+      function downloadChart(chartKey, filename){
+        if(!window[chartKey]) return alert('No hay una gráfica disponible para descargar');
+        const link = document.createElement('a');
+        link.href = window[chartKey].toBase64Image('image/png', 1);
+        link.download = filename;
+        link.click();
       }
 
       function normalizeSerie(values){
@@ -321,7 +416,7 @@
         try{
           const parsed = parseManualInput(txt);
           const data = buildDataFromSerie(parsed);
-          globalData = data; render(data);
+          globalData = data; render(data, 'manual');
           status.innerText = 'Estado: datos cargados localmente';
           if(document.getElementById('manual-send-telegram-cb').checked){
             // try to send automatically
@@ -348,6 +443,8 @@
       }
 
       document.getElementById('btn-send-manual').addEventListener('click', ()=>sendManualToBackend(true));
+      document.getElementById('download-auto-chart').addEventListener('click', ()=>downloadChart('autoChart', 'precio-bolsa-auto.png'));
+      document.getElementById('download-manual-chart').addEventListener('click', ()=>downloadChart('manualChart', 'precio-bolsa-manual.png'));
 
       function selectTool(tool){
         const auto = tool === 'auto';
