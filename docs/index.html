@@ -6,26 +6,48 @@
     <title>All-in-One — Monitor Precio de Bolsa</title>
     <style>
       /* Palette adapted from the provided image: deep navy, off-white cards, muted blue accent */
-      :root{--bg:#f4f6f8;--card:#ffffff;--accent:#0b2340;--muted:#6b7b8f;--highlight:#d94b3d;--text:#0b2340}
-      body{font-family:Inter,Segoe UI,Arial;background:var(--bg);color:var(--text);margin:0}
+      :root{--bg:#ffffff;--card:#ffffff;--accent:#0b2340;--muted:#6b7b8f;--highlight:#d94b3d;--text:#0b2340}
+      *{box-sizing:border-box}
+      body{font-family:Inter,Segoe UI,Arial;background:var(--bg);color:var(--text);margin:0;min-width:0}
       header{padding:18px 24px;background:var(--accent);color:var(--card);display:flex;align-items:center;justify-content:space-between}
       .brand{font-size:18px;font-weight:700;color:var(--card)}
-      .layout{display:flex;height:calc(100vh - 68px)}
+      .layout{display:flex;min-height:calc(100vh - 68px)}
       nav{width:240px;background:var(--card);padding:18px;box-sizing:border-box;border-right:1px solid #e6e9ed}
       nav button, nav a{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--accent);text-align:left;cursor:pointer;text-decoration:none}
       nav button.active{background:var(--accent);color:white}
-      main{flex:1;padding:20px;overflow:auto}
-      .kpis{display:flex;gap:12px;margin-bottom:14px}
+      main{flex:1;min-width:0;padding:20px;overflow:auto}
+      .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
       .kpi{background:var(--card);padding:16px;border-radius:10px;flex:1;border:1px solid #e6e9ed}
-      .controls{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+      .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin-bottom:12px}
       .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
       .muted{color:var(--muted)}
       .card{background:var(--card);padding:14px;border-radius:10px;border:1px solid #e6e9ed}
       table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
       table td,table th{padding:8px;border-bottom:1px solid #f1f3f5}
-      .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-      .chart-shell{position:relative;height:420px}
+      .top-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px}
+      .chart-shell{position:relative;width:100%;height:420px;background:#ffffff}
+      canvas{display:block;max-width:100%}
       footer{padding:12px;color:var(--muted);text-align:center}
+      @media (max-width:800px){
+        header{padding:14px 16px}
+        .layout{display:block}
+        nav{width:100%;padding:10px 12px;border-right:0;border-bottom:1px solid #e6e9ed;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+        nav button,nav a{margin:0;padding:10px}
+        nav hr{display:none}
+        main{padding:12px}
+        .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .chart-shell{height:360px}
+      }
+      @media (max-width:480px){
+        .brand{font-size:16px}
+        .top-row{display:block}
+        .controls{justify-content:flex-start;margin-top:12px}
+        .controls input,.controls .btn{width:100%}
+        .kpis{grid-template-columns:1fr 1fr;gap:8px}
+        .kpi{padding:10px}
+        .chart-shell{height:320px}
+        .card{padding:10px}
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
@@ -213,18 +235,75 @@
           const dataset = chart.data.datasets[0];
           const meta = chart.getDatasetMeta(0);
           const ctx = chart.ctx;
+          const chartArea = chart.chartArea;
+          const candidates = dataset.data.map((value, index) => ({value, index, point: meta.data[index]}));
+          const labelIndexes = new Set([0, dataset.data.length - 1]);
+          dataset.data.forEach((value, index) => {
+            const previous = dataset.data[index - 1];
+            const next = dataset.data[index + 1];
+            if(index === 0 || index === dataset.data.length - 1 || value === Math.max(...dataset.data) || value === Math.min(...dataset.data) || (previous !== undefined && Math.abs(value - previous) >= 20) || (next !== undefined && Math.abs(next - value) >= 20)) labelIndexes.add(index);
+          });
+          const selected = candidates.filter(item => labelIndexes.has(item.index)).sort((a,b) => a.point.x - b.point.x);
+          const occupied = [];
           ctx.save();
           ctx.fillStyle = '#222';
           ctx.font = '12px Segoe UI, Arial, sans-serif';
           ctx.textAlign = 'center';
-          meta.data.forEach((point, index) => {
-            const value = dataset.data[index];
-            const offset = index % 2 === 0 ? -12 : 18;
-            ctx.fillText(money(value), point.x, point.y + offset);
+          selected.forEach(item => {
+            const text = money(item.value);
+            const width = ctx.measureText(text).width + 10;
+            const preferredY = item.point.y < chartArea.top + 42 ? item.point.y + 24 : item.point.y - 12;
+            const candidatesY = [preferredY, item.point.y + 24, item.point.y - 12, item.point.y + 38, item.point.y - 26];
+            let y = candidatesY.find(candidate => candidate > chartArea.top + 12 && candidate < chartArea.bottom - 4 && !occupied.some(box => Math.abs(box.x - item.point.x) < (box.width + width) / 2 && Math.abs(box.y - candidate) < 18));
+            if(y === undefined) return;
+            occupied.push({x:item.point.x, y, width});
+            ctx.fillText(text, item.point.x, y);
           });
+          drawInternalLegend(chart, ctx);
           ctx.restore();
         }
       };
+
+      function drawInternalLegend(chart, ctx){
+        const x = chart.chartArea.left + 18;
+        const y = chart.chartArea.top + 18;
+        const width = Math.min(245, chart.chartArea.width * 0.42);
+        const rows = [
+          ['Costo Marginal', '#999999', false],
+          ['Cambios Significativos', '#f2a007', true],
+          ['Máximo', '#c43d3d', false],
+          ['Mínimo', '#4b9b5f', false],
+          ['Umbral de Escasez', '#3159ad', false]
+        ];
+        const rowHeight = 19;
+        ctx.fillStyle = 'rgba(255,255,255,0.94)';
+        ctx.strokeStyle = '#d2d2d2';
+        ctx.lineWidth = 1;
+        ctx.fillRect(x, y, width, rowHeight * rows.length + 14);
+        ctx.strokeRect(x, y, width, rowHeight * rows.length + 14);
+        ctx.font = '12px Segoe UI, Arial, sans-serif';
+        ctx.textAlign = 'left';
+        rows.forEach((row, index) => {
+          const rowY = y + 20 + index * rowHeight;
+          ctx.strokeStyle = row[1];
+          ctx.lineWidth = 2;
+          if(row[2]){
+            ctx.fillStyle = row[1];
+            ctx.beginPath();
+            ctx.arc(x + 12, rowY - 4, 5, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.setLineDash(index > 1 ? [5, 3] : []);
+            ctx.beginPath();
+            ctx.moveTo(x + 5, rowY - 4);
+            ctx.lineTo(x + 21, rowY - 4);
+            ctx.stroke();
+            ctx.setLineDash([]);
+          }
+          ctx.fillStyle = '#222';
+          ctx.fillText(row[0], x + 30, rowY);
+        });
+      }
 
       function drawPriceChart(canvasId, d, chartKey){
         const canvas = document.getElementById(canvasId);
@@ -266,7 +345,7 @@
               y: {min: Math.max(0, minimo - 50), max: maximo + 50, title:{display:true, text:'($) Costo Marginal'}},
               x: {title:{display:true, text:'Horas'}, grid:{display:false}}
             },
-            plugins: {legend:{position:'right', labels:{usePointStyle:true, boxWidth:28}}}
+            plugins: {legend:{display:false}}
           }
         });
       }
