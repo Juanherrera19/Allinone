@@ -1,0 +1,57 @@
+name: Precio de Bolsa (XM)
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC (adjust as needed)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run month-change alert (best-effort)
+        run: python scripts/check_month_alert.py
+        continue-on-error: true
+
+      - name: Run price workflow
+        run: python scripts/run_price.py --date tomorrow
+        env:
+          # If you prefer to override credentials in Actions, set these secrets in the repository.
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          XM_API_URL: ${{ secrets.XM_API_URL }}
+          XM_API_KEY: ${{ secrets.XM_API_KEY }}
+
+      - name: Copy generated data to docs
+        run: |
+          mkdir -p docs/data
+          cp -v data/*.json docs/data/ || true
+          cp -v data/*.png docs/data/ || true
+
+      - name: Commit and push data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data || true
+          git commit -m "chore: update docs data from workflow" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
