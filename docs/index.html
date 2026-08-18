@@ -70,6 +70,18 @@
           </div>
         </div>
 
+        <div class="card" style="margin-top:12px">
+          <h3>Precio de Bolsa manual</h3>
+          <div class="muted">Introduce aquí el `Precio de Escasez` manual que quieres guardar para los siguientes días.</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+            <input id="precio-manual-input" type="number" step="0.01" placeholder="Precio de Escasez" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:200px" />
+            <button id="precio-save-local" class="btn">Guardar localmente</button>
+            <button id="precio-save-download" class="btn" style="background:#2d9c6b">Guardar como JSON</button>
+            <button id="precio-save-server" class="btn" style="background:#0b5a88">Guardar en servidor</button>
+          </div>
+          <div id="precio-manual-status" class="muted" style="margin-top:8px">Estado: sin guardar</div>
+        </div>
+
         <div id="kpis-container">
         <div class="kpis">
           <div class="kpi card"><div class="muted">Promedio</div><div id="k-prom" style="font-size:20px">—</div></div>
@@ -215,8 +227,20 @@
           const obj = JSON.parse(text);
           if(obj && Array.isArray(obj.serie)) return obj;
         }catch(e){}
-        // Otherwise try to extract numbers
-        // Accept comma/newline/space separated values
+        // If the pasted text is the full TXT with multiple labeled lines, try to extract the "Costo Marginal" line
+        const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+        for(const l of lines){
+          // Accept lines like: "Costo Marginal",795000.00, 737544.00, ...
+          const lower = l.toLowerCase();
+          if(lower.startsWith('"costo marginal"') || lower.startsWith('costo marginal') || lower.startsWith('"costo_marginal"') || lower.startsWith('costo_marginal')){
+            // remove leading label and optional quotes
+            const parts = l.split(',').map(p=>p.trim());
+            // drop first token (label)
+            const nums = parts.slice(1).map(s=>s.replace(/[^0-9+\-.,eE]/g,'')).filter(Boolean).map(Number).filter(n=>!Number.isNaN(n));
+            if(nums.length>0) return { serie: nums };
+          }
+        }
+        // Otherwise try to extract numbers from the whole text
         const nums = text.split(/[\s,;|]+/).map(s=>s.replace(/[^0-9+\-.,eE]/g,'')).filter(Boolean).map(Number).filter(n=>!Number.isNaN(n));
         if(nums.length===0) throw new Error('No se encontraron números en la entrada');
         return { serie: nums };
@@ -276,6 +300,48 @@
       }
 
       document.getElementById('btn-send-manual').addEventListener('click', ()=>sendManualToBackend(true));
+
+      // Precio manual handlers
+      function savePrecioLocal(){
+        const val = parseFloat(document.getElementById('precio-manual-input').value);
+        const status = document.getElementById('precio-manual-status');
+        if(isNaN(val)){ alert('Introduce un precio válido'); return; }
+        const payload = { date: new Date().toISOString().slice(0,10), precio_escasez: val };
+        try{
+          // Save to localStorage for persistence across page loads
+          localStorage.setItem('precio_escasez_manual', JSON.stringify(payload));
+          // append to history
+          const hist = JSON.parse(localStorage.getItem('precio_escasez_history')||'[]'); hist.push(payload); localStorage.setItem('precio_escasez_history', JSON.stringify(hist));
+          status.innerText = 'Estado: guardado localmente';
+        }catch(e){ status.innerText = 'Estado: error al guardar'; alert('No se pudo guardar localmente: '+e.message); }
+      }
+
+      function downloadPrecioJSON(){
+        const val = parseFloat(document.getElementById('precio-manual-input').value);
+        if(isNaN(val)){ alert('Introduce un precio válido'); return; }
+        const payload = { date: new Date().toISOString().slice(0,10), precio_escasez: val };
+        const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='precio_escasez.json'; a.click(); URL.revokeObjectURL(url);
+      }
+
+      async function savePrecioServer(){
+        const val = parseFloat(document.getElementById('precio-manual-input').value);
+        const status = document.getElementById('precio-manual-status');
+        if(isNaN(val)){ alert('Introduce un precio válido'); return; }
+        status.innerText = 'Estado: enviando al servidor...';
+        try{
+          const url = (location.protocol.startsWith('file') ? 'http://localhost:5000' : '') + '/api/save_price';
+          const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({date:new Date().toISOString().slice(0,10), precio_escasez: val})});
+          if(!resp.ok){ const t = await resp.text().catch(()=>resp.statusText||'error'); throw new Error(t||'Error'); }
+          const j = await resp.json(); status.innerText = 'Estado: guardado en servidor'; alert('Servidor respondió: '+(j.status||JSON.stringify(j)));
+        }catch(e){ status.innerText = 'Estado: error'; alert('No se pudo guardar en servidor: '+e.message+'\nSi quieres, puedo añadir soporte en el backend para `/api/save_price`.'); }
+      }
+
+      document.getElementById('precio-save-local').addEventListener('click', savePrecioLocal);
+      document.getElementById('precio-save-download').addEventListener('click', downloadPrecioJSON);
+      document.getElementById('precio-save-server').addEventListener('click', savePrecioServer);
+
+      // On load, populate precio-manual-input from localStorage if exists
+      try{ const saved = JSON.parse(localStorage.getItem('precio_escasez_manual')||'null'); if(saved && saved.precio_escasez) document.getElementById('precio-manual-input').value = saved.precio_escasez; }catch(e){}
 
       // Removed 'Ejecutar ahora' and 'Enviar a Telegram' buttons as requested.
 
