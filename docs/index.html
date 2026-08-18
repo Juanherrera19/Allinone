@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>All-in-One — Monitor Precio de Bolsa</title>
+    <style>
+      :root{--bg:#0b1220;--card:#0e1724;--accent:#0e56ad;--text:#e6eef8}
+      body{font-family:Inter,Segoe UI,Arial;background:var(--bg);color:var(--text);margin:0}
+      header{padding:18px 24px;background:linear-gradient(90deg,#071126, #0b1a2a);display:flex;align-items:center;justify-content:space-between}
+      .brand{font-size:18px;font-weight:700}
+      .layout{display:flex;height:calc(100vh - 68px)}
+      nav{width:220px;background:var(--card);padding:18px;box-sizing:border-box}
+      nav button{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--text);text-align:left;cursor:pointer}
+      nav button.active{background:var(--accent);color:white}
+      main{flex:1;padding:20px;overflow:auto}
+      .kpis{display:flex;gap:12px;margin-bottom:14px}
+      .kpi{background:linear-gradient(180deg,#0f2340,#0b1a2a);padding:16px;border-radius:10px;flex:1}
+      .controls{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+      .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+      .muted{color:#9fb0d5}
+      .card{background:var(--card);padding:14px;border-radius:10px}
+      table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
+      table td,table th{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+      .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+      footer{padding:12px;color:#9fb0d5;text-align:center}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">All-in-One — Monitor Precio de Bolsa</div>
+      <div class="muted">Visor público — datos: <strong>/docs/data/precio_actual.json</strong></div>
+    </header>
+    <div class="layout">
+      <nav>
+        <button id="btn-price" class="active">Precio de Bolsa</button>
+        <button id="btn-despacho">Despacho Nal_Ties</button>
+        <button id="btn-indicadores">Indicadores</button>
+        <button id="btn-resumen">Resumen operativo</button>
+        <hr style="border:none;height:1px;background:#081827;margin:12px 0">
+        <div class="muted">Acciones</div>
+        <button id="btn-run">Ejecutar ahora (Actions)</button>
+        <button id="btn-telegram">Enviar a Telegram</button>
+      </nav>
+
+      <main>
+        <div class="top-row">
+          <div>
+            <h2 id="title-date">—</h2>
+            <div class="muted" id="meta-source">Fuente: —</div>
+          </div>
+          <div class="controls">
+            <input id="precio-input" type="number" step="0.01" style="padding:8px;border-radius:8px;border:none;width:160px" />
+            <button id="save-json" class="btn">Descargar JSON</button>
+            <button id="download-pr" class="btn" style="background:#2d9c6b">Crear PR (manual)</button>
+          </div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi card"><div class="muted">Promedio</div><div id="k-prom" style="font-size:20px">—</div></div>
+          <div class="kpi card"><div class="muted">Máximo</div><div id="k-max" style="font-size:20px">—</div></div>
+          <div class="kpi card"><div class="muted">Mínimo</div><div id="k-min" style="font-size:20px">—</div></div>
+          <div class="kpi card"><div class="muted">Horas > Umbral</div><div id="k-horas" style="font-size:20px">—</div></div>
+        </div>
+
+        <div class="card">
+          <canvas id="chart" height="120"></canvas>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Histórico reciente</h3>
+          <table id="history-table"><thead><tr><th>Fecha</th><th>Promedio</th><th>Máx</th><th>Mín</th></tr></thead><tbody></tbody></table>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Instrucciones</h3>
+          <p class="muted">Para ejecutar el flujo desde GitHub sin usar la consola: 1) Añade Secrets (TELEGRAM_TOKEN, TELEGRAM_CHAT_ID), 2) Actions → selecciona el workflow 'Precio de Bolsa (XM)' → Run workflow.</p>
+        </div>
+
+      </main>
+    </div>
+    <footer>Diseñado para GitHub Pages • Actualizaciones vía GitHub Actions</footer>
+
+    <script>
+      let globalData = null;
+      async function loadData(){
+        try{
+          const r = await fetch('data/precio_actual.json');
+          if(!r.ok) throw new Error('No data');
+          const d = await r.json();
+          globalData = d;
+          render(d);
+        }catch(e){
+          document.getElementById('title-date').innerText = 'No hay datos en data/precio_actual.json';
+        }
+      }
+
+      function render(d){
+        document.getElementById('title-date').innerText = d.date;
+        document.getElementById('meta-source').innerText = 'Fuente: ' + (d.meta && d.meta.source && d.meta.source.metric_id ? d.meta.source.metric_id : 'pydataxm');
+        document.getElementById('k-prom').innerText = `$${Number(d.promedio).toFixed(2)}`;
+        document.getElementById('k-max').innerText = `$${Number(d.maximo).toFixed(2)}`;
+        document.getElementById('k-min').innerText = `$${Number(d.minimo).toFixed(2)}`;
+        const umbral = d.umbral || (d.precio_escasez*0.95);
+        const horas = d.serie.filter(x=>x>=umbral).length;
+        document.getElementById('k-horas').innerText = horas;
+        document.getElementById('precio-input').value = d.meta&&d.meta.editable_precio_escasez?d.meta.editable_precio_escasez:d.precio_escasez;
+
+        // chart
+        const ctx = document.getElementById('chart').getContext('2d');
+        if(window._chart) window._chart.destroy();
+        window._chart = new Chart(ctx, {
+          type:'line',
+          data:{labels:d.serie.map((_,i)=>i.toString().padStart(2,'0')),datasets:[{label:'Costo Marginal',data:d.serie,borderColor:'#00a3ff',backgroundColor:'rgba(0,163,255,0.08)',pointRadius:4}]},
+          options:{scales:{y:{beginAtZero:false}}}
+        });
+
+        // history
+        try{
+          fetch('data/historico.json').then(r=>r.json()).then(hist=>{
+            const tb = document.querySelector('#history-table tbody');tb.innerHTML='';
+            hist.slice(-20).reverse().forEach(h=>{
+              const tr=document.createElement('tr');tr.innerHTML=`<td>${h.date}</td><td>$${Number(h.promedio).toFixed(2)}</td><td>$${Number(h.maximo).toFixed(2)}</td><td>$${Number(h.minimo).toFixed(2)}</td>`;tb.appendChild(tr);
+            });
+          }).catch(()=>{});
+        }catch(e){}
+      }
+
+      document.getElementById('save-json').addEventListener('click', ()=>{
+        if(!globalData) return alert('No hay datos');
+        const newPrecio = parseFloat(document.getElementById('precio-input').value);
+        globalData.precio_escasez = newPrecio; globalData.meta = globalData.meta||{}; globalData.meta.editable_precio_escasez = newPrecio;
+        const blob = new Blob([JSON.stringify(globalData,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='precio_actual.json'; a.click(); URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('btn-run').addEventListener('click', ()=>{
+        alert('Para ejecutar ahora: en GitHub → Actions → Precio de Bolsa (XM) → Run workflow.\nSi quieres automatizar desde la web, pega un Personal Access Token en la configuración (riesgo de seguridad).');
+      });
+
+      document.getElementById('btn-telegram').addEventListener('click', ()=>{
+        alert('Enviar a Telegram: el workflow envía la imagen/texto automáticamente tras ejecución. Ejecuta el workflow desde Actions para forzar envío.');
+      });
+
+      // navigation buttons (visual only)
+      ['price','despacho','indicadores','resumen'].forEach(id=>{
+        const btn=document.getElementById('btn-'+id.replace('_',''))||document.getElementById('btn-'+id);
+        if(btn) btn.addEventListener('click', ()=>{
+          document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+          // simple content swap: only Precio implemented now
+          if(id!=='price') alert('Módulo '+id+' no implementado aún.');
+        });
+      });
+
+      loadData();
+    </script>
+  </body>
+</html>
