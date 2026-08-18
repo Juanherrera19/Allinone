@@ -34,7 +34,8 @@
     </header>
     <div class="layout">
       <nav>
-        <button id="btn-price" class="active">Precio de Bolsa</button>
+        <button id="btn-price-auto" class="active">Precio de Bolsa (AUTO)</button>
+        <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
         <button id="btn-despacho">Despacho Nal_Ties</button>
         <button id="btn-indicadores">Indicadores</button>
         <a id="btn-resumen" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank">Resumen operativo</a>
@@ -47,39 +48,27 @@
             <h2 id="title-date">—</h2>
             <div class="muted" id="meta-source">Fuente: —</div>
           </div>
-          <div class="controls">
+          <div class="controls" id="auto-controls">
             <input id="precio-input" type="number" step="0.01" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:160px" />
             <button id="save-json" class="btn">Descargar JSON</button>
             <button id="download-pr" class="btn" style="background:#2d9c6b">Crear PR (manual)</button>
           </div>
-          <div class="card" style="margin-top:12px;display:flex;gap:12px;align-items:center">
-            <div style="flex:1">
-              <div class="muted">Scrapping / Ejecución</div>
-              <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-                <label class="muted">Intervalo (min):</label>
-                <input id="interval-mins" type="number" min="1" value="60" style="width:100px;padding:6px;border:1px solid #e6e9ed;border-radius:6px" />
-                <label style="margin-left:8px"><input id="send-telegram-cb" type="checkbox" /> Enviar a Telegram</label>
-              </div>
-              <div style="margin-top:8px">
-                <button id="start-schedule" class="btn">Iniciar programado</button>
-                <button id="stop-schedule" class="btn" style="background:#888;margin-left:8px">Detener</button>
-                <button id="run-once" class="btn" style="background:var(--highlight);margin-left:8px">Ejecutar ahora</button>
-              </div>
-              <div id="scrap-status" class="muted" style="margin-top:8px">Estado: detenido</div>
-            </div>
-          </div>
         </div>
 
+        <section id="auto-tool">
         <div class="card" style="margin-top:12px">
-          <h3>Precio de Bolsa manual</h3>
-          <div class="muted">Introduce aquí el `Precio de Escasez` manual que quieres guardar para los siguientes días.</div>
+          <div class="muted">Scrapping / Ejecución</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-            <input id="precio-manual-input" type="number" step="0.01" placeholder="Precio de Escasez" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:200px" />
-            <button id="precio-save-local" class="btn">Guardar localmente</button>
-            <button id="precio-save-download" class="btn" style="background:#2d9c6b">Guardar como JSON</button>
-            <button id="precio-save-server" class="btn" style="background:#0b5a88">Guardar en servidor</button>
+            <label class="muted">Intervalo (min):</label>
+            <input id="interval-mins" type="number" min="1" value="60" style="width:100px;padding:6px;border:1px solid #e6e9ed;border-radius:6px" />
+            <label style="margin-left:8px"><input id="send-telegram-cb" type="checkbox" /> Enviar a Telegram</label>
           </div>
-          <div id="precio-manual-status" class="muted" style="margin-top:8px">Estado: sin guardar</div>
+          <div style="margin-top:8px">
+            <button id="start-schedule" class="btn">Iniciar programado</button>
+            <button id="stop-schedule" class="btn" style="background:#888;margin-left:8px">Detener</button>
+            <button id="run-once" class="btn" style="background:var(--highlight);margin-left:8px">Ejecutar ahora</button>
+          </div>
+          <div id="scrap-status" class="muted" style="margin-top:8px">Estado: detenido</div>
         </div>
 
         <div id="kpis-container">
@@ -90,13 +79,31 @@
           <div class="kpi card"><div class="muted">Horas > Umbral</div><div id="k-horas" style="font-size:20px">—</div></div>
         </div>
 
-        <div class="card">
-          <canvas id="chart" height="120"></canvas>
+        <div class="card"><canvas id="chart" height="120"></canvas></div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Texto original para Telegram</h3>
+          <pre id="original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
         </div>
 
         <div class="card" style="margin-top:12px">
           <h3>Histórico reciente</h3>
           <table id="history-table"><thead><tr><th>Fecha</th><th>Promedio</th><th>Máx</th><th>Mín</th></tr></thead><tbody></tbody></table>
+        </div>
+        </div>
+        </section>
+
+        <section id="manual-tool" hidden>
+        <div class="card" style="margin-top:12px">
+          <h3>Precio de Bolsa (MANUAL)</h3>
+          <div class="muted">Introduce aquí el `Precio de Escasez` manual que quieres guardar para los siguientes días.</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+            <input id="precio-manual-input" type="number" step="0.01" placeholder="Precio de Escasez" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:200px" />
+            <button id="precio-save-local" class="btn">Guardar localmente</button>
+            <button id="precio-save-download" class="btn" style="background:#2d9c6b">Guardar como JSON</button>
+            <button id="precio-save-server" class="btn" style="background:#0b5a88">Guardar en servidor</button>
+          </div>
+          <div id="precio-manual-status" class="muted" style="margin-top:8px">Estado: sin guardar</div>
         </div>
 
         <div class="card" style="margin-top:12px">
@@ -110,8 +117,9 @@
           </div>
           <div id="manual-status" class="muted" style="margin-top:8px">Estado: inactivo</div>
         </div>
+        </section>
 
-        <!-- Instrucciones removidas por petición del usuario -->
+        <!-- El texto original se muestra en el módulo AUTO. -->
 
       </main>
     </div>
@@ -128,6 +136,7 @@
           if(!d || !Array.isArray(d.serie) || d.serie.length !== 24 || d.serie.some(v=>typeof v !== 'number')){
             throw new Error('Datos inválidos o incompletos (se esperan 24 valores en "serie").');
           }
+          d.serie = normalizeSerie(d.serie);
           globalData = d;
           render(d);
         }catch(e){
@@ -152,6 +161,7 @@
         const umbral = d.umbral || (d.precio_escasez*0.95);
         const horas = d.serie.filter(x=>x>=umbral).length;
         document.getElementById('k-horas').innerText = horas;
+        document.getElementById('original-text').innerText = buildOriginalText(d);
         document.getElementById('precio-input').value = d.meta&&d.meta.editable_precio_escasez?d.meta.editable_precio_escasez:d.precio_escasez;
 
         // chart
@@ -172,6 +182,39 @@
             });
           }).catch(()=>{});
         }catch(e){}
+      }
+
+      function normalizeSerie(values){
+        const serie = values.map(Number);
+        return Math.max(...serie) > 10000 ? serie.map(value => value / 1000) : serie;
+      }
+
+      function money(value){
+        return Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      }
+
+      function buildOriginalText(d){
+        const umbral = Number(d.umbral || d.precio_escasez * 0.95);
+        const maximo = Math.max(...d.serie);
+        const minimo = Math.min(...d.serie);
+        const promedio = d.serie.reduce((sum, value) => sum + value, 0) / d.serie.length;
+        const supera = d.serie.filter(value => value >= umbral).length;
+        const diferencia = maximo - umbral;
+        const lines = [
+          'Precio de bolsa horario', '',
+          `-*Precio Escasez: $${money(d.precio_escasez)}*`,
+          `-Umbral de Escasez: *$${money(umbral)}*`,
+          `-Los valores máximos alcanzan: $${money(maximo)} a $${money(diferencia)} sobre el umbral`,
+          `-Mínimo: $${money(minimo)}`,
+          `-Promedio: $${money(promedio)}`,
+          `-*Hay ${supera} valores por encima del umbral de escasez*`, '',
+          'Valores de la serie:', ''
+        ];
+        d.serie.forEach((value, hour) => {
+          const line = `${String(hour).padStart(2, '0')}: $${money(value)}`;
+          lines.push(value >= umbral ? `*${line}*` : line);
+        });
+        return lines.join('\n');
       }
 
       document.getElementById('save-json').addEventListener('click', ()=>{
@@ -230,6 +273,11 @@
         // If the pasted text is the full TXT with multiple labeled lines, try to extract the "Costo Marginal" line
         const lines = text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
         for(const l of lines){
+          const hourly = l.match(/^\*?(\d{2}):\s*\$?([\d,]+(?:\.\d+)?)\*?$/);
+          if(hourly) {
+            const hourlyValues = lines.map(line => line.match(/^\*?(\d{2}):\s*\$?([\d,]+(?:\.\d+)?)\*?$/)).filter(Boolean).sort((a,b)=>Number(a[1])-Number(b[1])).map(match=>Number(match[2].replace(/,/g, '')));
+            if(hourlyValues.length === 24) return { serie: hourlyValues };
+          }
           // Accept lines like: "Costo Marginal",795000.00, 737544.00, ...
           const lower = l.toLowerCase();
           if(lower.startsWith('"costo marginal"') || lower.startsWith('costo marginal') || lower.startsWith('"costo_marginal"') || lower.startsWith('costo_marginal')){
@@ -247,13 +295,13 @@
       }
 
       function buildDataFromSerie(obj){
-        const serie = obj.serie.map(Number);
+        const serie = normalizeSerie(obj.serie);
         if(!Array.isArray(serie) || serie.length!==24) throw new Error('Se esperan exactamente 24 valores en la serie');
         const sum = serie.reduce((a,b)=>a+b,0);
         const prom = sum/serie.length;
         const max = Math.max(...serie);
         const min = Math.min(...serie);
-        const precioEsc = parseFloat(document.getElementById('precio-input').value) || null;
+        const precioEsc = parseFloat(document.getElementById('precio-manual-input').value || document.getElementById('precio-input').value) || null;
         const umbral = precioEsc? precioEsc*0.95 : null;
         return {
           date: new Date().toISOString().slice(0,10),
@@ -301,6 +349,17 @@
 
       document.getElementById('btn-send-manual').addEventListener('click', ()=>sendManualToBackend(true));
 
+      function selectTool(tool){
+        const auto = tool === 'auto';
+        document.getElementById('auto-tool').hidden = !auto;
+        document.getElementById('manual-tool').hidden = auto;
+        document.getElementById('auto-controls').hidden = !auto;
+        document.getElementById('btn-price-auto').classList.toggle('active', auto);
+        document.getElementById('btn-price-manual').classList.toggle('active', !auto);
+      }
+      document.getElementById('btn-price-auto').addEventListener('click', ()=>selectTool('auto'));
+      document.getElementById('btn-price-manual').addEventListener('click', ()=>selectTool('manual'));
+
       // Precio manual handlers
       function savePrecioLocal(){
         const val = parseFloat(document.getElementById('precio-manual-input').value);
@@ -346,7 +405,7 @@
       // Removed 'Ejecutar ahora' and 'Enviar a Telegram' buttons as requested.
 
       // navigation buttons (visual only)
-      ['price','despacho','indicadores'].forEach(id=>{
+      ['despacho','indicadores'].forEach(id=>{
         const btn=document.getElementById('btn-'+id.replace('_',''))||document.getElementById('btn-'+id);
         if(btn) btn.addEventListener('click', ()=>{
           document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
