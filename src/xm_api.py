@@ -10,6 +10,16 @@ from datetime import datetime
 XM_API_URL = os.getenv("XM_API_URL")
 XM_API_KEY = os.getenv("XM_API_KEY")
 
+# Allow local config file (user asked not to use GitHub secrets)
+try:
+    from config_local import XM_API_URL as LOCAL_XM_API_URL, XM_API_KEY as LOCAL_XM_API_KEY
+    if not XM_API_URL and LOCAL_XM_API_URL:
+        XM_API_URL = LOCAL_XM_API_URL
+    if not XM_API_KEY and LOCAL_XM_API_KEY:
+        XM_API_KEY = LOCAL_XM_API_KEY
+except Exception:
+    pass
+
 def fetch_imar_for_date(target_date: datetime):
     """Consulta la API de XM para obtener la serie IMAR del `target_date`.
 

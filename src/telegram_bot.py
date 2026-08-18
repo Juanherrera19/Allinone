@@ -1,24 +1,35 @@
 import os
 import requests
 
+# Prefer explicit environment vars, then local config_local.py (user requested no secrets),
+# then fall back to previous heuristic.
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
+try:
+    # import local config if present
+    from config_local import TELEGRAM_TOKEN as LOCAL_TELEGRAM_TOKEN, TELEGRAM_CHAT_ID as LOCAL_TELEGRAM_CHAT_ID
+    if not TELEGRAM_TOKEN and LOCAL_TELEGRAM_TOKEN:
+        TELEGRAM_TOKEN = LOCAL_TELEGRAM_TOKEN
+    if not TELEGRAM_CHAT_ID and LOCAL_TELEGRAM_CHAT_ID:
+        TELEGRAM_CHAT_ID = LOCAL_TELEGRAM_CHAT_ID
+except Exception:
+    pass
+
 if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
-    # intentar extraer del archivo local original si existe (ruta del programa original)
+    # last-resort: try to parse legacy script for tokens (best-effort)
     try:
-        original = os.path.join('PYTHON', 'PROGRAMAS', 'ALL IN ONE', 'PRECIO DE BOLSA - AUTO.py')
+        original = os.path.join('PRECIO DE BOLSA - AUTO.py')
         if os.path.exists(original):
             with open(original, 'r', encoding='utf-8') as f:
                 txt = f.read()
-            # buscar constantes conocidas
             import re
             m_token = re.search(r'TELEGRAM_TOKEN\s*=\s*"([^"]+)"', txt)
             m_chat = re.search(r'TELEGRAM_CHAT_ID\s*=\s*"?([\-0-9]+)"?', txt)
-            if m_token:
-                TELEGRAM_TOKEN = TELEGRAM_TOKEN or m_token.group(1)
-            if m_chat:
-                TELEGRAM_CHAT_ID = TELEGRAM_CHAT_ID or m_chat.group(1)
+            if m_token and not TELEGRAM_TOKEN:
+                TELEGRAM_TOKEN = m_token.group(1)
+            if m_chat and not TELEGRAM_CHAT_ID:
+                TELEGRAM_CHAT_ID = m_chat.group(1)
     except Exception:
         pass
 

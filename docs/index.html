@@ -5,25 +5,26 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>All-in-One — Monitor Precio de Bolsa</title>
     <style>
-      :root{--bg:#0b1220;--card:#0e1724;--accent:#0e56ad;--text:#e6eef8}
+      /* Palette adapted from the provided image: deep navy, off-white cards, muted blue accent */
+      :root{--bg:#f4f6f8;--card:#ffffff;--accent:#0b2340;--muted:#6b7b8f;--highlight:#d94b3d;--text:#0b2340}
       body{font-family:Inter,Segoe UI,Arial;background:var(--bg);color:var(--text);margin:0}
-      header{padding:18px 24px;background:linear-gradient(90deg,#071126, #0b1a2a);display:flex;align-items:center;justify-content:space-between}
-      .brand{font-size:18px;font-weight:700}
+      header{padding:18px 24px;background:var(--accent);color:var(--card);display:flex;align-items:center;justify-content:space-between}
+      .brand{font-size:18px;font-weight:700;color:var(--card)}
       .layout{display:flex;height:calc(100vh - 68px)}
-      nav{width:220px;background:var(--card);padding:18px;box-sizing:border-box}
-      nav button{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--text);text-align:left;cursor:pointer}
+      nav{width:240px;background:var(--card);padding:18px;box-sizing:border-box;border-right:1px solid #e6e9ed}
+      nav button, nav a{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--accent);text-align:left;cursor:pointer;text-decoration:none}
       nav button.active{background:var(--accent);color:white}
       main{flex:1;padding:20px;overflow:auto}
       .kpis{display:flex;gap:12px;margin-bottom:14px}
-      .kpi{background:linear-gradient(180deg,#0f2340,#0b1a2a);padding:16px;border-radius:10px;flex:1}
+      .kpi{background:var(--card);padding:16px;border-radius:10px;flex:1;border:1px solid #e6e9ed}
       .controls{display:flex;gap:10px;align-items:center;margin-bottom:12px}
       .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
-      .muted{color:#9fb0d5}
-      .card{background:var(--card);padding:14px;border-radius:10px}
+      .muted{color:var(--muted)}
+      .card{background:var(--card);padding:14px;border-radius:10px;border:1px solid #e6e9ed}
       table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
-      table td,table th{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)}
+      table td,table th{padding:8px;border-bottom:1px solid #f1f3f5}
       .top-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-      footer{padding:12px;color:#9fb0d5;text-align:center}
+      footer{padding:12px;color:var(--muted);text-align:center}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
@@ -37,7 +38,7 @@
         <button id="btn-price" class="active">Precio de Bolsa</button>
         <button id="btn-despacho">Despacho Nal_Ties</button>
         <button id="btn-indicadores">Indicadores</button>
-        <button id="btn-resumen">Resumen operativo</button>
+        <a id="btn-resumen" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank">Resumen operativo</a>
         <hr style="border:none;height:1px;background:#081827;margin:12px 0">
         <div class="muted">Acciones</div>
         <button id="btn-run">Ejecutar ahora (Actions)</button>
@@ -51,9 +52,25 @@
             <div class="muted" id="meta-source">Fuente: —</div>
           </div>
           <div class="controls">
-            <input id="precio-input" type="number" step="0.01" style="padding:8px;border-radius:8px;border:none;width:160px" />
+            <input id="precio-input" type="number" step="0.01" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:160px" />
             <button id="save-json" class="btn">Descargar JSON</button>
             <button id="download-pr" class="btn" style="background:#2d9c6b">Crear PR (manual)</button>
+          </div>
+          <div class="card" style="margin-top:12px;display:flex;gap:12px;align-items:center">
+            <div style="flex:1">
+              <div class="muted">Scrapping / Ejecución</div>
+              <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+                <label class="muted">Intervalo (min):</label>
+                <input id="interval-mins" type="number" min="1" value="60" style="width:100px;padding:6px;border:1px solid #e6e9ed;border-radius:6px" />
+                <label style="margin-left:8px"><input id="send-telegram-cb" type="checkbox" /> Enviar a Telegram</label>
+              </div>
+              <div style="margin-top:8px">
+                <button id="start-schedule" class="btn">Iniciar programado</button>
+                <button id="stop-schedule" class="btn" style="background:#888;margin-left:8px">Detener</button>
+                <button id="run-once" class="btn" style="background:var(--highlight);margin-left:8px">Ejecutar ahora</button>
+              </div>
+              <div id="scrap-status" class="muted" style="margin-top:8px">Estado: detenido</div>
+            </div>
           </div>
         </div>
 
@@ -134,21 +151,52 @@
         const blob = new Blob([JSON.stringify(globalData,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='precio_actual.json'; a.click(); URL.revokeObjectURL(url);
       });
 
+      async function runScrapping(sendTelegram){
+        const statusEl = document.getElementById('scrap-status');
+        statusEl.innerText = 'Estado: ejecutando...';
+        try{
+          const resp = await fetch('/api/run', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram})});
+          if(!resp.ok) throw new Error('No response from backend');
+          const j = await resp.json();
+          statusEl.innerText = 'Última ejecución: ' + new Date().toLocaleString();
+          alert('Ejecución completada. Resultado:\n' + (j.message || JSON.stringify(j)));
+        }catch(e){
+          statusEl.innerText = 'Estado: error';
+          alert('Error al ejecutar scrapping: '+e.message+'\nSi trabajas localmente, asegúrate de tener el backend corriendo.');
+        }
+      }
+
+      document.getElementById('run-once').addEventListener('click', ()=>{
+        const send = document.getElementById('send-telegram-cb').checked;
+        runScrapping(send);
+      });
+
+      let scheduleId = null;
+      document.getElementById('start-schedule').addEventListener('click', ()=>{
+        const mins = parseInt(document.getElementById('interval-mins').value||60,10);
+        if(isNaN(mins) || mins<=0) return alert('Intervalo inválido');
+        if(scheduleId) clearInterval(scheduleId);
+        scheduleId = setInterval(()=>{ runScrapping(document.getElementById('send-telegram-cb').checked); }, mins*60000);
+        document.getElementById('scrap-status').innerText = `Estado: programado cada ${mins} min`;
+      });
+      document.getElementById('stop-schedule').addEventListener('click', ()=>{
+        if(scheduleId) { clearInterval(scheduleId); scheduleId = null; document.getElementById('scrap-status').innerText = 'Estado: detenido'; }
+      });
+
       document.getElementById('btn-run').addEventListener('click', ()=>{
-        alert('Para ejecutar ahora: en GitHub → Actions → Precio de Bolsa (XM) → Run workflow.\nSi quieres automatizar desde la web, pega un Personal Access Token en la configuración (riesgo de seguridad).');
+        alert('Para ejecutar desde GitHub Actions: Actions → Precio de Bolsa (XM) → Run workflow.');
       });
 
       document.getElementById('btn-telegram').addEventListener('click', ()=>{
-        alert('Enviar a Telegram: el workflow envía la imagen/texto automáticamente tras ejecución. Ejecuta el workflow desde Actions para forzar envío.');
+        alert('Enviar a Telegram: activa "Enviar a Telegram" antes de ejecutar el scrapping, o ejecuta el workflow en Actions.');
       });
 
       // navigation buttons (visual only)
-      ['price','despacho','indicadores','resumen'].forEach(id=>{
+      ['price','despacho','indicadores'].forEach(id=>{
         const btn=document.getElementById('btn-'+id.replace('_',''))||document.getElementById('btn-'+id);
         if(btn) btn.addEventListener('click', ()=>{
           document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
-          // simple content swap: only Precio implemented now
-          if(id!=='price') alert('Módulo '+id+' no implementado aún.');
+          alert('Módulo '+id+' no implementado aún.');
         });
       });
 
