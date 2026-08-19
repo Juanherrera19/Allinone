@@ -15,7 +15,7 @@
       nav{width:240px;background:var(--card);padding:18px;box-sizing:border-box;border-right:1px solid #e6e9ed}
       nav button, nav a{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--accent);text-align:left;cursor:pointer;text-decoration:none}
       nav button.active{background:var(--accent);color:white}
-      main{flex:1;min-width:0;padding:20px 48px 20px 20px;overflow:auto}
+      main{flex:1;min-width:0;padding:20px 96px 20px 20px;overflow:auto}
       .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
       .kpi{background:var(--card);padding:16px;border-radius:10px;flex:1;border:1px solid #e6e9ed}
       .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin-bottom:12px}
@@ -81,7 +81,7 @@
         nav{width:100%;padding:10px 12px;border-right:0;border-bottom:1px solid #e6e9ed;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
         nav button,nav a{margin:0;padding:10px}
         nav hr{display:none}
-        main{padding:12px 32px 12px 12px}
+        main{padding:12px 64px 12px 12px}
         .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
         .chart-shell{height:360px}
       }
@@ -865,7 +865,7 @@
         target.style.minWidth='0';
         const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
         wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
-        const exportMargin=28;
+        const exportMargin=0;
         const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:1.25,useCORS:true,width:Math.ceil(contentWidth + exportMargin),windowWidth:Math.ceil(contentWidth + exportMargin)});
         wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
         target.style.width=previousWidth;
@@ -889,7 +889,7 @@
         target.style.width=`${Math.ceil(contentWidth)}px`;
         target.style.minWidth='0';
         wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
-        const exportMargin=28;
+        const exportMargin=0;
         const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:1.25,useCORS:true,width:Math.ceil(contentWidth + exportMargin),windowWidth:Math.ceil(contentWidth + exportMargin)});
         wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
         target.style.width=previousWidth;
