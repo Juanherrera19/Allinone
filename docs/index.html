@@ -168,6 +168,7 @@
           <div class="muted">Actualiza el Precio de Escasez en el repositorio.</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
             <input id="precio-manual-input" type="number" step="0.01" placeholder="Precio de Escasez" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:200px" />
+            <button id="precio-save-local" class="btn">Guardar localmente</button>
             <button id="precio-save-server" class="btn" style="background:#0b5a88">Guardar en servidor</button>
           </div>
           <div id="precio-manual-status" class="muted" style="margin-top:8px">Estado: sin guardar</div>
@@ -598,6 +599,7 @@
       }
 
       document.getElementById('btn-send-manual').addEventListener('click', ()=>sendManualToBackend(true));
+      document.getElementById('precio-save-local').addEventListener('click', savePrecioLocal);
       document.getElementById('download-auto-chart').addEventListener('click', ()=>downloadChart('autoChart', 'precio-bolsa-auto.png'));
       document.getElementById('download-manual-chart').addEventListener('click', ()=>downloadChart('manualChart', 'precio-bolsa-manual.png'));
 
