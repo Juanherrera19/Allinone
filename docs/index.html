@@ -50,6 +50,7 @@
       .excel-table.second td.fuel-combustoleo{background:#ef999c !important}
       .excel-table.second td.fuel-carbon{background:#bc8a58 !important}
       .excel-table.second tr.tesorito-row td:nth-child(-n+6){background:#d9e2f3 !important;color:#000 !important;font-weight:700}
+      .excel-table.second tr.tesorito-row td:nth-child(5){background:#fff2cc !important;color:#000 !important}
       .excel-table.third tr.processing-total td:not(:first-child){font-size:14px;font-weight:700}
       .excel-formula-cell{cursor:help}
       .excel-table.second td:nth-child(2),.excel-table.second td:nth-child(4),.excel-table.second td:nth-child(5){text-align:right}
@@ -646,10 +647,27 @@
       ];
 
       const despachoTableOne = [
-        ['Termonorte',2112],['TEBSA',18984],['FLORES IV',10680],['FLORES I',3840],['BAQ 3',1440],['BAQ 4',1440],
-        ['Candelaria 1',13320],['Termocaribe',1185.6],['Proeléctrica ',2160],['Guajira 11',3624],['Guajira 21',3480],
-        ['Cartagena 1',1248],['Cartagena 2',1440],['Cartagena 3',1584],['GECELCA 3',3936],['GECELCA 32',6552],
-        ['Termosierra',10272],['MERIELEECTRIA',3936],['TESORITO',4800],['TERMOCENTRO',7372],['TERMOVALLE',65573]
+        {label:'Termonorte',max:2112,rows:[56]},
+        {label:'TEBSA',max:18984,rows:[57]},
+        {label:'FLORES IV',max:10680,rows:[58]},
+        {label:'FLORES I',max:3840,rows:[59]},
+        {label:'BAQ 3',max:1440,rows:[60]},
+        {label:'BAQ 4',max:1440,rows:[61]},
+        {label:'Candelaria 1',max:13320,rows:[62]},
+        {label:'Termocaribe',max:1185.6,rows:[63]},
+        {label:'Proeléctrica ',max:2160,rows:[64,65]},
+        {label:'Guajira 11',max:3624,rows:[66]},
+        {label:'Guajira 21',max:3480,rows:[67]},
+        {label:'Cartagena 1',max:1248,rows:[68]},
+        {label:'Cartagena 2',max:1440,rows:[69]},
+        {label:'Cartagena 3',max:1584,rows:[70]},
+        {label:'GECELCA 3',max:3936,rows:[71]},
+        {label:'GECELCA 32',max:6552,rows:[72]},
+        {label:'Termosierra',max:10272,rows:[73]},
+        {label:'MERIELEECTRIA',max:3936,rows:[74]},
+        {label:'TESORITO',max:4800,rows:[75]},
+        {label:'TERMOCENTRO',max:7372,rows:[76]},
+        {label:'TERMOVALLE',max:65573,rows:[77]}
       ];
 
       const despachoTableTwo = [
@@ -724,13 +742,12 @@
 
       function renderTableOne(calculated){
         const header=['Térmica','Despacho Térmico Máx\n(MW h-h)','Despacho Térmico Máx\n(MW)','Despacho Diario Total (MWh)','¿Cómo salió el Despacho?','Consumo Gas día (Mbtu)'];
-        const body=despachoTableOne.map(([label,max],index)=>{
-          const sourceRows=label.trim() === 'Proeléctrica' ? [64,65] : [56 + index];
-          const total=sourceRows.reduce((sum,row)=>sum + (calculated.get(row)?.total || 0),0);
-          const gasTotal=sourceRows.reduce((sum,row)=>sum + (calculated.get(row)?.gasTotal || 0),0);
-          return [label,max/24,max,total,total/max,gasTotal];
+        const body=despachoTableOne.map(item=>{
+          const total=item.rows.reduce((sum,row)=>sum + (calculated.get(row)?.total || 0),0);
+          const gasTotal=item.rows.reduce((sum,row)=>sum + (calculated.get(row)?.gasTotal || 0),0);
+          return [item.label,item.max/24,item.max,total,total/item.max,gasTotal];
         });
-        return makeExcelTable(header,body,'first',excelTableTitle());
+        return makeExcelTable(header,body,'first',excelTableTitle(),{tableOne:despachoTableOne,calculated});
       }
 
       function renderTableTwo(calculated){
@@ -779,6 +796,10 @@
         return Number(value) > 0.7 ? 'excel-status-blue' : Number(value) > 0.5 ? 'excel-status-black' : 'excel-status-red';
       }
 
+      function technicalTerms(values){
+        return values.map(value=>Number(value || 0).toLocaleString('es-CO',{minimumFractionDigits:2,maximumFractionDigits:2})).join(' + ');
+      }
+
       function fuelClass(value){
         const fuel=String(value || '').toLowerCase();
         if(fuel.startsWith('glp')) return 'fuel-glp';
@@ -792,12 +813,20 @@
         return `<div class="excel-table-wrap"><table class="excel-table second excel-legend"><colgroup><col style="width:163px"><col style="width:164px"><col style="width:107px"><col style="width:103px"><col style="width:105px"><col style="width:84px"><col style="width:82px"></colgroup><tbody><tr><td class="legend-label" colspan="2">Informacion tomada de XM y calculos internos GEAM</td><td class="legend-gas">Gas</td><td class="legend-diesel">Diésel</td><td class="legend-glp">GLP</td><td class="legend-combustoleo">Combustoleo</td><td class="legend-carbon">Carbón</td></tr></tbody></table></div>`;
       }
 
-      function excelFormula(type,rowIndex,columnIndex,row){
+      function excelFormula(type,rowIndex,columnIndex,row,context=null){
         if(type === 'first'){
           if(columnIndex === 1) return 'Despacho Térmico Máx (MW) / 24';
-          if(columnIndex === 3) return 'Suma del despacho horario (MWh)';
+          if(columnIndex === 3 && context?.tableOne){
+            const item=context.tableOne[rowIndex];
+            const values=item.rows.flatMap(sourceRow=>context.calculated.get(sourceRow)?.hours || []);
+            return `Suma del despacho horario (MWh): ${technicalTerms(values)}`;
+          }
           if(columnIndex === 4) return 'Despacho Diario Total / Despacho Térmico Máx';
-          if(columnIndex === 5) return 'Suma del consumo de gas horario (MBTU)';
+          if(columnIndex === 5 && context?.tableOne){
+            const item=context.tableOne[rowIndex];
+            const values=item.rows.flatMap(sourceRow=>context.calculated.get(sourceRow)?.gas || []);
+            return `Suma del consumo de gas horario (MBTU): ${technicalTerms(values)}`;
+          }
         }
         if(type === 'second'){
           if(row[0] === 'ZONA COSTA' || row[0] === 'ZONA INTERIOR') return columnIndex === 1 ? 'Suma de capacidades de las plantas de la zona' : columnIndex === 3 ? 'Suma de despachos térmicos máximos de la zona' : columnIndex === 4 ? 'Suma del despacho diario total de la zona' : columnIndex === 5 ? 'Suma del consumo equivalente de gas de la zona' : '';
@@ -821,13 +850,13 @@
         return '';
       }
 
-      function makeExcelTable(headers,body,type,title=''){
+      function makeExcelTable(headers,body,type,title='',context=null){
         const baseWidths=[23.33,23.44,15.22,14.78,15,12,11.78,9.78,8,13.89,9.78,11.78,10.22,9.78,13.55,9.78,...Array(10).fill(13)];
         const widths=type === 'first' ? baseWidths.slice(0,6) : type === 'second' ? baseWidths.slice(0,7) : type === 'third' ? [baseWidths[0],...baseWidths.slice(1,25),11.44,13.44,13,...Array(24).fill(13),13] : [baseWidths[0],...Array(24).fill(13),13];
         const colgroup=`<colgroup>${headers.map((_,index)=>`<col style="width:${Math.round((widths[index] || 13) * 7)}px">`).join('')}</colgroup>`;
         const titleRow=title ? `<tr><th class="excel-title" colspan="${headers.length}">${htmlEscape(title)}</th></tr>` : '';
         const header=`<thead>${titleRow}<tr>${headers.map((header,index)=>`<th class="${type === 'third' ? 'excel-blue-header' : 'excel-header'}">${htmlEscape(header)}</th>`).join('')}</tr></thead>`;
-        const rows=body.map((row,rowIndex)=>{ const sectionRow=typeof row[0] === 'string' && row[0].startsWith('ZONA '); const tesoritoRow=type === 'second' && String(row[0]).toUpperCase().startsWith('TESORITO'); const totalRow=type === 'third' && row[0] === 'TOTAL'; return `<tr class="${sectionRow ? 'excel-section-row' : ''} ${tesoritoRow ? 'tesorito-row' : ''} ${totalRow ? 'processing-total' : ''}">${row.map((value,index)=>{ const section=typeof value === 'string' && value.startsWith('ZONA '); const percent=((type === 'first' && index === 4) || (type === 'second' && index === 6)) && typeof value === 'number'; const text=percent ? formatPercent(value) : (typeof value === 'number' ? formatExcelNumber(value,index === 1 && type === 'third' ? 4 : 0) : value); const status=percent ? statusClass(value) : ''; const fuel=type === 'second' && index === 2 ? fuelClass(value) : ''; const formula=excelFormula(type,rowIndex,index,row); const formulaClass=formula ? 'excel-formula-cell' : ''; return `<td class="${section ? 'excel-section' : ''} ${index === 0 ? 'excel-label' : ''} ${percent ? 'excel-percent' : ''} ${status} ${fuel} ${formulaClass}"${formula ? ` title="${htmlEscape(formula)}"` : ''}>${htmlEscape(text)}</td>`; }).join('')}</tr>`; }).join('');
+        const rows=body.map((row,rowIndex)=>{ const sectionRow=typeof row[0] === 'string' && row[0].startsWith('ZONA '); const tesoritoRow=type === 'second' && String(row[0]).toUpperCase().startsWith('TESORITO'); const totalRow=type === 'third' && row[0] === 'TOTAL'; return `<tr class="${sectionRow ? 'excel-section-row' : ''} ${tesoritoRow ? 'tesorito-row' : ''} ${totalRow ? 'processing-total' : ''}">${row.map((value,index)=>{ const section=typeof value === 'string' && value.startsWith('ZONA '); const percent=((type === 'first' && index === 4) || (type === 'second' && index === 6)) && typeof value === 'number'; const text=percent ? formatPercent(value) : (typeof value === 'number' ? formatExcelNumber(value,index === 1 && type === 'third' ? 4 : 0) : value); const status=percent ? statusClass(value) : ''; const fuel=type === 'second' && index === 2 ? fuelClass(value) : ''; const formula=excelFormula(type,rowIndex,index,row,context); const formulaClass=formula ? 'excel-formula-cell' : ''; return `<td class="${section ? 'excel-section' : ''} ${index === 0 ? 'excel-label' : ''} ${percent ? 'excel-percent' : ''} ${status} ${fuel} ${formulaClass}"${formula ? ` title="${htmlEscape(formula)}"` : ''}>${htmlEscape(text)}</td>`; }).join('')}</tr>`; }).join('');
         return `<div class="excel-table-wrap"><table class="excel-table ${type}">${colgroup}${header}<tbody>${rows}</tbody></table></div>`;
       }
 
