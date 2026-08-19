@@ -8,7 +8,6 @@
 	"umbral": 1038.12,
 	"horas_supera": [[19, 1045.1]],
 	"meta": {
-		"source": {"metric_id": "manual_example"},
 		"applied_division_by_1000": true,
 		"editable_precio_escasez": 1092.76
 	}

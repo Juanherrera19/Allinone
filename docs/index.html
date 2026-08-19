@@ -114,17 +114,7 @@
       </nav>
 
       <main>
-        <div class="top-row" id="auto-header" hidden>
-          <div>
-            <h2 id="title-date">—</h2>
-            <div class="muted" id="meta-source">Fuente: —</div>
-          </div>
-          <div class="controls" id="auto-controls">
-            <input id="precio-input" type="number" step="0.01" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:160px" />
-            <button id="save-json" class="btn">Descargar JSON</button>
-            <button id="download-pr" class="btn" style="background:#2d9c6b">Crear PR (manual)</button>
-          </div>
-        </div>
+        <div class="top-row" id="auto-header" hidden></div>
 
         <section id="auto-tool" hidden>
         <div class="card" style="margin-top:12px">
@@ -171,18 +161,13 @@
 
         <section id="manual-tool" hidden>
         <div class="top-row" id="manual-header">
-          <div>
-            <h2 id="manual-title-date">Precio de Bolsa (MANUAL)</h2>
-            <div class="muted" id="manual-meta-source">Fuente: manual</div>
-          </div>
+          <div><h2 id="manual-title-date">Precio de Bolsa (MANUAL)</h2></div>
         </div>
         <div class="card" style="margin-top:12px">
-          <h3>Precio de Bolsa (MANUAL)</h3>
-          <div class="muted">Introduce aquí el `Precio de Escasez` manual que quieres guardar para los siguientes días.</div>
+          <h3>Actualizar Precio de Bolsa (MANUAL)</h3>
+          <div class="muted">Actualiza el Precio de Escasez en el repositorio.</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
             <input id="precio-manual-input" type="number" step="0.01" placeholder="Precio de Escasez" style="padding:8px;border-radius:8px;border:1px solid #e6e9ed;width:200px" />
-            <button id="precio-save-local" class="btn">Guardar localmente</button>
-            <button id="precio-save-download" class="btn" style="background:#2d9c6b">Guardar como JSON</button>
             <button id="precio-save-server" class="btn" style="background:#0b5a88">Guardar en servidor</button>
           </div>
           <div id="precio-manual-status" class="muted" style="margin-top:8px">Estado: sin guardar</div>
@@ -239,6 +224,7 @@
             <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
               <button id="despacho-download-one" class="btn" disabled>Descargar tabla 1 PNG</button>
               <button id="despacho-download-two" class="btn" disabled>Descargar tabla 2 PNG</button>
+              <button id="despacho-send-telegram" class="btn" style="background:#229ed9" disabled>Enviar tablas a Telegram</button>
             </div>
           </div>
           <div id="despacho-results" class="despacho-results" hidden>
@@ -255,11 +241,11 @@
 
       </main>
     </div>
-    <footer>Diseñado para GitHub Pages • Actualizaciones vía GitHub Actions</footer>
 
     <script>
       let autoData = null;
       let manualData = null;
+      const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000';
       async function loadData(){
         try{
           const r = await fetch('data/precio_actual.json');
@@ -274,8 +260,6 @@
           render(d, 'auto');
         }catch(e){
           autoData = null;
-          document.getElementById('title-date').innerText = 'No hay datos válidos en data/precio_actual.json';
-          document.getElementById('meta-source').innerText = '';
           document.getElementById('k-prom').innerText = '—';
           document.getElementById('k-max').innerText = '—';
           document.getElementById('k-min').innerText = '—';
@@ -290,10 +274,6 @@
         const prefix = manual ? 'manual-' : '';
         if(manual){
           document.getElementById('manual-title-date').innerText = `Precio de Bolsa (MANUAL) — ${d.date}`;
-          document.getElementById('manual-meta-source').innerText = 'Fuente: ' + (d.meta && d.meta.source && d.meta.source.metric_id ? d.meta.source.metric_id : 'manual');
-        } else {
-          document.getElementById('title-date').innerText = d.date;
-          document.getElementById('meta-source').innerText = 'Fuente: ' + (d.meta && d.meta.source && d.meta.source.metric_id ? d.meta.source.metric_id : 'pydataxm');
         }
         document.getElementById(prefix + 'k-prom').innerText = `$${Number(d.promedio).toFixed(2)}`;
         document.getElementById(prefix + 'k-max').innerText = `$${Number(d.maximo).toFixed(2)}`;
@@ -302,7 +282,6 @@
         const horas = d.serie.filter(x=>x>=umbral).length;
         document.getElementById(prefix + 'k-horas').innerText = horas;
         document.getElementById(manual ? 'manual-original-text' : 'original-text').innerText = buildOriginalText(d);
-        if(!manual) document.getElementById('precio-input').value = d.meta&&d.meta.editable_precio_escasez?d.meta.editable_precio_escasez:d.precio_escasez;
         if(manual) document.getElementById('manual-results').hidden = false;
         drawPriceChart(manual ? 'manual-chart' : 'chart', d, manual ? 'manualChart' : 'autoChart');
 
@@ -494,20 +473,12 @@
         return lines.join('\n');
       }
 
-      document.getElementById('save-json').addEventListener('click', ()=>{
-        if(!autoData) return alert('No hay datos AUTO válidos para descargar');
-        const newPrecio = parseFloat(document.getElementById('precio-input').value);
-        if (isNaN(newPrecio)) return alert('Introduce un valor numérico válido para Precio de Escasez');
-        autoData.precio_escasez = newPrecio; autoData.meta = autoData.meta||{}; autoData.meta.editable_precio_escasez = newPrecio;
-        const blob = new Blob([JSON.stringify(autoData,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='precio_actual.json'; a.click(); URL.revokeObjectURL(url);
-      });
-
       async function runScrapping(sendTelegram){
         const statusEl = document.getElementById('scrap-status');
         statusEl.innerText = 'Estado: ejecutando...';
         try{
           // POST only to explicit local endpoint; do not fake results.
-          const url = (location.protocol.startsWith('file') ? 'http://localhost:5000' : '') + '/api/run';
+          const url = `${API_BASE_URL}/api/run`;
           const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram})});
           if(!resp.ok) {
             const text = await resp.text().catch(()=>resp.statusText||'error');
@@ -617,7 +588,7 @@
         if(!manualData) return alert('No hay datos MANUAL cargados para enviar');
         status.innerText = 'Estado: enviando...';
         try{
-          const url = (location.protocol.startsWith('file') ? 'http://localhost:5000' : '') + '/api/run';
+          const url = `${API_BASE_URL}/api/run`;
           const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram, manual_data: manualData, manual:true})});
           if(!resp.ok){ const t = await resp.text().catch(()=>resp.statusText||'error'); throw new Error(t||'Error en backend'); }
           const j = await resp.json();
@@ -638,7 +609,6 @@
         document.getElementById('manual-tool').hidden = tool !== 'manual';
         document.getElementById('despacho-tool').hidden = !despacho;
         document.getElementById('auto-header').hidden = !auto;
-        document.getElementById('auto-controls').hidden = !auto;
         document.getElementById('btn-price-auto').classList.toggle('active', auto);
         document.getElementById('btn-price-manual').classList.toggle('active', tool === 'manual');
         document.getElementById('btn-despacho').classList.toggle('active', despacho);
@@ -867,6 +837,7 @@
           document.getElementById('despacho-date').innerText=`Despacho Diario y Consumo de Gas Equivalente — ${new Date().toLocaleDateString('es-CO')}`;
           document.getElementById('despacho-download-one').disabled=false;
           document.getElementById('despacho-download-two').disabled=false;
+          document.getElementById('despacho-send-telegram').disabled=false;
           status.innerText=`Estado: procesado (${records.length} plantas del TXT)`;
         }catch(error){
           status.innerText=`Estado: error — ${error.message}`;
@@ -904,6 +875,40 @@
       document.getElementById('despacho-download-one').addEventListener('click',()=>downloadDespachoImage('despacho-table-one','despacho-nal-ties-tabla-1.png'));
       document.getElementById('despacho-download-two').addEventListener('click',()=>downloadDespachoImage('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png'));
 
+      async function tablePngData(containerId){
+        const target=document.getElementById(containerId);
+        const tables=[...target.querySelectorAll('.excel-table')];
+        const contentWidth=Math.max(...tables.map(table=>table.getBoundingClientRect().width));
+        const previousWidth=target.style.width;
+        const previousMinWidth=target.style.minWidth;
+        const wrappers=[...target.querySelectorAll('.excel-table-wrap')];
+        const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
+        target.style.width=`${Math.ceil(contentWidth)}px`;
+        target.style.minWidth='0';
+        wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
+        const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:2,useCORS:true,width:Math.ceil(contentWidth),windowWidth:Math.ceil(contentWidth)});
+        wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
+        target.style.width=previousWidth;
+        target.style.minWidth=previousMinWidth;
+        return canvas.toDataURL('image/png');
+      }
+
+      async function sendDespachoToTelegram(){
+        const status=document.getElementById('despacho-status');
+        status.innerText='Estado: preparando imágenes para Telegram...';
+        try{
+          const payload={table_one:await tablePngData('despacho-table-one'),table_two:await tablePngData('despacho-table-two'),date:new Date().toISOString().slice(0,10)};
+          const response=await fetch(`${API_BASE_URL}/api/send_despacho`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          const contentType=response.headers.get('content-type') || '';
+          const body=contentType.includes('application/json') ? await response.json() : await response.text();
+          if(!response.ok) throw new Error(typeof body === 'string' ? body.slice(0,200) : body.message || 'Error del backend');
+          status.innerText='Estado: tablas enviadas a Telegram';
+        }catch(error){
+          status.innerText=`Estado: error al enviar — ${error.message}`;
+        }
+      }
+      document.getElementById('despacho-send-telegram').addEventListener('click',sendDespachoToTelegram);
+
       // Precio manual handlers
       function savePrecioLocal(){
         const val = parseFloat(document.getElementById('precio-manual-input').value);
@@ -932,15 +937,13 @@
         if(isNaN(val)){ alert('Introduce un precio válido'); return; }
         status.innerText = 'Estado: enviando al servidor...';
         try{
-          const url = (location.protocol.startsWith('file') ? 'http://localhost:5000' : '') + '/api/save_price';
+          const url = `${API_BASE_URL}/api/save_price`;
           const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({date:new Date().toISOString().slice(0,10), precio_escasez: val})});
           if(!resp.ok){ const t = await resp.text().catch(()=>resp.statusText||'error'); throw new Error(t||'Error'); }
           const j = await resp.json(); status.innerText = 'Estado: guardado en servidor'; alert('Servidor respondió: '+(j.status||JSON.stringify(j)));
         }catch(e){ status.innerText = 'Estado: error'; alert('No se pudo guardar en servidor: '+e.message+'\nSi quieres, puedo añadir soporte en el backend para `/api/save_price`.'); }
       }
 
-      document.getElementById('precio-save-local').addEventListener('click', savePrecioLocal);
-      document.getElementById('precio-save-download').addEventListener('click', downloadPrecioJSON);
       document.getElementById('precio-save-server').addEventListener('click', savePrecioServer);
 
       // On load, populate precio-manual-input from localStorage if exists
@@ -957,7 +960,6 @@
       // Removed 'Ejecutar ahora' and 'Enviar a Telegram' buttons as requested.
 
       selectTool('despacho');
-      loadData();
     </script>
   </body>
 </html>
