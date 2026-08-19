@@ -724,7 +724,12 @@
 
       function renderTableOne(calculated){
         const header=['Térmica','Despacho Térmico Máx\n(MW h-h)','Despacho Térmico Máx\n(MW)','Despacho Diario Total (MWh)','¿Cómo salió el Despacho?','Consumo Gas día (Mbtu)'];
-        const body=despachoTableOne.map(([label,max],index)=>{ const item=calculated.get(56+index); return [label,max/24,max,item.total,item.total/max,item.gasTotal]; });
+        const body=despachoTableOne.map(([label,max],index)=>{
+          const sourceRows=label.trim() === 'Proeléctrica' ? [64,65] : [56 + index];
+          const total=sourceRows.reduce((sum,row)=>sum + (calculated.get(row)?.total || 0),0);
+          const gasTotal=sourceRows.reduce((sum,row)=>sum + (calculated.get(row)?.gasTotal || 0),0);
+          return [label,max/24,max,total,total/max,gasTotal];
+        });
         return makeExcelTable(header,body,'first',excelTableTitle());
       }
 
