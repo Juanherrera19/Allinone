@@ -15,7 +15,7 @@
       nav{width:240px;background:var(--card);padding:18px;box-sizing:border-box;border-right:1px solid #e6e9ed}
       nav button, nav a{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--accent);text-align:left;cursor:pointer;text-decoration:none}
       nav button.active{background:var(--accent);color:white}
-      main{flex:1;min-width:0;padding:20px 96px 20px 20px;overflow:auto}
+      main{flex:1;min-width:0;padding:20px 144px 20px 20px;overflow:auto}
       .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
       .kpi{background:var(--card);padding:16px;border-radius:10px;flex:1;border:1px solid #e6e9ed}
       .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin-bottom:12px}
@@ -25,16 +25,16 @@
       table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
       table td,table th{padding:8px;border-bottom:1px solid #f1f3f5}
       .excel-table-wrap{overflow-x:auto;margin-top:12px;border:1px solid #b7b7b7}
-      .excel-table{width:max-content;min-width:100%;margin:0;border-collapse:collapse;table-layout:fixed;font-family:Calibri,Arial,sans-serif;color:#000;font-size:11px}
-      .excel-table th,.excel-table td{border:1px solid #4472c4;padding:2px 5px;white-space:pre-line;text-align:right;vertical-align:middle;height:21px}
+      .excel-table{width:max-content;min-width:100%;margin:0;border-collapse:collapse;table-layout:fixed;font-family:Calibri,Arial,sans-serif;color:#000;font-size:12px}
+      .excel-table th,.excel-table td{border:0.5px solid #4472c4;padding:2px 5px;white-space:pre-line;text-align:right;vertical-align:middle;height:21px}
       .excel-table .excel-title{background:#333f4f;color:#fff;font-size:18px;font-weight:700;height:42px;text-align:center}
       .excel-table.second .excel-title{background:#333f4f;color:#fff;font-size:20px;height:34px;border-color:#4472c4}
-      .excel-table .excel-header{background:#333f4f;color:#fff;font-weight:700;font-size:11px;height:67px;text-align:center}
+      .excel-table .excel-header{background:#333f4f;color:#fff;font-weight:700;font-size:12px;height:67px;text-align:center}
       .excel-table.second .excel-header{height:77px}
       .excel-table.second .excel-header:first-child{font-size:18px}
-      .excel-table .excel-blue-header{background:#0070c0;color:#ffff00;font-weight:700;font-size:11px;height:66px;text-align:center}
+      .excel-table .excel-blue-header{background:#0070c0;color:#ffff00;font-weight:700;font-size:12px;height:66px;text-align:center}
       .excel-table .excel-section{background:#d9e2f3;font-weight:700;text-align:left;font-size:14px}
-      .excel-table.second tr.excel-section-row td{background:#2f5597 !important;color:#fff !important;font-weight:700}
+      .excel-table.second tr.excel-section-row td{background:#333f4f !important;color:#fff !important;font-weight:700}
       .excel-table.second tr.excel-section-row td:not(:first-child){font-size:14px}
       .excel-table.second tr.excel-section-row td:nth-child(2),.excel-table.second tr.excel-section-row td:nth-child(4),.excel-table.second tr.excel-section-row td:nth-child(5),.excel-table.second tr.excel-section-row td:nth-child(6){text-align:center}
       .excel-table .excel-label{text-align:left;white-space:nowrap}
@@ -42,7 +42,7 @@
       .excel-table.first td:nth-child(6){background:#00b0f0}
       .excel-table.first th:nth-child(6),.excel-table.first td:nth-child(6){font-weight:700}
       .excel-table.second td:nth-child(3){background:#feea9a;text-align:center}
-      .excel-table.second td:nth-child(6){background:#ddebf7;text-align:center;font-weight:700;border-color:#4472c4}
+      .excel-table.second td:nth-child(6){background:#ddebf7;text-align:right;font-weight:700;border-color:#4472c4}
       .excel-table.second .tesorito-row td:nth-child(-n+6){background:#d9e2f3;font-weight:700}
       .excel-table.second td.fuel-gas{background:#feea9a !important}
       .excel-table.second td.fuel-diesel{background:#ffff00 !important}
@@ -81,7 +81,7 @@
         nav{width:100%;padding:10px 12px;border-right:0;border-bottom:1px solid #e6e9ed;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
         nav button,nav a{margin:0;padding:10px}
         nav hr{display:none}
-        main{padding:12px 64px 12px 12px}
+        main{padding:12px 96px 12px 12px}
         .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
         .chart-shell{height:360px}
       }
