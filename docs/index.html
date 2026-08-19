@@ -24,6 +24,50 @@
       .card{background:var(--card);padding:14px;border-radius:10px;border:1px solid #e6e9ed}
       table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
       table td,table th{padding:8px;border-bottom:1px solid #f1f3f5}
+      .excel-table-wrap{overflow-x:auto;margin-top:12px;border:1px solid #b7b7b7}
+      .excel-table{width:max-content;min-width:100%;margin:0;border-collapse:collapse;table-layout:fixed;font-family:Calibri,Arial,sans-serif;color:#000;font-size:11px}
+      .excel-table th,.excel-table td{border:1px solid #4472c4;padding:2px 5px;white-space:pre-line;text-align:right;vertical-align:middle;height:21px}
+      .excel-table .excel-title{background:#1f4e78;color:#fff;font-size:18px;font-weight:700;height:42px;text-align:center}
+      .excel-table.second .excel-title{background:#1f4e78;color:#fff;font-size:20px;height:34px;border-color:#4472c4}
+      .excel-table .excel-header{background:#1f4e78;color:#fff;font-weight:700;font-size:11px;height:67px;text-align:center}
+      .excel-table.second .excel-header{height:77px}
+      .excel-table.second .excel-header:first-child{font-size:18px}
+      .excel-table .excel-blue-header{background:#0070c0;color:#ffff00;font-weight:700;font-size:11px;height:66px;text-align:center}
+      .excel-table .excel-section{background:#d9e2f3;font-weight:700;text-align:left;font-size:14px}
+      .excel-table.second tr.excel-section-row td{background:#2f5597 !important;color:#fff !important;font-weight:700}
+      .excel-table.second tr.excel-section-row td:not(:first-child){font-size:14px}
+      .excel-table .excel-label{text-align:left;white-space:nowrap}
+      .excel-table .excel-percent{font-size:12px;text-align:center}
+      .excel-table.first td:nth-child(6){background:#00b0f0}
+      .excel-table.first th:nth-child(6),.excel-table.first td:nth-child(6){font-weight:700}
+      .excel-table.second td:nth-child(3){background:#feea9a;text-align:center}
+      .excel-table.second td:nth-child(6){background:#e2f0d9;text-align:center;font-weight:700;border-color:#4472c4}
+      .excel-table.second .tesorito-row td:nth-child(-n+6){background:#d9e2f3;font-weight:700}
+      .excel-table.second td.fuel-gas{background:#feea9a !important}
+      .excel-table.second td.fuel-diesel{background:#ffff00 !important}
+      .excel-table.second td.fuel-glp{background:#b7d7a8 !important}
+      .excel-table.second td.fuel-combustoleo{background:#ef999c !important}
+      .excel-table.second td.fuel-carbon{background:#bc8a58 !important}
+      .excel-table.second tr.tesorito-row td:nth-child(-n+6){background:#d9e2f3 !important;color:#000 !important;font-weight:700}
+      .excel-table.third tr.processing-total td:not(:first-child){font-size:14px;font-weight:700}
+      .excel-formula-cell{cursor:help}
+      .excel-table.first td:nth-child(5),.excel-table.second td:nth-child(2),.excel-table.second td:nth-child(4),.excel-table.second td:nth-child(5),.excel-table.second td:nth-child(7),.excel-table.third td:nth-child(29){text-align:center}
+      .excel-status-blue{color:#0000ff;font-weight:700}
+      .excel-status-black{color:#000;font-weight:700}
+      .excel-status-red{color:#ff0000;font-weight:700}
+      .excel-legend td{height:25px;font-weight:400;text-align:center}
+      .excel-legend .legend-label{text-align:left;font-weight:400;white-space:nowrap}
+      .excel-legend .legend-gas{background:#feea9a}
+      .excel-legend .legend-diesel{background:#ffff00}
+      .excel-legend .legend-glp{background:#b7d7a8}
+      .excel-legend .legend-combustoleo{background:#ef999c}
+      .excel-legend .legend-carbon{background:#bc8a58}
+      .excel-table.second.excel-legend td.legend-combustoleo{background:#ef999c}
+      .excel-table.second.excel-legend{width:808px;min-width:808px}
+      .excel-table.second.excel-legend .legend-label{overflow:visible;border-right:0}
+      .excel-table.second.excel-legend .legend-label + td{border-left:0}
+      .despacho-heading{margin:26px 0 8px;font-family:Calibri,Arial,sans-serif;color:#2f5597}
+      .despacho-results[hidden]{display:none}
       .top-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px}
       .chart-shell{position:relative;width:100%;max-width:1100px;height:420px;margin:0 auto;background:#ffffff}
       canvas{display:block;max-width:100%}
@@ -50,6 +94,7 @@
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   </head>
   <body>
     <header>
@@ -57,16 +102,16 @@
     </header>
     <div class="layout">
       <nav>
-        <button id="btn-price-auto" class="active">Precio de Bolsa (AUTO)</button>
+        <button id="btn-price-auto" hidden>Precio de Bolsa (AUTO)</button>
         <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
-        <button id="btn-despacho">Despacho Nal_Ties</button>
+        <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
         <button id="btn-indicadores">Indicadores</button>
         <a id="btn-resumen" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank">Resumen operativo</a>
         <hr style="border:none;height:1px;background:#e6e9ed;margin:12px 0">
       </nav>
 
       <main>
-        <div class="top-row" id="auto-header">
+        <div class="top-row" id="auto-header" hidden>
           <div>
             <h2 id="title-date">—</h2>
             <div class="muted" id="meta-source">Fuente: —</div>
@@ -78,7 +123,7 @@
           </div>
         </div>
 
-        <section id="auto-tool">
+        <section id="auto-tool" hidden>
         <div class="card" style="margin-top:12px">
           <div class="muted">Scrapping / Ejecución</div>
           <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
@@ -172,6 +217,35 @@
             <pre id="manual-original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
           </div>
         </div>
+        </section>
+
+        <section id="despacho-tool">
+          <div class="top-row">
+            <div>
+              <h2>Despacho Nal_Ties (MANUAL)</h2>
+              <div class="muted" id="despacho-date">Despacho Diario y Consumo de Gas Equivalente</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <h3>Datos del TXT</h3>
+            <textarea id="despacho-text" placeholder="Pega aquí el contenido del TXT" style="width:100%;height:180px;margin-top:8px;padding:8px;border:1px solid #e6e9ed;border-radius:6px"></textarea>
+            <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+              <button id="despacho-process" class="btn">Procesar</button>
+              <span id="despacho-status" class="muted">Estado: pendiente</span>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+              <button id="despacho-download-one" class="btn" disabled>Descargar tabla 1 PNG</button>
+              <button id="despacho-download-two" class="btn" disabled>Descargar tabla 2 PNG</button>
+            </div>
+          </div>
+          <div id="despacho-results" class="despacho-results" hidden>
+            <div id="despacho-table-one"></div>
+            <div id="despacho-table-two"></div>
+            <h2 class="despacho-heading">PROCESAMIENTO</h2>
+            <div id="despacho-table-three"></div>
+            <h2 class="despacho-heading">DATOS REALES</h2>
+            <div id="despacho-real-data"></div>
+          </div>
         </section>
 
         <!-- El texto original se muestra en el módulo AUTO. -->
@@ -555,16 +629,269 @@
 
       function selectTool(tool){
         const auto = tool === 'auto';
+        const despacho = tool === 'despacho';
         document.getElementById('auto-tool').hidden = !auto;
-        document.getElementById('manual-tool').hidden = auto;
+        document.getElementById('manual-tool').hidden = tool !== 'manual';
+        document.getElementById('despacho-tool').hidden = !despacho;
         document.getElementById('auto-header').hidden = !auto;
         document.getElementById('auto-controls').hidden = !auto;
         document.getElementById('btn-price-auto').classList.toggle('active', auto);
-        document.getElementById('btn-price-manual').classList.toggle('active', !auto);
+        document.getElementById('btn-price-manual').classList.toggle('active', tool === 'manual');
+        document.getElementById('btn-despacho').classList.toggle('active', despacho);
         if(!auto && manualData) render(manualData, 'manual');
       }
       document.getElementById('btn-price-auto').addEventListener('click', ()=>selectTool('auto'));
       document.getElementById('btn-price-manual').addEventListener('click', ()=>selectTool('manual'));
+      document.getElementById('btn-despacho').addEventListener('click', ()=>selectTool('despacho'));
+
+      const despachoPlants = [
+        {row:56,label:'Termonorte',lookup:'TERMONORTE',heat:8.09,factor:1.15},
+        {row:57,label:'TEBSA',lookup:'TEBSAB CC',heat:7.1898,factor:1.15},
+        {row:58,label:'FLORES IV',lookup:'FLORES 4 CC',heat:7.0066,factor:1.15},
+        {row:59,label:'FLORES I',lookup:'FLORES I CC',heat:7.267,factor:1.15},
+        {row:60,label:'BAQ 3',lookup:'BARRANQUILLA 3',heat:10.5077,factor:1.15},
+        {row:61,label:'BAQ 4',lookup:'BARRANQUILLA 4',heat:11.6696,factor:1.15},
+        {row:62,label:'Candelaria 1',lookup:'TERMOCANDELARIA CC',heat:6.488,factor:1},
+        {row:63,label:'Termocaribe',lookup:'TERMOCARIBE III',heat:8.703,factor:1},
+        {row:64,label:'Proeléctrica 1',lookup:'PROELECTRICA 1',heat:8.2719,factor:1.15},
+        {row:65,label:'Proeléctrica 2',lookup:'PROELECTRICA 2',heat:8.0707,factor:1.15},
+        {row:66,label:'Guajira 11',lookup:'GUAJIRA 1',heat:10.9546,factor:1},
+        {row:67,label:'Guajira 21',lookup:'GUAJIRA 2',heat:10.9172,factor:1.15},
+        {row:68,label:'Cartagena 1',lookup:'CARTAGENA 1',heat:13.665,factor:1.15},
+        {row:69,label:'Cartagena 2',lookup:'CARTAGENA 2',heat:11.8104,factor:1.15},
+        {row:70,label:'Cartagena 3',lookup:'CARTAGENA 3',heat:11.522,factor:1.15},
+        {row:71,label:'GECELCA3',lookup:'GECELCA 3',heat:10.1434,factor:1},
+        {row:72,label:'GECELCA32',lookup:'GECELCA 32',heat:10.2484,factor:1},
+        {row:73,label:'TERMOSIERRA',lookup:'TERMOSIERRA CC',heat:6.78527,factor:1.15},
+        {row:74,label:'MERIELEECTRIA',lookup:'MERILECTRICA 1',heat:9.0003,factor:1.15},
+        {row:75,label:'TESORITO',lookup:'TESORITO',heat:7.5166,factor:1.15},
+        {row:76,label:'TERMOCENTRO',lookup:'TERMOCENTRO CC',heat:7.372,factor:1.15},
+        {row:77,label:'TERMOVALLE',lookup:'TERMOVALLE CC',heat:6.5573,factor:1.15}
+      ];
+
+      const despachoTableOne = [
+        ['Termonorte',2112],['TEBSA',18984],['FLORES IV',10680],['FLORES I',3840],['BAQ 3',1440],['BAQ 4',1440],
+        ['Candelaria 1',13320],['Termocaribe',1185.6],['Proeléctrica ',2160],['Guajira 11',3624],['Guajira 21',3480],
+        ['Cartagena 1',1248],['Cartagena 2',1440],['Cartagena 3',1584],['GECELCA 3',3936],['GECELCA 32',6552],
+        ['Termosierra',10272],['MERIELEECTRIA',3936],['TESORITO',4800],['TERMOCENTRO',7372],['TERMOVALLE',65573]
+      ];
+
+      const despachoTableTwo = [
+        {label:'TEBSA CC',capacity:null,fuel:'Gas/Bquilla',max:18984,rows:[57]},
+        {label:'BAQ 3,4 CS (TEBSA)',capacity:null,fuel:'Gas/Bquilla',max:2880,rows:[60,61]},
+        {label:'CANDELARIA 1, 2',capacity:null,fuel:'Gas/Cgena',max:13320,rows:[62]},
+        {label:'FLORES IV CC (PRIME)',capacity:null,fuel:'Gas/Bquilla',max:10680,rows:[58]},
+        {label:'FLORES I CC (PRIME)',capacity:null,fuel:'Gas/Bquilla',max:3840,rows:[59]},
+        {label:'PROELÉCTRICA',capacity:null,fuel:'Gas/Cgena',max:2160,rows:[64,65]},
+        {label:'GUAJIRA 1,2 (GECELCA)',capacity:null,fuel:'Gas - Carb/Mingueo',max:7104,rows:[66,67]},
+        {label:'TESORITO (CELSIA)',capacity:null,fuel:'Gas/Sahagún',max:4800,rows:[75]},
+        {label:'TERMONORTE',capacity:null,fuel:'Gas - Diésel/Sta Marta',max:2112,rows:[56]},
+        {label:'TERMOCARIBE',capacity:null,fuel:'GLP/Gas Sta Rosa',max:1185.6,rows:[63]},
+        {label:'CARTAGENA 1,2,3 (ENEL)',capacity:null,fuel:'Combustoleo/Cgena',max:4272,rows:[68,69,70]},
+        {label:'GECELCA 3, 32 (GECELCA)',capacity:null,fuel:'Carbón/Pto Ltador',max:10488,rows:[71,72]},
+        {label:'TERMOSIERRA (EPM)',capacity:428,fuel:'Gas/Pto Nare',max:10272,rows:[73]},
+        {label:'MERIELEECTRIA (CELSIA)',capacity:164,fuel:'Gas/B/meja',max:3936,rows:[74]},
+        {label:'TERMOVALLE (PRIME)',capacity:241,fuel:'Gas/Palmira',max:5773.2,rows:[77]},
+        {label:'TERMOCENTRO',capacity:300,fuel:'Gas/Cimitarra',max:7200,rows:[76]}
+      ];
+
+      function despachoNumber(value){
+        const number = Number(String(value).replace(/\s/g,'').replace(',', '.'));
+        return Number.isFinite(number) ? number : 0;
+      }
+
+      function parseDespachoCsvLine(line){
+        const values = [];
+        let value = '', quoted = false;
+        for(let index=0; index<line.length; index++){
+          const char = line[index];
+          if(char === '"'){
+            if(quoted && line[index + 1] === '"'){ value += '"'; index++; }
+            else quoted = !quoted;
+          } else if(char === ',' && !quoted){ values.push(value.trim()); value = ''; }
+          else value += char;
+        }
+        values.push(value.trim());
+        return values;
+      }
+
+      function parseDespachoText(text){
+        const records = [];
+        String(text || '').split(/\r?\n/).map(line=>line.trim()).filter(Boolean).forEach(line=>{
+          const values = parseDespachoCsvLine(line.replace(/^\uFEFF/, ''));
+          if(values.length < 25) return;
+          records.push({name:values[0],key:values[0].toUpperCase(),hours:values.slice(1,25).map(despachoNumber)});
+        });
+        if(!records.length) throw new Error('No se encontraron filas con 24 valores horarios.');
+        return records;
+      }
+
+      function sumHours(hours){ return hours.reduce((sum,value)=>sum + value, 0); }
+      function sumPlantHours(plants, byRow){
+        return Array.from({length:24},(_,hour)=>plants.reduce((sum, row)=>sum + (byRow.get(row) || {hours:[]}).hours[hour], 0));
+      }
+      function formatExcelNumber(value, decimals=0){ return Number(value || 0).toLocaleString('es-CO',{minimumFractionDigits:decimals,maximumFractionDigits:decimals}); }
+      function formatPercent(value){ return `${(Number(value || 0) * 100).toFixed(1)}%`; }
+      function htmlEscape(value){ return String(value ?? '').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])); }
+      function plantByRow(records){
+        const lookup = new Map(records.map(record=>[record.key,record]));
+        return new Map(despachoPlants.map(plant=>[plant.row, lookup.get(plant.lookup) || {name:plant.lookup,hours:Array(24).fill(0)}]));
+      }
+      function calculatedPlants(records){
+        const byRow = plantByRow(records);
+        return new Map(despachoPlants.map(plant=>{
+          const source = byRow.get(plant.row);
+          const gas = source.hours.map(value=>value > 0 ? ((plant.heat * plant.factor) + 1) * value : 0);
+          return [plant.row,{...plant,hours:source.hours,gas,total:sumHours(source.hours),gasTotal:sumHours(gas)}];
+        }));
+      }
+
+      function renderTableOne(calculated){
+        const header=['Térmica','Despacho Térmico Máx\n(MW h-h)','Despacho Térmico Máx\n(MW)','Despacho Diario Total (MWh)','¿Cómo salió el Despacho?','Consumo Gas día (Mbtu)'];
+        const body=despachoTableOne.map(([label,max],index)=>{ const item=calculated.get(56+index); return [label,max/24,max,item.total,item.total/max,item.gasTotal]; });
+        return makeExcelTable(header,body,'first',excelTableTitle());
+      }
+
+      function renderTableTwo(calculated){
+        const byRow=calculated;
+        const rows=despachoTableTwo.map(item=>{
+          const plants=item.rows.map(row=>byRow.get(row));
+          const max=item.max;
+          const total=plants.reduce((sum,plant)=>sum+plant.total,0);
+          const gas=plants.reduce((sum,plant)=>sum+plant.gasTotal,0);
+          return [item.label,item.capacity === null ? max/24 : item.capacity,item.fuel,max,total,gas,max ? total/max : 0];
+        });
+        const coast=rows.slice(0,12), interior=rows.slice(12);
+        const zoneRow=(label,group)=>[label,group.reduce((sum,row)=>sum+row[1],0),'',group.reduce((sum,row)=>sum+row[3],0),group.reduce((sum,row)=>sum+row[4],0),group.reduce((sum,row)=>sum+row[5],0),''];
+        const body=[zoneRow('ZONA COSTA',coast),...coast,zoneRow('ZONA INTERIOR',interior),...interior];
+        const table=makeExcelTable(['Planta','Capacidad (MW)','Combustible Ppal/ Ubicación','Despacho Térmico Máx\n(MWh)','Despacho Diario Total (MWh)','Consumo Equiv. Gas día (MBTUD)','¿Cómo salió el Despacho?'],body,'second',excelTableTitle());
+        return table + makeFuelLegend();
+      }
+
+      function renderTableThree(calculated){
+        const headers=['Térmica',...Array.from({length:24},(_,index)=>String(index+1)), 'Despacho Diario Total (MWh)','Heat Rate (MBTU/MWh)','Factor HHV',...Array.from({length:24},(_,index)=>`h${index+1}`),'Consumo día (MBTU)'];
+        const body=despachoPlants.map(plant=>{ const item=calculated.get(plant.row); return [item.label,...item.hours,item.total,item.heat,item.factor,...item.gas,item.gasTotal]; });
+        const totalHours=Array.from({length:24},(_,hour)=>despachoPlants.reduce((sum,plant)=>sum+calculated.get(plant.row).hours[hour],0));
+        const totalGas=Array.from({length:24},(_,hour)=>despachoPlants.reduce((sum,plant)=>sum+calculated.get(plant.row).gas[hour],0));
+        body.push(['TOTAL',...totalHours,sumHours(totalHours),'','',...totalGas,sumHours(totalGas)]);
+        return makeExcelTable(headers,body,'third');
+      }
+
+      function renderRealData(records){
+        const sorted=[...records].sort((a,b)=>a.name.localeCompare(b.name,'es',{sensitivity:'base'}));
+        const headers=['Planta',...Array.from({length:24},(_,index)=>String(index+1)),'Suma diaria'];
+        return makeExcelTable(headers,sorted.map(record=>[record.name,...record.hours,sumHours(record.hours)]),'real');
+      }
+
+      function excelTableTitle(){
+        const tomorrow=new Date();
+        tomorrow.setDate(tomorrow.getDate()+1);
+        const parts=new Intl.DateTimeFormat('es-CO',{day:'2-digit',month:'short',year:'2-digit'}).formatToParts(tomorrow);
+        const day=parts.find(part=>part.type === 'day').value;
+        const month=parts.find(part=>part.type === 'month').value.replace('.', '');
+        const year=parts.find(part=>part.type === 'year').value;
+        const date=`${day} ${month}, ${year}`;
+        return `Despacho Diario y Consumo de Gas Equivalente: ${date}`;
+      }
+
+      function statusClass(value){
+        return Number(value) > 0.7 ? 'excel-status-blue' : Number(value) > 0.5 ? 'excel-status-black' : 'excel-status-red';
+      }
+
+      function fuelClass(value){
+        const fuel=String(value || '').toLowerCase();
+        if(fuel.startsWith('glp')) return 'fuel-glp';
+        if(fuel.startsWith('combustoleo')) return 'fuel-combustoleo';
+        if(fuel.startsWith('carbón')) return 'fuel-carbon';
+        if(fuel.includes('diésel')) return 'fuel-diesel';
+        return fuel.startsWith('gas') ? 'fuel-gas' : '';
+      }
+
+      function makeFuelLegend(){
+        return `<div class="excel-table-wrap"><table class="excel-table second excel-legend"><colgroup><col style="width:163px"><col style="width:164px"><col style="width:107px"><col style="width:103px"><col style="width:105px"><col style="width:84px"><col style="width:82px"></colgroup><tbody><tr><td class="legend-label" colspan="2">Informacion tomada de XM y calculos internos GEAM</td><td class="legend-gas">Gas</td><td class="legend-diesel">Diésel</td><td class="legend-glp">GLP</td><td class="legend-combustoleo">Combustoleo</td><td class="legend-carbon">Carbón</td></tr></tbody></table></div>`;
+      }
+
+      function excelFormula(type,rowIndex,columnIndex,row){
+        if(type === 'first'){
+          if(columnIndex === 1) return 'Despacho Térmico Máx (MW) / 24';
+          if(columnIndex === 3) return 'Suma del despacho horario (MWh)';
+          if(columnIndex === 4) return 'Despacho Diario Total / Despacho Térmico Máx';
+          if(columnIndex === 5) return 'Suma del consumo de gas horario (MBTU)';
+        }
+        if(type === 'second'){
+          if(row[0] === 'ZONA COSTA' || row[0] === 'ZONA INTERIOR') return columnIndex === 1 ? 'Suma de capacidades de las plantas de la zona' : columnIndex === 3 ? 'Suma de despachos térmicos máximos de la zona' : columnIndex === 4 ? 'Suma del despacho diario total de la zona' : columnIndex === 5 ? 'Suma del consumo equivalente de gas de la zona' : '';
+          if(columnIndex === 1) return 'Despacho Térmico Máx (MWh) / 24';
+          if(columnIndex === 4) return 'Suma del despacho horario de las plantas asociadas';
+          if(columnIndex === 5) return 'Suma del consumo de gas de las plantas asociadas';
+          if(columnIndex === 6) return 'Despacho Diario Total / Despacho Térmico Máx';
+        }
+        if(type === 'third'){
+          if(row[0] === 'TOTAL'){
+            if(columnIndex >= 1 && columnIndex <= 24) return 'Suma del despacho horario de todas las plantas';
+            if(columnIndex === 25) return 'Suma de los despachos diarios de todas las plantas';
+            if(columnIndex >= 28 && columnIndex <= 51) return 'Suma del consumo de gas horario de todas las plantas';
+            if(columnIndex === 52) return 'Suma del consumo de gas diario de todas las plantas';
+          }
+          if(columnIndex >= 1 && columnIndex <= 24) return 'Valor horario de la planta tomado del TXT';
+          if(columnIndex === 25) return 'Suma del despacho horario de la planta (horas 1 a 24)';
+          if(columnIndex >= 28 && columnIndex <= 51) return 'Si el despacho horario es mayor que 0: ((Heat Rate × Factor HHV) + 1) × Despacho horario';
+          if(columnIndex === 52) return 'Suma del consumo de gas horario (horas 1 a 24)';
+        }
+        return '';
+      }
+
+      function makeExcelTable(headers,body,type,title=''){
+        const baseWidths=[23.33,23.44,15.22,14.78,15,12,11.78,9.78,8,13.89,9.78,11.78,10.22,9.78,13.55,9.78,...Array(10).fill(13)];
+        const widths=type === 'first' ? baseWidths.slice(0,6) : type === 'second' ? baseWidths.slice(0,7) : type === 'third' ? [baseWidths[0],...baseWidths.slice(1,25),11.44,13.44,13,...Array(24).fill(13),13] : [baseWidths[0],...Array(24).fill(13),13];
+        const colgroup=`<colgroup>${headers.map((_,index)=>`<col style="width:${Math.round((widths[index] || 13) * 7)}px">`).join('')}</colgroup>`;
+        const titleRow=title ? `<tr><th class="excel-title" colspan="${headers.length}">${htmlEscape(title)}</th></tr>` : '';
+        const header=`<thead>${titleRow}<tr>${headers.map((header,index)=>`<th class="${type === 'third' ? 'excel-blue-header' : 'excel-header'}">${htmlEscape(header)}</th>`).join('')}</tr></thead>`;
+        const rows=body.map((row,rowIndex)=>{ const sectionRow=typeof row[0] === 'string' && row[0].startsWith('ZONA '); const tesoritoRow=type === 'second' && String(row[0]).toUpperCase().startsWith('TESORITO'); const totalRow=type === 'third' && row[0] === 'TOTAL'; return `<tr class="${sectionRow ? 'excel-section-row' : ''} ${tesoritoRow ? 'tesorito-row' : ''} ${totalRow ? 'processing-total' : ''}">${row.map((value,index)=>{ const section=typeof value === 'string' && value.startsWith('ZONA '); const percent=((type === 'first' && index === 4) || (type === 'second' && index === 6)) && typeof value === 'number'; const text=percent ? formatPercent(value) : (typeof value === 'number' ? formatExcelNumber(value,index === 1 && type === 'third' ? 4 : 0) : value); const status=percent ? statusClass(value) : ''; const fuel=type === 'second' && index === 2 ? fuelClass(value) : ''; const formula=excelFormula(type,rowIndex,index,row); const formulaClass=formula ? 'excel-formula-cell' : ''; return `<td class="${section ? 'excel-section' : ''} ${index === 0 ? 'excel-label' : ''} ${percent ? 'excel-percent' : ''} ${status} ${fuel} ${formulaClass}"${formula ? ` title="${htmlEscape(formula)}"` : ''}>${htmlEscape(text)}</td>`; }).join('')}</tr>`; }).join('');
+        return `<div class="excel-table-wrap"><table class="excel-table ${type}">${colgroup}${header}<tbody>${rows}</tbody></table></div>`;
+      }
+
+      function processDespacho(){
+        const status=document.getElementById('despacho-status');
+        try{
+          const records=parseDespachoText(document.getElementById('despacho-text').value);
+          const calculated=calculatedPlants(records);
+          document.getElementById('despacho-table-one').innerHTML=renderTableOne(calculated);
+          document.getElementById('despacho-table-two').innerHTML=renderTableTwo(calculated);
+          document.getElementById('despacho-table-three').innerHTML=renderTableThree(calculated);
+          document.getElementById('despacho-real-data').innerHTML=renderRealData(records);
+          document.getElementById('despacho-results').hidden=false;
+          document.getElementById('despacho-date').innerText=`Despacho Diario y Consumo de Gas Equivalente — ${new Date().toLocaleDateString('es-CO')}`;
+          document.getElementById('despacho-download-one').disabled=false;
+          document.getElementById('despacho-download-two').disabled=false;
+          status.innerText=`Estado: procesado (${records.length} plantas del TXT)`;
+        }catch(error){
+          status.innerText=`Estado: error — ${error.message}`;
+        }
+      }
+      document.getElementById('despacho-process').addEventListener('click', processDespacho);
+
+      async function downloadDespachoImage(containerId, filename){
+        if(typeof html2canvas !== 'function'){
+          alert('No se pudo cargar el capturador de imágenes.');
+          return;
+        }
+        const target=document.getElementById(containerId);
+        if(!target || !target.firstElementChild){
+          alert('Primero procesa el TXT.');
+          return;
+        }
+        const wrappers=[...target.querySelectorAll('.excel-table-wrap')];
+        const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
+        wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
+        const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:2,useCORS:true,width:target.scrollWidth,windowWidth:target.scrollWidth});
+        wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
+        const link=document.createElement('a');
+        link.download=filename;
+        link.href=canvas.toDataURL('image/png');
+        link.click();
+      }
+      document.getElementById('despacho-download-one').addEventListener('click',()=>downloadDespachoImage('despacho-table-one','despacho-nal-ties-tabla-1.png'));
+      document.getElementById('despacho-download-two').addEventListener('click',()=>downloadDespachoImage('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png'));
 
       // Precio manual handlers
       function savePrecioLocal(){
@@ -618,15 +945,7 @@
 
       // Removed 'Ejecutar ahora' and 'Enviar a Telegram' buttons as requested.
 
-      // navigation buttons (visual only)
-      ['despacho','indicadores'].forEach(id=>{
-        const btn=document.getElementById('btn-'+id.replace('_',''))||document.getElementById('btn-'+id);
-        if(btn) btn.addEventListener('click', ()=>{
-          document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
-          alert('Módulo '+id+' no implementado aún.');
-        });
-      });
-
+      selectTool('despacho');
       loadData();
     </script>
   </body>
