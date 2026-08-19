@@ -27,21 +27,22 @@
       .excel-table-wrap{overflow-x:auto;margin-top:12px;border:1px solid #b7b7b7}
       .excel-table{width:max-content;min-width:100%;margin:0;border-collapse:collapse;table-layout:fixed;font-family:Calibri,Arial,sans-serif;color:#000;font-size:11px}
       .excel-table th,.excel-table td{border:1px solid #4472c4;padding:2px 5px;white-space:pre-line;text-align:right;vertical-align:middle;height:21px}
-      .excel-table .excel-title{background:#1f4e78;color:#fff;font-size:18px;font-weight:700;height:42px;text-align:center}
-      .excel-table.second .excel-title{background:#1f4e78;color:#fff;font-size:20px;height:34px;border-color:#4472c4}
-      .excel-table .excel-header{background:#1f4e78;color:#fff;font-weight:700;font-size:11px;height:67px;text-align:center}
+      .excel-table .excel-title{background:#333f4f;color:#fff;font-size:18px;font-weight:700;height:42px;text-align:center}
+      .excel-table.second .excel-title{background:#333f4f;color:#fff;font-size:20px;height:34px;border-color:#4472c4}
+      .excel-table .excel-header{background:#333f4f;color:#fff;font-weight:700;font-size:11px;height:67px;text-align:center}
       .excel-table.second .excel-header{height:77px}
       .excel-table.second .excel-header:first-child{font-size:18px}
       .excel-table .excel-blue-header{background:#0070c0;color:#ffff00;font-weight:700;font-size:11px;height:66px;text-align:center}
       .excel-table .excel-section{background:#d9e2f3;font-weight:700;text-align:left;font-size:14px}
       .excel-table.second tr.excel-section-row td{background:#2f5597 !important;color:#fff !important;font-weight:700}
       .excel-table.second tr.excel-section-row td:not(:first-child){font-size:14px}
+      .excel-table.second tr.excel-section-row td:nth-child(2),.excel-table.second tr.excel-section-row td:nth-child(4),.excel-table.second tr.excel-section-row td:nth-child(5),.excel-table.second tr.excel-section-row td:nth-child(6){text-align:center}
       .excel-table .excel-label{text-align:left;white-space:nowrap}
       .excel-table .excel-percent{font-size:12px;text-align:center}
       .excel-table.first td:nth-child(6){background:#00b0f0}
       .excel-table.first th:nth-child(6),.excel-table.first td:nth-child(6){font-weight:700}
       .excel-table.second td:nth-child(3){background:#feea9a;text-align:center}
-      .excel-table.second td:nth-child(6){background:#e2f0d9;text-align:center;font-weight:700;border-color:#4472c4}
+      .excel-table.second td:nth-child(6){background:#ddebf7;text-align:center;font-weight:700;border-color:#4472c4}
       .excel-table.second .tesorito-row td:nth-child(-n+6){background:#d9e2f3;font-weight:700}
       .excel-table.second td.fuel-gas{background:#feea9a !important}
       .excel-table.second td.fuel-diesel{background:#ffff00 !important}
@@ -51,17 +52,19 @@
       .excel-table.second tr.tesorito-row td:nth-child(-n+6){background:#d9e2f3 !important;color:#000 !important;font-weight:700}
       .excel-table.third tr.processing-total td:not(:first-child){font-size:14px;font-weight:700}
       .excel-formula-cell{cursor:help}
-      .excel-table.first td:nth-child(5),.excel-table.second td:nth-child(2),.excel-table.second td:nth-child(4),.excel-table.second td:nth-child(5),.excel-table.second td:nth-child(7),.excel-table.third td:nth-child(29){text-align:center}
+      .excel-table.second td:nth-child(2),.excel-table.second td:nth-child(4),.excel-table.second td:nth-child(5){text-align:right}
+      .excel-table.second td:nth-child(3),.excel-table.second td:nth-child(7){text-align:center}
+      .excel-table.first td:nth-child(5),.excel-table.third td:nth-child(29){text-align:center}
       .excel-status-blue{color:#0000ff;font-weight:700}
       .excel-status-black{color:#000;font-weight:700}
       .excel-status-red{color:#ff0000;font-weight:700}
       .excel-legend td{height:25px;font-weight:400;text-align:center}
       .excel-legend .legend-label{text-align:left;font-weight:400;white-space:nowrap}
-      .excel-legend .legend-gas{background:#feea9a}
+      .excel-legend .legend-gas{background:#ffff00 !important}
       .excel-legend .legend-diesel{background:#ffff00}
       .excel-legend .legend-glp{background:#b7d7a8}
       .excel-legend .legend-combustoleo{background:#ef999c}
-      .excel-legend .legend-carbon{background:#bc8a58}
+      .excel-legend .legend-carbon{background:#bc8a58 !important}
       .excel-table.second.excel-legend td.legend-combustoleo{background:#ef999c}
       .excel-table.second.excel-legend{width:808px;min-width:808px}
       .excel-table.second.excel-legend .legend-label{overflow:visible;border-right:0}
@@ -102,7 +105,7 @@
     </header>
     <div class="layout">
       <nav>
-        <button id="btn-price-auto" hidden>Precio de Bolsa (AUTO)</button>
+        <button id="btn-price-auto" hidden disabled aria-hidden="true">Precio de Bolsa (AUTO)</button>
         <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
         <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
         <button id="btn-indicadores">Indicadores</button>
@@ -628,6 +631,7 @@
       document.getElementById('download-manual-chart').addEventListener('click', ()=>downloadChart('manualChart', 'precio-bolsa-manual.png'));
 
       function selectTool(tool){
+        if(tool === 'auto') return;
         const auto = tool === 'auto';
         const despacho = tool === 'despacho';
         document.getElementById('auto-tool').hidden = !auto;
@@ -881,10 +885,17 @@
           return;
         }
         const wrappers=[...target.querySelectorAll('.excel-table-wrap')];
+        const contentWidth=Math.max(...[...target.querySelectorAll('.excel-table')].map(table=>table.getBoundingClientRect().width));
+        const previousWidth=target.style.width;
+        const previousMinWidth=target.style.minWidth;
+        target.style.width=`${Math.ceil(contentWidth)}px`;
+        target.style.minWidth='0';
         const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
         wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
-        const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:2,useCORS:true,width:target.scrollWidth,windowWidth:target.scrollWidth});
+        const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:2,useCORS:true,width:Math.ceil(contentWidth),windowWidth:Math.ceil(contentWidth)});
         wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
+        target.style.width=previousWidth;
+        target.style.minWidth=previousMinWidth;
         const link=document.createElement('a');
         link.download=filename;
         link.href=canvas.toDataURL('image/png');
