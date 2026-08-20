@@ -61,15 +61,25 @@
       .excel-status-red{color:#ff0000;font-weight:700}
       .excel-legend td{height:25px;font-weight:400;text-align:center}
       .excel-legend .legend-label{text-align:left;font-weight:400;white-space:nowrap}
-      .excel-legend .legend-gas{background:#ffff00 !important}
-      .excel-legend .legend-diesel{background:#ffff00}
+      .excel-legend .legend-gas{background:#feea9a !important}
+      .excel-legend .legend-diesel{background:#ffff00 !important}
       .excel-legend .legend-glp{background:#b7d7a8}
       .excel-legend .legend-combustoleo{background:#ef999c}
       .excel-legend .legend-carbon{background:#bc8a58 !important}
       .excel-table.second.excel-legend td.legend-combustoleo{background:#ef999c}
       .excel-table.second.excel-legend{width:808px;min-width:808px}
-      .excel-table.second.excel-legend .legend-label{overflow:visible;border-right:0}
+      .excel-table.second.excel-legend .legend-label{overflow:visible;border-right:0;font-size:12px}
+      .excel-table.second.excel-legend td:not(.legend-label){font-size:12px}
       .excel-table.second.excel-legend .legend-label + td{border-left:0}
+      .excel-table.first,.excel-table.second{font-size:17px}
+      .excel-table.first .excel-title{font-size:23px}
+      .excel-table.second .excel-title{font-size:25px}
+      .excel-table.first .excel-header,.excel-table.second .excel-header{font-size:17px}
+      .excel-table.second .excel-header:first-child{font-size:23px}
+      .excel-table.first .excel-blue-header,.excel-table.second .excel-blue-header{font-size:17px}
+      .excel-table.first .excel-section,.excel-table.second .excel-section{font-size:19px}
+      .excel-table.second tr.excel-section-row td:not(:first-child){font-size:19px}
+      .excel-table.first .excel-percent,.excel-table.second .excel-percent{font-size:17px}
       .despacho-heading{margin:26px 0 8px;font-family:Calibri,Arial,sans-serif;color:#2f5597}
       .despacho-results[hidden]{display:none}
       .top-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px}
