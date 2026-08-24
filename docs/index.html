@@ -82,6 +82,13 @@
       .excel-table.first .excel-percent,.excel-table.second .excel-percent{font-size:17px}
       .despacho-heading{margin:26px 0 8px;font-family:Calibri,Arial,sans-serif;color:#2f5597}
       .despacho-results[hidden]{display:none}
+      .multidespacho-results[hidden]{display:none}
+      .multidespacho-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+      .multidespacho-grid label{display:flex;flex-direction:column;gap:5px;font-weight:600}
+      .multidespacho-grid input,.multidespacho-grid select{padding:9px;border:1px solid #e6e9ed;border-radius:6px;background:#fff;color:var(--text)}
+      .multidespacho-grid select[multiple]{min-height:86px}
+      .multidespacho-summary{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0;color:var(--muted)}
+      .multidespacho-table{overflow:auto}
       .top-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px}
       .chart-shell{position:relative;width:100%;max-width:1100px;height:420px;margin:0 auto;background:#ffffff}
       canvas{display:block;max-width:100%}
@@ -105,10 +112,13 @@
         .kpi{padding:10px}
         .chart-shell{height:320px}
         .card{padding:10px}
+        .multidespacho-grid{grid-template-columns:1fr}
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   </head>
   <body>
     <header>
@@ -119,6 +129,7 @@
         <button id="btn-price-auto" hidden disabled aria-hidden="true">Precio de Bolsa (AUTO)</button>
         <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
         <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
+        <button id="btn-multidespacho">Multidespacho</button>
         <button id="btn-indicadores">Indicadores</button>
         <a id="btn-resumen" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank">Resumen operativo</a>
         <hr style="border:none;height:1px;background:#e6e9ed;margin:12px 0">
@@ -246,6 +257,54 @@
             <div id="despacho-table-three"></div>
             <h2 class="despacho-heading">DATOS REALES</h2>
             <div id="despacho-real-data"></div>
+          </div>
+        </section>
+
+        <section id="multidespacho-tool" hidden>
+          <div class="top-row">
+            <div>
+              <h2>Multidespacho</h2>
+              <div class="muted">Consolida archivos Nal_Ties y NAL usando la lógica de Despacho Nal_Ties (MANUAL).</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <h3>Cargar información</h3>
+            <div class="multidespacho-grid">
+              <label>Archivo ZIP
+                <input id="multidespacho-zip" type="file" accept=".zip,application/zip" />
+              </label>
+              <label>Año de la información
+                <input id="multidespacho-year" type="number" min="2000" max="2100" step="1" value="2026" />
+              </label>
+              <label>Planta
+                <select id="multidespacho-plant" multiple><option value="" selected>Todas las plantas</option></select>
+              </label>
+              <label>Fecha inicial
+                <input id="multidespacho-start" type="date" />
+              </label>
+              <label>Fecha final
+                <input id="multidespacho-end" type="date" />
+              </label>
+              <label>Métrica
+                <select id="multidespacho-metric" multiple>
+                  <option value="total" selected>Despacho Diario Total (MWh)</option>
+                  <option value="gas" selected>Consumo Gas día (Mbtu)</option>
+                </select>
+              </label>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <button id="multidespacho-process" class="btn">Procesar ZIP</button>
+              <button id="multidespacho-export" class="btn" style="background:#2d9c6b" disabled>Exportar XLSX</button>
+              <button id="multidespacho-export-zip" class="btn" style="background:#0b5a88" disabled>Exportar tablas en ZIP</button>
+              <span id="multidespacho-status" class="muted">Estado: pendiente</span>
+            </div>
+          </div>
+          <div id="multidespacho-results" class="multidespacho-results" hidden>
+            <div id="multidespacho-summary" class="multidespacho-summary"></div>
+            <div class="card">
+              <h3 id="multidespacho-table-title">Resultados</h3>
+              <div id="multidespacho-table" class="multidespacho-table"></div>
+            </div>
           </div>
         </section>
 
@@ -618,18 +677,22 @@
         if(tool === 'auto') return;
         const auto = tool === 'auto';
         const despacho = tool === 'despacho';
+        const multidespacho = tool === 'multidespacho';
         document.getElementById('auto-tool').hidden = !auto;
         document.getElementById('manual-tool').hidden = tool !== 'manual';
         document.getElementById('despacho-tool').hidden = !despacho;
+        document.getElementById('multidespacho-tool').hidden = !multidespacho;
         document.getElementById('auto-header').hidden = !auto;
         document.getElementById('btn-price-auto').classList.toggle('active', auto);
         document.getElementById('btn-price-manual').classList.toggle('active', tool === 'manual');
         document.getElementById('btn-despacho').classList.toggle('active', despacho);
+        document.getElementById('btn-multidespacho').classList.toggle('active', multidespacho);
         if(!auto && manualData) render(manualData, 'manual');
       }
       document.getElementById('btn-price-auto').addEventListener('click', ()=>selectTool('auto'));
       document.getElementById('btn-price-manual').addEventListener('click', ()=>selectTool('manual'));
       document.getElementById('btn-despacho').addEventListener('click', ()=>selectTool('despacho'));
+      document.getElementById('btn-multidespacho').addEventListener('click', ()=>selectTool('multidespacho'));
 
       const despachoPlants = [
         {row:56,label:'Termonorte',lookup:'TERMONORTE',heat:8.09,factor:1.15},
@@ -923,7 +986,7 @@
       document.getElementById('despacho-download-two').addEventListener('click',()=>downloadDespachoImage('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png'));
 
       async function tablePngData(containerId){
-        const target=document.getElementById(containerId);
+        const target=typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
         const tables=[...target.querySelectorAll('.excel-table')];
         const contentWidth=Math.max(...tables.map(table=>table.getBoundingClientRect().width));
         const previousWidth=target.style.width;
@@ -956,6 +1019,169 @@
         }
       }
       document.getElementById('despacho-send-telegram').addEventListener('click',sendDespachoToTelegram);
+
+      let multidespachoData = [];
+
+      function multidespachoDateFromName(filename, year){
+        const match=filename.match(/(?:^|[\\/])d[A-Z]{3}(\d{2})(\d{2})(?:_|\.)/i);
+        if(!match) return null;
+        const month=Number(match[1]) - 1;
+        const day=Number(match[2]);
+        if(month < 0 || month > 11 || day < 1 || day > 31) return null;
+        const parsed=new Date(Number(year),month,day);
+        return parsed.getFullYear() === Number(year) && parsed.getMonth() === month && parsed.getDate() === day
+          ? `${year}-${String(month + 1).padStart(2,'0')}-${String(day).padStart(2,'0')}` : null;
+      }
+
+      function multidespachoPlantOptions(){
+        const select=document.getElementById('multidespacho-plant');
+        despachoPlants.forEach(plant=>{
+          const option=document.createElement('option');
+          option.value=String(plant.row);
+          option.textContent=plant.label;
+          select.appendChild(option);
+        });
+      }
+
+      function filteredMultidespachoRows(){
+        const start=document.getElementById('multidespacho-start').value;
+        const end=document.getElementById('multidespacho-end').value;
+        const selectedPlants=[...document.getElementById('multidespacho-plant').selectedOptions].map(option=>option.value);
+        const selectedMetrics=[...document.getElementById('multidespacho-metric').selectedOptions].map(option=>option.value);
+        const plants=selectedPlants.includes('') || !selectedPlants.length ? despachoPlants : despachoPlants.filter(plant=>selectedPlants.includes(String(plant.row)));
+        const rows=[];
+        multidespachoData.filter(item=>(!start || item.date >= start) && (!end || item.date <= end)).forEach(item=>{
+          plants.forEach(plant=>{
+            const calculated=item.calculated.get(plant.row);
+            rows.push([item.date,plant.label,selectedMetrics.includes('total') ? calculated.total : null,selectedMetrics.includes('gas') ? calculated.gasTotal : null]);
+          });
+        });
+        return {rows,metrics:selectedMetrics};
+      }
+
+      function renderMultidespacho(){
+        const {rows,metrics}=filteredMultidespachoRows();
+        const metricLabels={total:'Despacho Diario Total (MWh)',gas:'Consumo Gas día (Mbtu)'};
+        const headers=['Fecha','Planta',...metrics.map(metric=>metricLabels[metric])];
+        const tableRows=rows.map(row=>[row[0],row[1],...metrics.map(metric=>formatExcelNumber(row[metric === 'total' ? 2 : 3],2))]);
+        document.getElementById('multidespacho-table-title').textContent=metrics.length ? metrics.map(metric=>metricLabels[metric]).join(' / ') : 'Resultados';
+        document.getElementById('multidespacho-table').innerHTML=makeExcelTable(headers,tableRows,'real');
+        const totals=metrics.map(metric=>rows.reduce((sum,row)=>sum + row[metric === 'total' ? 2 : 3],0));
+        document.getElementById('multidespacho-summary').innerHTML=`<span><strong>Días:</strong> ${new Set(rows.map(row=>row[0])).size}</span><span><strong>Filas:</strong> ${rows.length}</span>${metrics.map((metric,index)=>`<span><strong>Total ${metricLabels[metric]}:</strong> ${formatExcelNumber(totals[index],2)}</span>`).join('')}`;
+      }
+
+      async function processMultidespacho(){
+        const status=document.getElementById('multidespacho-status');
+        const file=document.getElementById('multidespacho-zip').files[0];
+        const year=Number(document.getElementById('multidespacho-year').value);
+        if(!file) { status.textContent='Estado: selecciona un archivo ZIP.'; return; }
+        if(!Number.isInteger(year) || year < 2000 || year > 2100) { status.textContent='Estado: introduce un año válido.'; return; }
+        try{
+          status.textContent='Estado: leyendo ZIP local...';
+          const archive=await JSZip.loadAsync(file);
+          const entries=Object.values(archive.files).filter(entry=>!entry.dir && entry.name.toLowerCase().endsWith('.txt'));
+          if(!entries.length) throw new Error('El ZIP no contiene archivos .txt.');
+          const processed=[];
+          const ignored=[];
+          for(const entry of entries){
+            const parsedDate=multidespachoDateFromName(entry.name,year);
+            if(!parsedDate){ ignored.push(entry.name); continue; }
+            const records=parseDespachoText(await entry.async('text'));
+            processed.push({date:parsedDate,sourceName:entry.name.split(/[\\/]/).pop(),calculated:calculatedPlants(records)});
+          }
+          if(!processed.length) throw new Error('No se encontraron nombres con formato dMMMdd en el ZIP.');
+          multidespachoData=processed.sort((first,second)=>first.date.localeCompare(second.date));
+          const dates=multidespachoData.map(item=>item.date);
+          document.getElementById('multidespacho-start').value=dates[0];
+          document.getElementById('multidespacho-end').value=dates[dates.length - 1];
+          document.getElementById('multidespacho-results').hidden=false;
+          document.getElementById('multidespacho-export').disabled=false;
+          document.getElementById('multidespacho-export-zip').disabled=false;
+          renderMultidespacho();
+          status.textContent=`Estado: ${processed.length} TXT procesados${ignored.length ? `, ${ignored.length} ignorados` : ''}.`;
+        }catch(error){
+          multidespachoData=[];
+          document.getElementById('multidespacho-export').disabled=true;
+          document.getElementById('multidespacho-export-zip').disabled=true;
+          status.textContent=`Estado: error — ${error.message}`;
+        }
+      }
+
+      function exportMultidespacho(){
+        const {rows,metrics}=filteredMultidespachoRows();
+        if(!rows.length || !metrics.length){ alert('Selecciona al menos una planta y una métrica con datos.'); return; }
+        const metricLabels={total:'Despacho Diario Total (MWh)',gas:'Consumo Gas día (Mbtu)'};
+        const headers=['Fecha','Planta',...metrics.map(metric=>metricLabels[metric])];
+        const exportRows=rows.map(row=>[row[0],row[1],...metrics.map(metric=>row[metric === 'total' ? 2 : 3])]);
+        const worksheet=XLSX.utils.aoa_to_sheet([['Multidespacho'],headers,...exportRows]);
+        worksheet['!cols']=[{wch:14},{wch:24},...metrics.map(()=>({wch:28}))];
+        const workbook=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook,worksheet,'Multidespacho');
+        XLSX.writeFile(workbook,`multidespacho-${new Date().toISOString().slice(0,10)}.xlsx`);
+      }
+
+      function multidespachoSafeName(value){
+        return String(value || 'archivo').replace(/\.txt$/i,'').replace(/[^a-zA-Z0-9._-]+/g,'-').replace(/^-+|-+$/g,'') || 'archivo';
+      }
+
+      function multidespachoTemporaryTable(html){
+        const container=document.createElement('div');
+        container.innerHTML=html;
+        container.style.position='fixed';
+        container.style.left='-100000px';
+        container.style.top='0';
+        container.style.background='#fff';
+        container.style.width='max-content';
+        document.body.appendChild(container);
+        return container;
+      }
+
+      async function exportMultidespachoZip(){
+        if(typeof JSZip !== 'function' || typeof html2canvas !== 'function'){
+          alert('No se pudieron cargar las herramientas de exportación.');
+          return;
+        }
+        if(!multidespachoData.length){ alert('Primero procesa el ZIP.'); return; }
+        const status=document.getElementById('multidespacho-status');
+        const button=document.getElementById('multidespacho-export-zip');
+        const archive=new JSZip();
+        button.disabled=true;
+        try{
+          for(let index=0; index<multidespachoData.length; index++){
+            const item=multidespachoData[index];
+            status.textContent=`Estado: generando tablas ${index + 1}/${multidespachoData.length}...`;
+            const safeBase=`${item.date}-${multidespachoSafeName(item.sourceName)}`;
+            const first=multidespachoTemporaryTable(renderTableOne(item.calculated));
+            const second=multidespachoTemporaryTable(renderTableTwo(item.calculated));
+            try{
+              const firstPng=await tablePngData(first);
+              const secondPng=await tablePngData(second);
+              archive.file(`${safeBase}-tabla-1.png`,firstPng.split(',',2)[1],{base64:true});
+              archive.file(`${safeBase}-tabla-2-con-leyenda.png`,secondPng.split(',',2)[1],{base64:true});
+            }finally{
+              first.remove();
+              second.remove();
+            }
+          }
+          const blob=await archive.generateAsync({type:'blob'});
+          const link=document.createElement('a');
+          link.download=`multidespacho-tablas-${new Date().toISOString().slice(0,10)}.zip`;
+          link.href=URL.createObjectURL(blob);
+          link.click();
+          URL.revokeObjectURL(link.href);
+          status.textContent=`Estado: ZIP generado con ${multidespachoData.length * 2} tablas.`;
+        }catch(error){
+          status.textContent=`Estado: error al generar ZIP — ${error.message}`;
+        }finally{
+          button.disabled=false;
+        }
+      }
+
+      document.getElementById('multidespacho-process').addEventListener('click',processMultidespacho);
+      document.getElementById('multidespacho-export').addEventListener('click',exportMultidespacho);
+      document.getElementById('multidespacho-export-zip').addEventListener('click',exportMultidespachoZip);
+      ['multidespacho-start','multidespacho-end','multidespacho-plant','multidespacho-metric'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{ if(multidespachoData.length) renderMultidespacho(); }));
+      multidespachoPlantOptions();
 
       // Precio manual handlers
       function savePrecioLocal(){
