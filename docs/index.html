@@ -20,6 +20,20 @@
       .kpi{background:var(--card);padding:16px;border-radius:10px;flex:1;border:1px solid #e6e9ed}
       .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin-bottom:12px}
       .btn{background:var(--accent);color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer}
+      .btn:disabled{opacity:.45;cursor:not-allowed}
+      .btn-secondary{background:#0b5a88}
+      .btn-whatsapp{background:#1fa855}
+      .nav-ext{display:flex !important;align-items:center;gap:6px}
+      .ext-icon{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+      .nav-ext:hover .ext-icon{opacity:1}
+      .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+      .file-drop{margin-top:10px;padding:12px;border:1.5px dashed #c6cfd8;border-radius:8px;background:#fbfcfd;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+      .file-drop.dragover{border-color:var(--accent);background:#eef3f8}
+      .file-drop input[type=file]{flex:1;min-width:180px}
+      .file-drop .file-name{color:var(--muted);font-size:13px}
+      .share-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+      .share-hint{color:var(--muted);font-size:12.5px;margin-top:8px;line-height:1.45}
+      .share-hint:empty{display:none}
       .muted{color:var(--muted)}
       .card{background:var(--card);padding:14px;border-radius:10px;border:1px solid #e6e9ed}
       table{width:100%;border-collapse:collapse;color:var(--text);margin-top:12px}
@@ -131,8 +145,8 @@
         <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
         <button id="btn-multidespacho">Multidespacho</button>
         <button id="btn-indicadores">Indicadores</button>
-        <a id="btn-resumen" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank">Resumen operativo</a>
-        <a id="btn-calculadora-snt" href="https://juanherrera19.github.io/CalculadoraSNT/" target="_blank">Calculadora SNT</a>
+        <a id="btn-resumen" class="nav-ext" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Resumen operativo</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
+        <a id="btn-calculadora-snt" class="nav-ext" href="https://juanherrera19.github.io/CalculadoraSNT/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Calculadora SNT</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
         <hr style="border:none;height:1px;background:#e6e9ed;margin:12px 0">
       </nav>
 
@@ -198,13 +212,15 @@
         </div>
 
         <div class="card" style="margin-top:12px">
-          <h3>Pegar manualmente (texto o JSON)</h3>
-          <div class="muted">Si el scrapping falla, pega aquí el contenido del .txt o un JSON con {"serie": [...]}</div>
+          <h3>Cargar datos: adjunta el .txt o pega el contenido</h3>
+          <div class="muted">Adjunta el archivo .txt tal como lo recibes y se procesa solo. Si prefieres, pega abajo 24 valores separados por comas o un JSON con {"serie": [...]}</div>
+          <div class="file-drop" id="manual-drop">
+            <input id="manual-file" type="file" accept=".txt,.csv,.json,text/plain" />
+            <span class="file-name" id="manual-file-name">Ningún archivo adjunto — también puedes arrastrarlo aquí</span>
+          </div>
           <textarea id="manual-text" placeholder="Pega aquí 24 valores separados por comas o JSON válido" style="width:100%;height:120px;margin-top:8px;padding:8px;border:1px solid #e6e9ed;border-radius:6px"></textarea>
-          <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-            <button id="btn-exec-manual" class="btn">Ejecutar manualmente</button>
-            <label style="margin-left:8px"><input id="manual-send-telegram-cb" type="checkbox" /> Enviar a Telegram al ejecutar</label>
-            <button id="btn-send-manual" class="btn" style="background:#2d9c6b;margin-left:8px">Enviar a Telegram</button>
+          <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <button id="btn-exec-manual" class="btn">Ejecutar</button>
           </div>
           <div id="manual-status" class="muted" style="margin-top:8px">Estado: inactivo</div>
         </div>
@@ -225,8 +241,15 @@
           </div>
 
           <div class="card" style="margin-top:12px">
-            <h3>Texto original para Telegram</h3>
+            <h3>Texto para compartir</h3>
+            <div class="share-row">
+              <button id="manual-copy-text" class="btn">Copiar texto</button>
+              <button id="manual-copy-image" class="btn btn-secondary">Copiar gráfica</button>
+              <button id="manual-share-whatsapp" class="btn btn-whatsapp">Compartir por WhatsApp</button>
+            </div>
             <pre id="manual-original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
+            <div class="share-hint" id="manual-share-status"></div>
+            <div class="share-hint">En celular, <strong>Compartir por WhatsApp</strong> envía la gráfica y el texto juntos en un solo paso. En computador la gráfica se copia al portapapeles y se abre WhatsApp Web con el texto listo: pega la imagen con Ctrl+V.</div>
           </div>
         </div>
         </section>
@@ -239,7 +262,12 @@
             </div>
           </div>
           <div class="card" style="margin-top:12px">
-            <h3>Datos del TXT</h3>
+            <h3>Datos del TXT: adjunta el archivo o pega el contenido</h3>
+            <div class="muted">Adjunta el .txt del despacho y se procesa solo. Si prefieres, pega el contenido en el cuadro.</div>
+            <div class="file-drop" id="despacho-drop">
+              <input id="despacho-file" type="file" accept=".txt,.csv,text/plain" />
+              <span class="file-name" id="despacho-file-name">Ningún archivo adjunto — también puedes arrastrarlo aquí</span>
+            </div>
             <textarea id="despacho-text" placeholder="Pega aquí el contenido del TXT" style="width:100%;height:180px;margin-top:8px;padding:8px;border:1px solid #e6e9ed;border-radius:6px"></textarea>
             <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
               <button id="despacho-process" class="btn">Procesar</button>
@@ -248,8 +276,11 @@
             <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
               <button id="despacho-download-one" class="btn" disabled>Descargar tabla 1 PNG</button>
               <button id="despacho-download-two" class="btn" disabled>Descargar tabla 2 PNG</button>
-              <button id="despacho-send-telegram" class="btn" style="background:#229ed9" disabled>Enviar tablas a Telegram</button>
+              <button id="despacho-share-one" class="btn btn-whatsapp" disabled>Compartir tabla 1 por WhatsApp</button>
+              <button id="despacho-share-two" class="btn btn-whatsapp" disabled>Compartir tabla 2 por WhatsApp</button>
             </div>
+            <div class="share-hint" id="despacho-share-status"></div>
+            <div class="share-hint">En celular se abre el menú de compartir con la imagen de la tabla lista. En computador la imagen se copia al portapapeles y se abre WhatsApp Web: pégala con Ctrl+V.</div>
           </div>
           <div id="despacho-results" class="despacho-results" hidden>
             <div id="despacho-table-one"></div>
@@ -504,6 +535,167 @@
         });
       }
 
+      /* ---------- Utilidades para copiar, compartir y leer archivos ---------- */
+
+      const WHATSAPP_TEXT_LIMIT = 1800;
+
+      function canShareFiles(files){
+        return typeof navigator !== 'undefined' && !!navigator.share && !!navigator.canShare && navigator.canShare({files});
+      }
+
+      // Los TXT suelen venir en Windows-1252; si UTF-8 estricto falla, reintentamos con ese juego.
+      async function readTextFile(file){
+        const buffer = await file.arrayBuffer();
+        try{ return new TextDecoder('utf-8', {fatal:true}).decode(buffer); }
+        catch(e){ return new TextDecoder('windows-1252').decode(buffer); }
+      }
+
+      function canvasToBlob(canvas){
+        return new Promise((resolve, reject)=>{
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('No se pudo generar la imagen')), 'image/png');
+        });
+      }
+
+      // El canvas de Chart.js es transparente y WhatsApp lo mostraria con fondo negro.
+      function flattenOnWhite(source){
+        const out = document.createElement('canvas');
+        out.width = source.width;
+        out.height = source.height;
+        const ctx = out.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, out.width, out.height);
+        ctx.drawImage(source, 0, 0);
+        return out;
+      }
+
+      async function copyTextToClipboard(text){
+        try{
+          await navigator.clipboard.writeText(text);
+          return true;
+        }catch(e){
+          const helper = document.createElement('textarea');
+          helper.value = text;
+          helper.setAttribute('readonly','');
+          helper.style.position = 'fixed';
+          helper.style.top = '-1000px';
+          document.body.appendChild(helper);
+          helper.select();
+          let ok = false;
+          try{ ok = document.execCommand('copy'); }catch(err){ ok = false; }
+          helper.remove();
+          return ok;
+        }
+      }
+
+      async function copyImageToClipboard(blob){
+        if(!navigator.clipboard || !navigator.clipboard.write || typeof ClipboardItem === 'undefined') return false;
+        try{
+          await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+          return true;
+        }catch(e){ return false; }
+      }
+
+      function downloadBlob(blob, filename){
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(()=>URL.revokeObjectURL(url), 5000);
+      }
+
+      function openWhatsAppWithText(text){
+        const body = (text || '').slice(0, WHATSAPP_TEXT_LIMIT);
+        window.open('https://wa.me/?text=' + encodeURIComponent(body), '_blank', 'noopener');
+      }
+
+      function flash(node, message, tone){
+        if(!node) return;
+        node.innerText = message;
+        node.style.color = tone === 'error' ? 'var(--highlight)' : tone === 'muted' ? 'var(--muted)' : '#1d7a4c';
+        clearTimeout(node._flashTimer);
+        node._flashTimer = setTimeout(()=>{ node.innerText = ''; node.style.color = ''; }, 8000);
+      }
+
+      // Celular: Web Share envia imagen y texto juntos. Escritorio: portapapeles (o descarga) + WhatsApp Web.
+      async function shareToWhatsApp(options){
+        const blob = options.blob;
+        const filename = options.filename;
+        const text = options.text || '';
+        const status = options.status;
+        const file = blob ? new File([blob], filename, {type:'image/png'}) : null;
+        if(file && canShareFiles([file])){
+          try{
+            await navigator.share({files:[file], text});
+            flash(status, 'Compartido.');
+            return;
+          }catch(e){
+            if(e && e.name === 'AbortError'){ flash(status, 'Envio cancelado.', 'muted'); return; }
+          }
+        }
+        let note = '';
+        if(blob){
+          const copied = await copyImageToClipboard(blob);
+          if(copied){
+            note = 'Imagen copiada al portapapeles: pegala en WhatsApp con Ctrl+V. ';
+          }else{
+            downloadBlob(blob, filename);
+            note = 'Tu navegador no permite copiar imagenes, se descargo ' + filename + ': adjuntala en WhatsApp. ';
+          }
+        }
+        if(text) openWhatsAppWithText(text);
+        flash(status, note + (text ? 'WhatsApp abierto con el texto.' : ''));
+      }
+
+      function priceChartBlob(chartKey){
+        const chart = window[chartKey];
+        if(!chart) throw new Error('Primero ejecuta los datos para generar la grafica.');
+        return canvasToBlob(flattenOnWhite(chart.canvas));
+      }
+
+      // Adjuntar .txt en vez de copiar y pegar: lee el archivo y dispara el procesamiento.
+      function setupFileAttach(config){
+        const input = document.getElementById(config.inputId);
+        const drop = document.getElementById(config.dropId);
+        const nameLabel = document.getElementById(config.nameId);
+        const textarea = document.getElementById(config.textareaId);
+        const status = document.getElementById(config.statusId);
+        if(!input || !drop || !textarea) return;
+
+        async function handle(file){
+          if(!file) return;
+          const name = (file.name || '').toLowerCase();
+          const looksText = /\.(txt|csv|json|prn|dat)$/.test(name) || (file.type || '').startsWith('text/');
+          if(!looksText){
+            if(status) status.innerText = 'Estado: el archivo debe ser .txt (tambien acepta .csv o .json)';
+            return;
+          }
+          try{
+            textarea.value = await readTextFile(file);
+            if(nameLabel) nameLabel.innerText = file.name + ' \u2014 ' + (file.size/1024).toFixed(1) + ' KB';
+            config.onLoaded();
+          }catch(e){
+            if(status) status.innerText = 'Estado: no se pudo leer el archivo \u2014 ' + e.message;
+          }
+        }
+
+        input.addEventListener('change', ()=>handle(input.files && input.files[0]));
+        [drop, textarea].forEach(zone=>{
+          zone.addEventListener('dragover', event=>{ event.preventDefault(); drop.classList.add('dragover'); });
+          zone.addEventListener('dragleave', ()=>drop.classList.remove('dragover'));
+          zone.addEventListener('drop', event=>{
+            const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+            if(!file) return;
+            event.preventDefault();
+            drop.classList.remove('dragover');
+            input.value = '';
+            handle(file);
+          });
+        });
+      }
+
       function downloadChart(chartKey, filename){
         if(!window[chartKey]) return alert('No hay una gráfica disponible para descargar');
         const link = document.createElement('a');
@@ -645,31 +837,52 @@
           try{ localStorage.setItem('precio_bolsa_manual_data', JSON.stringify(data)); }catch(e){}
           render(data, 'manual');
           status.innerText = 'Estado: datos cargados localmente';
-          if(document.getElementById('manual-send-telegram-cb').checked){
-            // try to send automatically
-            sendManualToBackend(true);
-          }
         }catch(e){
           status.innerText = 'Estado: error';
           alert('Error al procesar entrada manual: '+e.message);
         }
       });
 
-      async function sendManualToBackend(sendTelegram){
-        const status = document.getElementById('manual-status');
-        if(!manualData) return alert('No hay datos MANUAL cargados para enviar');
-        status.innerText = 'Estado: enviando...';
-        try{
-          const url = `${API_BASE_URL}/api/run`;
-          const resp = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({send_telegram: !!sendTelegram, manual_data: manualData, manual:true})});
-          if(!resp.ok){ const t = await resp.text().catch(()=>resp.statusText||'error'); throw new Error(t||'Error en backend'); }
-          const j = await resp.json();
-          status.innerText = 'Estado: enviado';
-          alert('Enviado al backend. Respuesta: '+(j.status||JSON.stringify(j)));
-        }catch(e){ status.innerText = 'Estado: error'; alert('No se pudo enviar al backend: '+e.message+'\nAsegúrate de tener el backend corriendo (python src/api_runner.py)'); }
+      function manualShareText(){
+        const text = document.getElementById('manual-original-text').innerText;
+        if(!text || text.trim() === '—') throw new Error('Primero ejecuta los datos para generar el texto.');
+        return text;
       }
 
-      document.getElementById('btn-send-manual').addEventListener('click', ()=>sendManualToBackend(true));
+      document.getElementById('manual-copy-text').addEventListener('click', async ()=>{
+        const status = document.getElementById('manual-share-status');
+        try{
+          const ok = await copyTextToClipboard(manualShareText());
+          flash(status, ok ? 'Texto copiado al portapapeles.' : 'No se pudo copiar el texto.', ok ? 'ok' : 'error');
+        }catch(e){ flash(status, e.message, 'error'); }
+      });
+
+      document.getElementById('manual-copy-image').addEventListener('click', async ()=>{
+        const status = document.getElementById('manual-share-status');
+        try{
+          const blob = await priceChartBlob('manualChart');
+          const copied = await copyImageToClipboard(blob);
+          if(copied){
+            flash(status, 'Grafica copiada al portapapeles: pegala con Ctrl+V.');
+          }else{
+            downloadBlob(blob, 'precio-bolsa-manual.png');
+            flash(status, 'Tu navegador no permite copiar imagenes, asi que se descargo el PNG.');
+          }
+        }catch(e){ flash(status, e.message, 'error'); }
+      });
+
+      document.getElementById('manual-share-whatsapp').addEventListener('click', async ()=>{
+        const status = document.getElementById('manual-share-status');
+        const button = document.getElementById('manual-share-whatsapp');
+        button.disabled = true;
+        try{
+          const text = manualShareText();
+          const blob = await priceChartBlob('manualChart');
+          await shareToWhatsApp({blob, filename:'precio-bolsa-manual.png', text, status});
+        }catch(e){ flash(status, e.message, 'error'); }
+        finally{ button.disabled = false; }
+      });
+
       document.getElementById('precio-save-local').addEventListener('click', savePrecioLocal);
       document.getElementById('download-auto-chart').addEventListener('click', ()=>downloadChart('autoChart', 'precio-bolsa-auto.png'));
       document.getElementById('download-manual-chart').addEventListener('click', ()=>downloadChart('manualChart', 'precio-bolsa-manual.png'));
@@ -947,7 +1160,8 @@
           document.getElementById('despacho-date').innerText=`Despacho Diario y Consumo de Gas Equivalente — ${new Date().toLocaleDateString('es-CO')}`;
           document.getElementById('despacho-download-one').disabled=false;
           document.getElementById('despacho-download-two').disabled=false;
-          document.getElementById('despacho-send-telegram').disabled=false;
+          document.getElementById('despacho-share-one').disabled=false;
+          document.getElementById('despacho-share-two').disabled=false;
           status.innerText=`Estado: procesado (${records.length} plantas del TXT)`;
         }catch(error){
           status.innerText=`Estado: error — ${error.message}`;
@@ -955,71 +1169,57 @@
       }
       document.getElementById('despacho-process').addEventListener('click', processDespacho);
 
-      async function downloadDespachoImage(containerId, filename){
-        if(typeof html2canvas !== 'function'){
-          alert('No se pudo cargar el capturador de imágenes.');
-          return;
-        }
-        const target=document.getElementById(containerId);
-        if(!target || !target.firstElementChild){
-          alert('Primero procesa el TXT.');
-          return;
-        }
+      // Acepta un id o un elemento: lo reutilizan Despacho (descargar/compartir) y Multidespacho (ZIP).
+      async function renderDespachoCanvas(container){
+        if(typeof html2canvas !== 'function') throw new Error('No se pudo cargar el capturador de imagenes.');
+        const target=typeof container === 'string' ? document.getElementById(container) : container;
+        if(!target) throw new Error('No se encontro la tabla para exportar.');
+        const tables=[...target.querySelectorAll('.excel-table')];
+        if(!tables.length) throw new Error('Primero procesa el TXT.');
+        const contentWidth=Math.max(...tables.map(table=>table.getBoundingClientRect().width));
         const wrappers=[...target.querySelectorAll('.excel-table-wrap')];
-        const contentWidth=Math.max(...[...target.querySelectorAll('.excel-table')].map(table=>table.getBoundingClientRect().width));
         const previousWidth=target.style.width;
         const previousMinWidth=target.style.minWidth;
+        const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
         target.style.width=`${Math.ceil(contentWidth)}px`;
         target.style.minWidth='0';
-        const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
         wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
-        const exportMargin=0;
-        const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:1.25,useCORS:true,width:Math.ceil(contentWidth + exportMargin),windowWidth:Math.ceil(contentWidth + exportMargin)});
-        wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
-        target.style.width=previousWidth;
-        target.style.minWidth=previousMinWidth;
-        const link=document.createElement('a');
-        link.download=filename;
-        link.href=canvas.toDataURL('image/png');
-        link.click();
+        try{
+          return await html2canvas(target,{backgroundColor:'#ffffff',scale:1.25,useCORS:true,width:Math.ceil(contentWidth),windowWidth:Math.ceil(contentWidth)});
+        }finally{
+          wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
+          target.style.width=previousWidth;
+          target.style.minWidth=previousMinWidth;
+        }
+      }
+
+      async function downloadDespachoImage(containerId, filename){
+        const status=document.getElementById('despacho-share-status');
+        try{
+          const canvas=await renderDespachoCanvas(containerId);
+          downloadBlob(await canvasToBlob(canvas), filename);
+          flash(status, 'Imagen descargada: ' + filename);
+        }catch(error){ flash(status, error.message, 'error'); }
       }
       document.getElementById('despacho-download-one').addEventListener('click',()=>downloadDespachoImage('despacho-table-one','despacho-nal-ties-tabla-1.png'));
       document.getElementById('despacho-download-two').addEventListener('click',()=>downloadDespachoImage('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png'));
 
-      async function tablePngData(containerId){
-        const target=typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
-        const tables=[...target.querySelectorAll('.excel-table')];
-        const contentWidth=Math.max(...tables.map(table=>table.getBoundingClientRect().width));
-        const previousWidth=target.style.width;
-        const previousMinWidth=target.style.minWidth;
-        const wrappers=[...target.querySelectorAll('.excel-table-wrap')];
-        const previousOverflow=wrappers.map(wrapper=>wrapper.style.overflow);
-        target.style.width=`${Math.ceil(contentWidth)}px`;
-        target.style.minWidth='0';
-        wrappers.forEach(wrapper=>wrapper.style.overflow='visible');
-        const exportMargin=0;
-        const canvas=await html2canvas(target,{backgroundColor:'#ffffff',scale:1.25,useCORS:true,width:Math.ceil(contentWidth + exportMargin),windowWidth:Math.ceil(contentWidth + exportMargin)});
-        wrappers.forEach((wrapper,index)=>wrapper.style.overflow=previousOverflow[index]);
-        target.style.width=previousWidth;
-        target.style.minWidth=previousMinWidth;
-        return canvas.toDataURL('image/png');
-      }
-
-      async function sendDespachoToTelegram(){
-        const status=document.getElementById('despacho-status');
-        status.innerText='Estado: preparando imágenes para Telegram...';
+      async function shareDespachoTable(containerId, filename, caption, buttonId){
+        const status=document.getElementById('despacho-share-status');
+        const button=document.getElementById(buttonId);
+        const label=button.innerText;
+        button.disabled=true;
+        button.innerText='Preparando imagen...';
         try{
-          const payload={table_one:await tablePngData('despacho-table-one'),table_two:await tablePngData('despacho-table-two'),date:new Date().toISOString().slice(0,10)};
-          const response=await fetch(`${API_BASE_URL}/api/send_despacho`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-          const contentType=response.headers.get('content-type') || '';
-          const body=contentType.includes('application/json') ? await response.json() : await response.text();
-          if(!response.ok) throw new Error(typeof body === 'string' ? body.slice(0,200) : body.message || 'Error del backend');
-          status.innerText='Estado: tablas enviadas a Telegram';
-        }catch(error){
-          status.innerText=`Estado: error al enviar — ${error.message}`;
-        }
+          const canvas=await renderDespachoCanvas(containerId);
+          const blob=await canvasToBlob(canvas);
+          const fecha=new Date().toLocaleDateString('es-CO');
+          await shareToWhatsApp({blob, filename, text:`${caption} — ${fecha}`, status});
+        }catch(error){ flash(status, error.message, 'error'); }
+        finally{ button.disabled=false; button.innerText=label; }
       }
-      document.getElementById('despacho-send-telegram').addEventListener('click',sendDespachoToTelegram);
+      document.getElementById('despacho-share-one').addEventListener('click',()=>shareDespachoTable('despacho-table-one','despacho-nal-ties-tabla-1.png','Despacho Nal_Ties — Tabla 1','despacho-share-one'));
+      document.getElementById('despacho-share-two').addEventListener('click',()=>shareDespachoTable('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png','Despacho Nal_Ties — Tabla 2','despacho-share-two'));
 
       let multidespachoData = [];
 
@@ -1155,8 +1355,8 @@
             const first=multidespachoTemporaryTable(renderTableOne(item.calculated));
             const second=multidespachoTemporaryTable(renderTableTwo(item.calculated));
             try{
-              const firstPng=await tablePngData(first);
-              const secondPng=await tablePngData(second);
+              const firstPng=(await renderDespachoCanvas(first)).toDataURL('image/png');
+              const secondPng=(await renderDespachoCanvas(second)).toDataURL('image/png');
               archive.file(`${safeBase}-tabla-1.png`,firstPng.split(',',2)[1],{base64:true});
               archive.file(`${safeBase}-tabla-2-con-leyenda.png`,secondPng.split(',',2)[1],{base64:true});
             }finally{
@@ -1232,7 +1432,17 @@
         }
       }catch(e){}
 
-      // Removed 'Ejecutar ahora' and 'Enviar a Telegram' buttons as requested.
+      // Adjuntar .txt en lugar de copiar y pegar: al cargarlo se procesa de una vez.
+      setupFileAttach({
+        inputId:'manual-file', dropId:'manual-drop', nameId:'manual-file-name',
+        textareaId:'manual-text', statusId:'manual-status',
+        onLoaded:()=>document.getElementById('btn-exec-manual').click()
+      });
+      setupFileAttach({
+        inputId:'despacho-file', dropId:'despacho-drop', nameId:'despacho-file-name',
+        textareaId:'despacho-text', statusId:'despacho-status',
+        onLoaded:processDespacho
+      });
 
       selectTool('despacho');
     </script>
