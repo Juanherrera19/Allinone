@@ -234,7 +234,9 @@
           </div>
 
           <div class="card">
-            <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;margin-bottom:8px">
+              <span class="share-hint" id="manual-chart-status" style="margin:0;margin-right:auto"></span>
+              <button id="copy-manual-chart" class="btn btn-secondary">Copiar imagen</button>
               <button id="download-manual-chart" class="btn">Descargar gráfica PNG</button>
             </div>
             <div class="chart-shell"><canvas id="manual-chart"></canvas></div>
@@ -244,7 +246,6 @@
             <h3>Texto para compartir</h3>
             <div class="share-row">
               <button id="manual-copy-text" class="btn">Copiar texto</button>
-              <button id="manual-copy-image" class="btn btn-secondary">Copiar gráfica</button>
               <button id="manual-share-whatsapp" class="btn btn-whatsapp">Compartir por WhatsApp</button>
             </div>
             <pre id="manual-original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
@@ -487,10 +488,7 @@
         });
       }
 
-      function drawPriceChart(canvasId, d, chartKey){
-        const canvas = document.getElementById(canvasId);
-        if(!canvas) return;
-        if(window[chartKey]) window[chartKey].destroy();
+      function priceChartConfig(d){
         const maximo = Math.max(...d.serie);
         const minimo = Math.min(...d.serie);
         const umbral = Number(d.umbral || d.precio_escasez * 0.95);
@@ -507,7 +505,7 @@
           pointHoverRadius: 0,
           fill: false
         });
-        window[chartKey] = new Chart(canvas.getContext('2d'), {
+        return {
           type: 'line',
           plugins: [whiteChartBackgroundPlugin, priceLabelsPlugin],
           data: {
@@ -532,7 +530,51 @@
               title:{display:true, text:'Precio de Bolsa (máximos y mínimos horarios)', color:'#222', font:{size:18, weight:'500'}, padding:{top:2,bottom:12}}
             }
           }
-        });
+        };
+      }
+
+      function drawPriceChart(canvasId, d, chartKey){
+        const canvas = document.getElementById(canvasId);
+        if(!canvas) return;
+        if(window[chartKey]) window[chartKey].destroy();
+        window[chartKey] = new Chart(canvas.getContext('2d'), priceChartConfig(d));
+      }
+
+      // La leyenda (205px) y las etiquetas (10px) son de tamano fijo: en un lienzo
+      // angosto de celular se comen la grafica y se salen por los bordes. Por eso la
+      // imagen que se exporta se dibuja siempre a lo ancho, fuera de pantalla, y no
+      // se captura la que se ve en el telefono.
+      const PRICE_EXPORT_WIDTH = 1200;
+      const PRICE_EXPORT_HEIGHT = 675;
+
+      async function renderPriceChartExport(d){
+        const holder = document.createElement('div');
+        holder.style.cssText = 'position:fixed;left:-20000px;top:0;width:' + PRICE_EXPORT_WIDTH + 'px;height:' + PRICE_EXPORT_HEIGHT + 'px;background:#fff';
+        const canvas = document.createElement('canvas');
+        canvas.width = PRICE_EXPORT_WIDTH;
+        canvas.height = PRICE_EXPORT_HEIGHT;
+        holder.appendChild(canvas);
+        document.body.appendChild(holder);
+        const config = priceChartConfig(d);
+        config.options.responsive = false;
+        config.options.maintainAspectRatio = false;
+        config.options.animation = false;
+        config.options.devicePixelRatio = 1;
+        // Mas aire a los lados: la etiqueta del ultimo valor se centra en el punto y
+        // con el relleno de pantalla sobresale por el borde derecho.
+        config.options.layout = {padding:{top:22, right:46, bottom:8, left:14}};
+        let chart;
+        try{
+          chart = new Chart(canvas.getContext('2d'), config);
+          chart.resize(PRICE_EXPORT_WIDTH, PRICE_EXPORT_HEIGHT);
+          chart.update('none');
+          // requestAnimationFrame no se dispara si la pestana esta en segundo plano.
+          await new Promise(resolve => setTimeout(resolve, 0));
+          return flattenOnWhite(canvas);
+        }finally{
+          if(chart) chart.destroy();
+          holder.remove();
+        }
       }
 
       /* ---------- Utilidades para copiar, compartir y leer archivos ---------- */
@@ -649,7 +691,9 @@
         flash(status, note + (text ? 'WhatsApp abierto con el texto.' : ''));
       }
 
-      function priceChartBlob(chartKey){
+      async function priceChartBlob(chartKey){
+        const d = chartKey === 'manualChart' ? manualData : autoData;
+        if(d && Array.isArray(d.serie)) return canvasToBlob(await renderPriceChartExport(d));
         const chart = window[chartKey];
         if(!chart) throw new Error('Primero ejecuta los datos para generar la grafica.');
         return canvasToBlob(flattenOnWhite(chart.canvas));
@@ -696,12 +740,14 @@
         });
       }
 
-      function downloadChart(chartKey, filename){
-        if(!window[chartKey]) return alert('No hay una gráfica disponible para descargar');
-        const link = document.createElement('a');
-        link.href = window[chartKey].toBase64Image('image/png', 1);
-        link.download = filename;
-        link.click();
+      async function downloadChart(chartKey, filename, statusId){
+        const status = statusId ? document.getElementById(statusId) : null;
+        try{
+          downloadBlob(await priceChartBlob(chartKey), filename);
+          flash(status, 'Imagen descargada: ' + filename);
+        }catch(e){
+          if(status) flash(status, e.message, 'error'); else alert(e.message);
+        }
       }
 
       function normalizeSerie(values){
@@ -857,20 +903,6 @@
         }catch(e){ flash(status, e.message, 'error'); }
       });
 
-      document.getElementById('manual-copy-image').addEventListener('click', async ()=>{
-        const status = document.getElementById('manual-share-status');
-        try{
-          const blob = await priceChartBlob('manualChart');
-          const copied = await copyImageToClipboard(blob);
-          if(copied){
-            flash(status, 'Grafica copiada al portapapeles: pegala con Ctrl+V.');
-          }else{
-            downloadBlob(blob, 'precio-bolsa-manual.png');
-            flash(status, 'Tu navegador no permite copiar imagenes, asi que se descargo el PNG.');
-          }
-        }catch(e){ flash(status, e.message, 'error'); }
-      });
-
       document.getElementById('manual-share-whatsapp').addEventListener('click', async ()=>{
         const status = document.getElementById('manual-share-status');
         const button = document.getElementById('manual-share-whatsapp');
@@ -885,7 +917,23 @@
 
       document.getElementById('precio-save-local').addEventListener('click', savePrecioLocal);
       document.getElementById('download-auto-chart').addEventListener('click', ()=>downloadChart('autoChart', 'precio-bolsa-auto.png'));
-      document.getElementById('download-manual-chart').addEventListener('click', ()=>downloadChart('manualChart', 'precio-bolsa-manual.png'));
+      document.getElementById('download-manual-chart').addEventListener('click', ()=>downloadChart('manualChart', 'precio-bolsa-manual.png', 'manual-chart-status'));
+
+      document.getElementById('copy-manual-chart').addEventListener('click', async ()=>{
+        const status = document.getElementById('manual-chart-status');
+        const button = document.getElementById('copy-manual-chart');
+        button.disabled = true;
+        try{
+          const blob = await priceChartBlob('manualChart');
+          if(await copyImageToClipboard(blob)){
+            flash(status, 'Imagen copiada: pegala con Ctrl+V.');
+          }else{
+            downloadBlob(blob, 'precio-bolsa-manual.png');
+            flash(status, 'Tu navegador no permite copiar imagenes, asi que se descargo el PNG.');
+          }
+        }catch(e){ flash(status, e.message, 'error'); }
+        finally{ button.disabled = false; }
+      });
 
       function selectTool(tool){
         if(tool === 'auto') return;
