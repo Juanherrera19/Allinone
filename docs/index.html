@@ -169,6 +169,31 @@
       @media (max-width:480px){
         #nominacion-tool .nominacion-grid{grid-template-columns:1fr}
       }
+      .registro-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+      .registro-grid[hidden]{display:none}
+      .registro-campo{display:flex;flex-direction:column;gap:5px;font-weight:600}
+      #registro-tool input[type=text],#registro-tool input[type=date]{width:100%;padding:10px;border:1px solid #e6e9ed;border-radius:6px;background:#fff;color:var(--text);font-size:16px}
+      .registro-check{display:flex;gap:8px;align-items:center;font-weight:600;cursor:pointer;margin-top:4px}
+      .registro-check input{width:20px;height:20px;flex:none}
+      .registro-check-ext{align-self:end;padding-bottom:10px}
+      .registro-drop{margin-top:14px}
+      .registro-tabla-wrap{overflow-x:auto;margin-top:12px}
+      .registro-tabla{margin:0;font-size:13px}
+      .registro-tabla th{background:#f3f5f8;text-align:left;font-weight:600;white-space:nowrap}
+      .registro-tabla td,.registro-tabla th{padding:6px 8px;border-bottom:1px solid #e6e9ed}
+      .registro-tabla td.num,.registro-tabla th.num{text-align:right;white-space:nowrap}
+      .registro-tabla td.contrato{white-space:nowrap}
+      .registro-tabla tr.con-error td{background:#fdecea}
+      #registro-tool .registro-tabla input{width:96px;padding:6px 8px;border:1px solid #e6e9ed;border-radius:6px;font-size:15px;text-align:right}
+      .registro-totales{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0 0;color:var(--muted)}
+      .registro-totales strong{color:var(--text)}
+      .registro-aviso{border-radius:8px;padding:10px 12px;margin:12px 0 0;line-height:1.45;font-size:14px}
+      .registro-aviso ul{margin:6px 0 0;padding-left:18px}
+      .registro-aviso.error{border:2px solid var(--highlight);background:#fdecea;color:#8a1f15;font-weight:600}
+      .registro-aviso.info{border:1px solid #f0c36d;background:#fff8e6;color:#6b4e00}
+      @media (max-width:480px){
+        .registro-grid{grid-template-columns:1fr}
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -187,14 +212,14 @@
           <details class="nav-subgrupo" open>
             <summary>ATK</summary>
             <div class="nav-items">
-              <button id="btn-registro-atk" class="nav-pronto" disabled><span>Registro operativo</span></button>
+              <button id="btn-registro-atk">Registro operativo</button>
               <button id="btn-nominacion">Nominación</button>
             </div>
           </details>
           <details class="nav-subgrupo" open>
             <summary>GEAM</summary>
             <div class="nav-items">
-              <button id="btn-registro-geam" class="nav-pronto" disabled><span>Registro operativo</span></button>
+              <button id="btn-registro-geam">Registro operativo</button>
               <button id="btn-indicadores" class="nav-pronto" disabled><span>Indicadores</span></button>
               <a id="btn-resumen" class="nav-ext" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Resumen operativo</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
               <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
@@ -473,6 +498,55 @@
             </div>
             <div class="share-hint" id="nominacion-status-cne"></div>
             <div class="nominacion-preview" id="nominacion-preview-cne" hidden>—</div>
+          </div>
+        </section>
+
+        <section id="registro-tool" hidden>
+          <div class="top-row">
+            <div>
+              <h2 id="registro-titulo">Registro operativo</h2>
+              <div class="muted" id="registro-subtitulo">Adjunta el Excel del día y descarga el archivo plano (CSV). El Excel se lee en este navegador: no se sube a ningún lado.</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Archivo plano</h3>
+            <div class="registro-grid">
+              <label class="registro-campo">Fecha del reporte
+                <input id="registro-fecha" type="date" />
+              </label>
+              <label class="registro-check registro-check-ext"><input id="registro-ext" type="checkbox" /> Extemporáneo</label>
+            </div>
+            <div class="file-drop registro-drop" id="registro-fuente-drop">
+              <input id="registro-fuente-file" type="file" accept=".xlsx,.xlsm,.xls" />
+              <span class="file-name" id="registro-fuente-nombre">Ningún Excel adjunto — también puedes arrastrarlo aquí</span>
+            </div>
+            <div class="share-hint" id="registro-fuente-estado"></div>
+            <div class="registro-grid" id="registro-ext-campos" hidden>
+              <label class="registro-campo">Código de registro EXT
+                <input id="registro-ext-codigo" type="text" inputmode="numeric" autocomplete="off" value="0" />
+              </label>
+              <label class="registro-campo">Código operador SEGAS
+                <input id="registro-ext-operador" type="text" inputmode="numeric" autocomplete="off" />
+              </label>
+            </div>
+            <div id="registro-avisos"></div>
+            <div class="nominacion-acciones">
+              <button type="button" class="nominacion-ver" id="registro-ver" aria-expanded="false" aria-controls="registro-preview">Ver CSV ▾</button>
+              <div class="nominacion-botones">
+                <button id="registro-copiar" class="btn nominacion-copiar" aria-label="Copiar CSV" title="Copiar CSV"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+                <button id="registro-descargar" class="btn btn-con-icono registro-descargar" title="Descargar CSV" aria-label="Descargar CSV"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span id="registro-archivo">CSV</span></button>
+              </div>
+            </div>
+            <div class="share-hint" id="registro-estado"></div>
+            <div class="nominacion-preview" id="registro-preview" hidden><pre id="registro-preview-texto">—</pre></div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Cantidades del día</h3>
+            <div class="muted">Salen del Excel adjunto. Si hace falta, corrígelas o digítalas aquí: el CSV se actualiza solo.</div>
+            <div class="registro-tabla-wrap"><table class="registro-tabla" id="registro-tabla"></table></div>
+            <div class="registro-totales" id="registro-totales"></div>
           </div>
         </section>
 
@@ -1080,12 +1154,16 @@
         document.getElementById('despacho-tool').hidden = !despacho;
         document.getElementById('multidespacho-tool').hidden = !multidespacho;
         document.getElementById('nominacion-tool').hidden = tool !== 'nominacion';
+        document.getElementById('registro-tool').hidden = !tool.startsWith('registro-');
         document.getElementById('auto-header').hidden = !auto;
         document.getElementById('btn-price-auto').classList.toggle('active', auto);
         document.getElementById('btn-price-manual').classList.toggle('active', tool === 'manual');
         document.getElementById('btn-despacho').classList.toggle('active', despacho);
         document.getElementById('btn-multidespacho').classList.toggle('active', multidespacho);
         document.getElementById('btn-nominacion').classList.toggle('active', tool === 'nominacion');
+        document.getElementById('btn-registro-atk').classList.toggle('active', tool === 'registro-atk');
+        document.getElementById('btn-registro-geam').classList.toggle('active', tool === 'registro-geam');
+        if(tool.startsWith('registro-')) registroMostrar(tool === 'registro-atk' ? 'ATK' : 'GEAM');
         if(!auto && manualData) render(manualData, 'manual');
       }
       document.getElementById('btn-price-auto').addEventListener('click', ()=>selectTool('auto'));
@@ -1093,6 +1171,8 @@
       document.getElementById('btn-despacho').addEventListener('click', ()=>selectTool('despacho'));
       document.getElementById('btn-multidespacho').addEventListener('click', ()=>selectTool('multidespacho'));
       document.getElementById('btn-nominacion').addEventListener('click', ()=>selectTool('nominacion'));
+      document.getElementById('btn-registro-atk').addEventListener('click', ()=>selectTool('registro-atk'));
+      document.getElementById('btn-registro-geam').addEventListener('click', ()=>selectTool('registro-geam'));
 
       const despachoPlants = [
         {row:56,label:'Termonorte',lookup:'TERMONORTE',heat:8.09,factor:1.15},
@@ -1954,6 +2034,408 @@
         boton._copiadoTimer = setTimeout(()=>{ boton.classList.remove('copiado'); boton.setAttribute('aria-label', boton.dataset.label); }, 2500);
       }
       nominacionIniciar();
+
+      /* ---------- Registro operativo: archivo plano CSV de ATK y GEAM ---------- */
+
+      // Replica la macro ExportarDatosACSV del "Plano reporte Inf Operativa": 16 columnas (T:AI de
+      // DATOS), sin encabezado, separadas por coma y con fin de linea CRLF, a partir de las 7 columnas
+      // del Excel diario. Con "Extemporaneo" se anteponen las 3 columnas de la hoja ETT (ExportarDatosCSV).
+      // Los codigos son las tablas de la hoja LISTAS de los planos (las de GEAM incluyen las de ATK).
+
+      // Tabla10: punto -> [codigo proceso, codigo punto salida/entrada, codigo tramo]
+      const REGISTRO_PUNTOS = [
+        ['MARIA CONCHITA',4,433,116], ['BARRANQUILLA',4,42,169], ['LA MAMI',4,41,111], ['BONGA',4,498,115],
+        ['CARTAGENA',4,43,166], ['TERMONORTE',5,968,111], ['ARENOSA',5,653,111], ['TERMOGUAJIRA',5,917,110],
+        ['CUSIANA',4,12,133], ['HOCOL',4,243,115], ['ESTACIÓN ARENOSA',5,653,111],
+        ['MONOMEROS COLOMBO VENEZOLANOS S.A',5,626,111], ['ECOPETROL POZOS COLORADOS',5,600,111],
+        ['ESTACIÓN GNC CONCEPCIÓN',5,603,111], ['ESTACIÓN GNC ZUCA',5,610,111], ['ESTACIÓN GNC GASXI TAYRONA',5,606,111],
+        ['ESTACIÓN GNV MANANTIAL',5,501,111], ['ESTACIÓN GNC FERROCARRIL',5,605,111], ['ESTACIÓN GNV LA CASTELLANA',5,611,111],
+        ['JOBO',4,45,173], ['BALLENA',4,39,110]
+      ];
+      // Tabla11: sector de consumo -> codigo
+      const REGISTRO_SECTORES = [
+        ['COMERCIAL',1], ['INDUSTRIAL',2], ['RESIDENCIAL',3], ['TRANSPORTADORA DE GAS',7], ['PETROQUIMICA',8],
+        ['REFINERIA',9], ['GNV',10], ['TERMICO',11], ['EXPORTADORES',12], ['PETROLERO',21]
+      ];
+      // Tabla12: comprador -> codigo
+      const REGISTRO_COMPRADORES = [
+        ['EPM',252], ['Vanti S.A. ESP',183], ['SURTIGAS',191], ['EFIGAS',272], ['E2',232], ['GASCARIBE',202],
+        ['GECELCA',237], ['PETROMIL',182], ['HOLYGAS',234668]
+      ];
+      // Tabla13: sector + mercado -> codigo tipo demanda esencial (1 esencial, 2 no esencial)
+      const REGISTRO_ESENCIAL = [
+        ['RESIDENCIAL','REG',1], ['COMERCIAL','REG',1], ['GNV','NR',1], ['Transportadores de Gas','NR',1], ['Refinería','NR',1],
+        ['INDUSTRIAL','REG',2], ['INDUSTRIAL','NR',2], ['Petroquímica','NR',2], ['TERMICO','NR',2], ['Comercial','NR',2],
+        ['Exportaciones','NR',2], ['Petrolero','NR',2]
+      ];
+      // Hoja PUNTOS SNT-FUENTE: [codigo punto SNT, descripcion, codigo tramo]. Solo se usa si aparece un
+      // punto que no esta en la Tabla10, como punto de entrada (proceso 4), igual que los de la Tabla10.
+      const REGISTRO_SNT = [[375,"ACORDEÓN",173],[425,"AGUAS VIVAS",173],[436,"ALBOKA",173],[378,"ARANDALA",173],[475,"ARANDALA CIÉNAGA DE ORO",173],[476,"ARANDALA PORQUERO",173],[94,"ARIANNA",173],[379,"ARRECIFE",173],[39,"BALLENA",110],[42,"BARRANQUILLA",169],[253,"BLOQUE ESPERANZA (Campo Mayor)",173],[254,"BLOQUE ESPERANZA (Prueba Extensa)",173],[429,"BLOQUE VIM 21",173],[255,"BLOQUE VIM 5",173],[498,"BONGA",115],[75,"BONGA MAMEY",115],[260,"BREMEN JOBO",163],[307,"BREVA-1",173],[493,"BRUJO",173],[28,"BUENOS AIRES",141],[233,"BULLERENGUE",166],[110,"CAÑAFLECHA",173],[263,"CAÑAHUATE",173],[300,"CAÑANDONGA",173],[77,"CARAMELO",116],[43,"CARTAGENA",166],[30,"CHICORAL",142],[130,"CHUCHUPA",110],[236,"CLARINETE",173],[437,"CLAXON",173],[435,"CORNAMUSA",173],[237,"CORRALES",153],[53,"CUPIAGUA",133],[496,"CUPIAGUA EN RECETOR",133],[12,"CUSIANA",133],[517,"ESTACIÓN BALLENA",110],[34,"FLOREÑA",148],[439,"FRESA",173],[234,"GCARIBE CAMPOS MENORES",116],[19,"GIBRALTAR",135],[473,"HOBO-HUILA",191],[243,"HOCOL",115],[489,"ISTANBUL",116],[45,"JOBO",173],[157,"KATANA",173],[40,"LA CRECIENTE",115],[303,"LA ESTANCIA",116],[41,"LA MAMI",111],[440,"LULO",173],[492,"MÁGICO",173],[173,"MAMEY",115],[46,"MAMONAL",150],[433,"MARIA CONCHITA",116],[434,"MARÍA CONCHITA PK 33+130",116],[381,"MERECUMBE",111],[89,"NELSON",173],[251,"NELSON CIÉNAGA DE ORO",173],[250,"NELSON PORQUERO",173],[249,"NÍSPERO - TROMBÓN",173],[252,"OBOE",173],[376,"OCARINA",173],[232,"PALMER",173],[301,"PANDERETA",173],[497,"PAUTO SUR",133],[519,"PLANTA APIAY",131],[523,"PLANTA CUPIAGUA",133],[524,"PLANTA CUSIANA",133],[529,"PLANTA GIBRALTAR",135],[531,"PLANTA ORIPAYA",140],[532,"PLANTA SARDINATA",140],[438,"PROMIGAS_E",116],[26,"SARDINATA",140],[441,"SAXOFÓN",173],[477,"SAXOFÓN CIÉNAGA DE ORO",191],[478,"SAXOFÓN PORQUERO",173],[495,"SINU-9",114],[244,"SPEC",166],[31,"TANE/CACOTA",143],[304,"TOPOSI",116],[261,"TORONJA",173],[479,"TORONJA CIÉNAGA DE ORO",173],[480,"TORONJA PORQUERO",173],[248,"TROMBÓN",173],[88,"TUCURINCA",111],[2,"VASCONIA",126]];
+      const REGISTRO_OPERADOR = '234262'; // CODIGO OPERADOR SEGAS de la hoja ETT
+      const REGISTRO_FUENTE = {ATK:'el DIARIO ATINKANA NOMINACIÓN', GEAM:'la OPERATIVIDAD 2026'};
+      const registroMemoria = {ATK:null, GEAM:null};
+      const registroFuentes = {ATK:null, GEAM:null}; // Excel diario adjunto: solo en memoria (puede pesar)
+      let registroEmpresa = 'ATK';
+      let registroResultado = null;
+
+      function registroNorm(value){
+        return String(value ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/['"]/g, '').replace(/\s+/g, ' ').trim().toUpperCase();
+      }
+
+      const registroPuntos = new Map(REGISTRO_PUNTOS.map(([nombre, proceso, codigo, tramo])=>[registroNorm(nombre), {proceso, codigo, tramo}]));
+      const registroSnt = new Map(REGISTRO_SNT.map(([codigo, nombre, tramo])=>[registroNorm(nombre), {proceso:4, codigo, tramo, snt:true}]));
+      const registroSectores = new Map(REGISTRO_SECTORES.map(([nombre, codigo])=>[registroNorm(nombre), codigo]));
+      const registroCompradores = new Map(REGISTRO_COMPRADORES.map(([nombre, codigo])=>[registroNorm(nombre), codigo]));
+      const registroEsencial = new Map(REGISTRO_ESENCIAL.map(([sector, mercado, codigo])=>[registroNorm(sector) + '|' + registroNorm(mercado), codigo]));
+
+      // El formato no acepta espacios ni caracteres especiales en el contrato (los Excel traen apostrofes).
+      function registroContrato(value){
+        return String(value ?? '').replace(/[\s'"]/g, '');
+      }
+
+      // Numero de Excel o texto con digitos. Vacio = null (va como 0 en el CSV, igual que en el plano).
+      function registroNumero(value){
+        if(typeof value === 'number') return Number.isFinite(value) ? value : null;
+        const digits = String(value ?? '').replace(/\D/g, '');
+        return digits ? Number(digits) : null;
+      }
+
+      // Las fechas llegan como serial de Excel; se convierten sin pasar por la zona horaria.
+      function registroFechaExcel(value){
+        if(typeof value === 'number' && value > 20000 && value < 80000){
+          const d = XLSX.SSF.parse_date_code(value);
+          return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+        }
+        const match = /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(String(value ?? '').trim());
+        return match ? `${match[1]}-${match[2].padStart(2,'0')}-${match[3].padStart(2,'0')}` : null;
+      }
+
+      function registroFechaLocal(date){
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+      }
+
+      function registroFechaCorta(iso){
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        return match ? `${match[3]}/${match[2]}/${match[1]}` : '—';
+      }
+
+      function registroEstado(emp){
+        if(!registroMemoria[emp]){
+          try{ registroMemoria[emp] = JSON.parse(localStorage.getItem('registro_operativo_' + emp) || 'null'); }catch(e){}
+          registroMemoria[emp] = registroMemoria[emp] || {};
+        }
+        return registroMemoria[emp];
+      }
+
+      function registroGuardar(emp){
+        try{ localStorage.setItem('registro_operativo_' + emp, JSON.stringify(registroMemoria[emp])); }catch(e){}
+      }
+
+      function registroLimpiarFila(fila){
+        const texto = value=>String(value ?? '').trim();
+        return {contrato:texto(fila.contrato), comprador:texto(fila.comprador), punto:texto(fila.punto), mercado:texto(fila.mercado), sector:texto(fila.sector), mbtu:registroNumero(fila.mbtu)};
+      }
+
+      // Excel que les envian: en todas las hojas busca la fila de encabezados con FECHA, CONTRATO,
+      // COMPRADOR, MBTU, PUNTO, MERCADO y SECTOR, sin depender del nombre de la hoja ni del orden.
+      function registroLeerFuente(wb){
+        const porFecha = {};
+        let hojas = 0;
+        wb.SheetNames.forEach(nombre=>{
+          let columnas = null;
+          XLSX.utils.sheet_to_json(wb.Sheets[nombre], {header:1, raw:true, defval:null}).forEach(fila=>{
+            if(!fila) return;
+            if(!columnas){
+              const h = fila.map(registroNorm);
+              const c = {
+                fecha: h.indexOf('FECHA'),
+                contrato: h.findIndex(v=>v.includes('CONTRATO')),
+                comprador: h.findIndex(v=>v.includes('COMPRADOR')),
+                mbtu: h.findIndex(v=>v.startsWith('MBTU')),
+                punto: h.findIndex(v=>v.startsWith('PUNTO')),
+                mercado: h.indexOf('MERCADO'),
+                sector: h.indexOf('SECTOR')
+              };
+              if(Object.values(c).every(i=>i >= 0)){ columnas = c; hojas++; }
+              return;
+            }
+            const fecha = registroFechaExcel(fila[columnas.fecha]);
+            if(!fecha) return;
+            (porFecha[fecha] = porFecha[fecha] || []).push(registroLimpiarFila({
+              contrato: fila[columnas.contrato], comprador: fila[columnas.comprador], punto: fila[columnas.punto],
+              mercado: fila[columnas.mercado], sector: fila[columnas.sector], mbtu: fila[columnas.mbtu]
+            }));
+          });
+        });
+        if(!hojas) throw new Error('no encontré una hoja con las columnas FECHA, CONTRATO, COMPRADOR, MBTU, PUNTO, MERCADO y SECTOR.');
+        return porFecha;
+      }
+
+      function registroBuscarPunto(nombre){
+        const clave = registroNorm(nombre);
+        if(registroPuntos.has(clave)) return registroPuntos.get(clave);
+        // "ESTACION ARENOSA 1" (asi viene en el diario) -> el nombre mas largo de la tabla que sea su prefijo
+        let mejor = null;
+        registroPuntos.forEach((valor, nombreTabla)=>{
+          if(clave.startsWith(nombreTabla + ' ') && (!mejor || nombreTabla.length > mejor.nombre.length)) mejor = {nombre:nombreTabla, valor};
+        });
+        if(mejor) return mejor.valor;
+        return registroSnt.get(clave) || null;
+      }
+
+      function registroConstruir(filas){
+        const registros = new Map();
+        const errores = [];
+        const nuevos = new Map();
+        const lineas = filas.map((fila, index)=>{
+          const punto = registroBuscarPunto(fila.punto);
+          const mercado = registroNorm(fila.mercado);
+          const sector = registroNorm(fila.sector);
+          const codigoSector = registroSectores.get(sector);
+          const codigoComprador = registroCompradores.get(registroNorm(fila.comprador));
+          const codigoEsencial = registroEsencial.get(sector + '|' + mercado);
+          const faltan = [];
+          if(!punto) faltan.push(`punto «${fila.punto}»`);
+          if(codigoSector === undefined) faltan.push(`sector «${fila.sector}»`);
+          if(codigoComprador === undefined) faltan.push(`comprador «${fila.comprador}»`);
+          if(mercado !== 'REG' && mercado !== 'NR') faltan.push(`mercado «${fila.mercado}» (debe ser REG o NR)`);
+          else if(codigoEsencial === undefined) faltan.push(`demanda esencial de ${fila.sector} ${fila.mercado}`);
+          if(faltan.length){
+            errores.push(`Fila ${index + 1} · ${registroContrato(fila.contrato) || 'sin contrato'}: falta el código de: ${faltan.join(', ')}.`);
+            return null;
+          }
+          if(punto.snt) nuevos.set(registroNorm(fila.punto), `${fila.punto}: no está en la Tabla10 del plano; lo tomé del catálogo SNT como punto de entrada (código ${punto.codigo}, tramo ${punto.tramo}).`);
+          // Proceso 4 (MS PE) reporta el punto de entrada; los demas, el de salida.
+          const campos = [punto.proceso, '', '', '', punto.proceso === 4 ? 0 : punto.codigo, punto.proceso === 4 ? punto.codigo : 0, punto.tramo, 0, '', mercado === 'REG' ? 1 : 2, codigoEsencial, codigoSector];
+          // CODIGO REGISTRO: un consecutivo por cada combinacion distinta de codigos, en orden de aparicion.
+          const clave = campos.join('|');
+          if(!registros.has(clave)) registros.set(clave, registros.size + 1);
+          return {campos:[...campos, registroContrato(fila.contrato), codigoComprador], registro:registros.get(clave), mbtu:fila.mbtu || 0};
+        });
+        // CANTIDAD ENTREGADA: suma de todas las filas del mismo registro (como la columna AH del plano).
+        const totales = new Map();
+        lineas.forEach(linea=>{ if(linea) totales.set(linea.registro, (totales.get(linea.registro) || 0) + linea.mbtu); });
+        lineas.forEach(linea=>{ if(linea){ linea.entregada = totales.get(linea.registro); linea.csv = [...linea.campos, linea.entregada, linea.registro]; } });
+        return {lineas, errores, registros:registros.size, puntosSnt:[...nuevos.values()]};
+      }
+
+      function registroTextoCsv(resultado, ext){
+        return resultado.lineas.map(linea=>{
+          const campos = ext ? [ext.codigo, ext.fecha, ext.operador, ...linea.csv] : linea.csv;
+          return campos.map(valor=>valor === null || valor === undefined ? '' : String(valor)).join(',');
+        }).join('\r\n') + '\r\n';
+      }
+
+      // Compara las filas nuevas con las anteriores para avisar cambios de punto, contratos nuevos y
+      // contratos que ya no vienen. Los puntos se comparan por sus codigos, no por como se escriben.
+      function registroCambios(anteriores, nuevas){
+        if(!anteriores || !anteriores.length) return [];
+        const base = fila=>[registroContrato(fila.contrato), registroNorm(fila.comprador), registroNorm(fila.sector), registroNorm(fila.mercado)].join('|');
+        const codigos = fila=>{ const p = registroBuscarPunto(fila.punto); return p ? `${p.proceso}/${p.codigo}/${p.tramo}` : '?' + registroNorm(fila.punto); };
+        const previas = anteriores.map(fila=>({fila, base:base(fila), codigos:codigos(fila)}));
+        const pendientes = [];
+        nuevas.forEach(fila=>{
+          const i = previas.findIndex(previa=>previa.base === base(fila) && previa.codigos === codigos(fila));
+          if(i >= 0) previas.splice(i, 1); else pendientes.push(fila);
+        });
+        const avisos = [];
+        pendientes.forEach(fila=>{
+          const i = previas.findIndex(previa=>previa.base === base(fila));
+          if(i < 0){ avisos.push(`Contrato nuevo: ${registroContrato(fila.contrato)} · ${fila.punto} · ${fila.sector}.`); return; }
+          const [previa] = previas.splice(i, 1);
+          const p = registroBuscarPunto(fila.punto);
+          avisos.push(`${registroContrato(fila.contrato)} cambió de punto: ${previa.fila.punto} → ${fila.punto}` + (p ? ` (código ${p.codigo}, tramo ${p.tramo}).` : '.'));
+        });
+        previas.forEach(({fila})=>avisos.push(`Ya no viene: ${registroContrato(fila.contrato)} · ${fila.punto} · ${fila.sector}.`));
+        return avisos;
+      }
+
+      function registroCargarFecha(){
+        const emp = registroEmpresa;
+        const fuente = registroFuentes[emp];
+        if(!fuente) return;
+        const fecha = document.getElementById('registro-fecha').value;
+        const filas = fuente.porFecha[fecha];
+        if(!filas || !filas.length){
+          fuente.sinFecha = fecha;
+          return;
+        }
+        fuente.sinFecha = null;
+        const estado = registroEstado(emp);
+        estado.avisos = registroCambios(estado.filas, filas);
+        estado.filas = filas.map(fila=>({...fila}));
+        estado.origen = `${fuente.nombre} · ${registroFechaCorta(fecha)}`;
+        estado.fechaDatos = fecha;
+        estado.editado = false;
+        registroGuardar(emp);
+        registroPintarTabla();
+      }
+
+      function registroPintarTabla(){
+        const filas = registroEstado(registroEmpresa).filas || [];
+        const tabla = document.getElementById('registro-tabla');
+        if(!filas.length){ tabla.innerHTML = ''; return; }
+        tabla.innerHTML = '<thead><tr><th>#</th><th>Contrato</th><th>Comprador</th><th>Punto</th><th>Mercado</th><th>Sector</th><th class="num">MBTU</th><th class="num">Reg.</th><th class="num">Entregada</th></tr></thead><tbody>' +
+          filas.map((fila, i)=>`<tr id="registro-fila-${i}"><td>${i + 1}</td><td class="contrato">${htmlEscape(registroContrato(fila.contrato))}</td><td>${htmlEscape(fila.comprador)}</td><td>${htmlEscape(fila.punto)}</td><td>${htmlEscape(fila.mercado)}</td><td>${htmlEscape(fila.sector)}</td>` +
+            `<td class="num"><input type="text" inputmode="numeric" autocomplete="off" data-fila="${i}" value="${fila.mbtu === null || fila.mbtu === undefined ? '' : fila.mbtu}" aria-label="MBTU fila ${i + 1}" /></td>` +
+            `<td class="num" id="registro-reg-${i}">—</td><td class="num" id="registro-ent-${i}">—</td></tr>`).join('') + '</tbody>';
+      }
+
+      function registroAviso(tipo, titulo, lista){
+        return `<div class="registro-aviso ${tipo}">${htmlEscape(titulo)}${lista && lista.length ? '<ul>' + lista.map(item=>`<li>${htmlEscape(item)}</li>`).join('') + '</ul>' : ''}</div>`;
+      }
+
+      function registroActualizar(){
+        const emp = registroEmpresa;
+        const estado = registroEstado(emp);
+        const filas = estado.filas || [];
+        const fecha = document.getElementById('registro-fecha').value;
+        const ext = document.getElementById('registro-ext').checked;
+        const extCodigo = document.getElementById('registro-ext-codigo').value.trim();
+        const extOperador = document.getElementById('registro-ext-operador').value.trim();
+        const resultado = filas.length ? registroConstruir(filas) : null;
+
+        filas.forEach((_, i)=>{
+          const linea = resultado && resultado.lineas[i];
+          const reg = document.getElementById(`registro-reg-${i}`);
+          const ent = document.getElementById(`registro-ent-${i}`);
+          if(reg) reg.textContent = linea ? linea.registro : '—';
+          if(ent) ent.textContent = linea ? nominacionMiles(linea.entregada) : '—';
+          const tr = document.getElementById(`registro-fila-${i}`);
+          if(tr) tr.classList.toggle('con-error', !!resultado && !linea);
+        });
+        const total = filas.reduce((suma, fila)=>suma + (fila.mbtu || 0), 0);
+        document.getElementById('registro-totales').innerHTML = filas.length
+          ? `<span>Datos: <strong>${htmlEscape(estado.origen || '—')}</strong>${estado.editado ? ' (con cambios a mano)' : ''}</span><span>Filas: <strong>${filas.length}</strong></span><span>Registros: <strong>${resultado ? resultado.registros : '—'}</strong></span><span>Total: <strong>${nominacionMiles(total)}</strong> MBTU</span>`
+          : '<span>Todavía no hay cantidades: adjunta el Excel del día.</span>';
+
+        const avisos = [];
+        const fuente = registroFuentes[emp];
+        const ajenos = filas.filter(fila=>fila.contrato && !registroContrato(fila.contrato).toUpperCase().startsWith(emp + '-'));
+        if(!filas.length) avisos.push(registroAviso('error', `Adjunta ${REGISTRO_FUENTE[emp]} para armar el plano.`));
+        else if(ajenos.length === filas.length) avisos.push(registroAviso('error', `Este archivo no parece de ${emp}: sus contratos empiezan por ${registroContrato(ajenos[0].contrato).split('-')[0]}-. Adjunta ${REGISTRO_FUENTE[emp]}.`));
+        if(resultado && resultado.errores.length) avisos.push(registroAviso('error', 'Estas filas no se pueden armar. Avísanos para agregar el código que falta:', resultado.errores));
+        if(!fecha) avisos.push(registroAviso('error', 'Falta la fecha del reporte.'));
+        if(ext && (!extCodigo || !extOperador)) avisos.push(registroAviso('error', 'Para el extemporáneo faltan el código de registro EXT o el código operador SEGAS.'));
+        if(fuente && fuente.sinFecha){
+          const fechas = Object.keys(fuente.porFecha).sort();
+          avisos.push(registroAviso('info', `${fuente.nombre} no tiene filas del ${registroFechaCorta(fuente.sinFecha)} (la última es del ${registroFechaCorta(fechas[fechas.length - 1])}). La tabla sigue con los datos de ${estado.origen || 'antes'}.`));
+        }else if(filas.length && fecha && estado.fechaDatos && estado.fechaDatos !== fecha){
+          avisos.push(registroAviso('info', `Ojo: las cantidades de la tabla son del ${registroFechaCorta(estado.fechaDatos)} y el reporte es del ${registroFechaCorta(fecha)}. Adjunta el Excel del día o digita las cantidades.`));
+        }
+        const vacias = filas.filter(fila=>fila.mbtu === null || fila.mbtu === undefined).length;
+        if(vacias) avisos.push(registroAviso('info', `${vacias} ${vacias === 1 ? 'fila no tiene' : 'filas no tienen'} cantidad: van con 0.`));
+        if(resultado && resultado.puntosSnt.length) avisos.push(registroAviso('info', 'Puntos nuevos resueltos con el catálogo SNT, revísalos:', resultado.puntosSnt));
+        if(estado.avisos && estado.avisos.length) avisos.push(registroAviso('info', 'Cambios frente al día anterior (los códigos ya quedaron resueltos):', estado.avisos));
+        document.getElementById('registro-avisos').innerHTML = avisos.join('');
+
+        const listo = !!resultado && !resultado.errores.length && ajenos.length < filas.length && !!fecha && (!ext || (extCodigo && extOperador));
+        const hoy = registroFechaLocal(new Date()).replace(/-/g, '');
+        const nombre = ext ? `Exportado_${hoy}.csv` : `${(fecha || '').replace(/-/g, '')}.csv`;
+        registroResultado = listo ? {texto: registroTextoCsv(resultado, ext ? {codigo:extCodigo, fecha:fecha.replace(/-/g, '/'), operador:extOperador} : null), nombre} : null;
+        document.getElementById('registro-preview-texto').textContent = registroResultado ? registroResultado.texto : '—';
+        document.getElementById('registro-archivo').textContent = listo ? nombre : 'CSV';
+        document.getElementById('registro-descargar').disabled = !listo;
+        document.getElementById('registro-copiar').disabled = !listo;
+      }
+
+      function registroMostrar(emp){
+        registroEmpresa = emp;
+        const estado = registroEstado(emp);
+        document.getElementById('registro-titulo').textContent = `Registro operativo · ${emp}`;
+        const fuente = registroFuentes[emp];
+        document.getElementById('registro-fuente-nombre').textContent = fuente ? fuente.nombre : `Adjunta ${REGISTRO_FUENTE[emp]} — también puedes arrastrarlo aquí`;
+        document.getElementById('registro-fuente-estado').textContent = fuente ? fuente.resumen : '';
+        document.getElementById('registro-fuente-file').value = '';
+        const ext = estado.ext || {};
+        document.getElementById('registro-ext-codigo').value = ext.codigo ?? '0';
+        document.getElementById('registro-ext-operador').value = ext.operador ?? REGISTRO_OPERADOR;
+        registroPintarTabla();
+        registroActualizar();
+      }
+
+      async function registroCargarFuente(file){
+        const emp = registroEmpresa;
+        const status = document.getElementById('registro-fuente-estado');
+        status.style.color = '';
+        status.textContent = 'Leyendo el Excel...';
+        try{
+          if(typeof XLSX === 'undefined') throw new Error('no se pudo cargar el lector de Excel.');
+          const porFecha = registroLeerFuente(XLSX.read(await file.arrayBuffer(), {type:'array'}));
+          const fechas = Object.keys(porFecha).sort();
+          registroFuentes[emp] = {nombre:file.name, porFecha, sinFecha:null,
+            resumen:`Leído: ${fechas.length} días, del ${registroFechaCorta(fechas[0])} al ${registroFechaCorta(fechas[fechas.length - 1])}. Cambia la fecha del reporte para tomar otro día.`};
+          if(registroEmpresa !== emp) return;
+          document.getElementById('registro-fuente-nombre').textContent = file.name;
+          status.textContent = registroFuentes[emp].resumen;
+          registroCargarFecha();
+          registroActualizar();
+        }catch(e){
+          status.style.color = 'var(--highlight)';
+          status.textContent = 'No se pudo leer el Excel: ' + e.message;
+        }
+      }
+
+      function registroIniciar(){
+        document.getElementById('registro-fecha').value = registroFechaLocal(new Date(Date.now() - 864e5)); // ayer, como la macro
+        const input = document.getElementById('registro-fuente-file');
+        const drop = document.getElementById('registro-fuente-drop');
+        input.addEventListener('change', ()=>{ if(input.files && input.files[0]) registroCargarFuente(input.files[0]); });
+        drop.addEventListener('dragover', event=>{ event.preventDefault(); drop.classList.add('dragover'); });
+        drop.addEventListener('dragleave', ()=>drop.classList.remove('dragover'));
+        drop.addEventListener('drop', event=>{
+          const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+          if(!file) return;
+          event.preventDefault();
+          drop.classList.remove('dragover');
+          input.value = '';
+          registroCargarFuente(file);
+        });
+        document.getElementById('registro-fecha').addEventListener('change', ()=>{ registroCargarFecha(); registroActualizar(); });
+        document.getElementById('registro-tabla').addEventListener('input', event=>{
+          const i = Number(event.target.dataset.fila);
+          const estado = registroEstado(registroEmpresa);
+          if(!estado.filas || !estado.filas[i]) return;
+          estado.filas[i].mbtu = registroNumero(event.target.value);
+          estado.editado = true;
+          estado.fechaDatos = document.getElementById('registro-fecha').value; // lo digitado es de la fecha elegida
+          registroGuardar(registroEmpresa);
+          registroActualizar();
+        });
+        document.getElementById('registro-ext').addEventListener('change', event=>{
+          document.getElementById('registro-ext-campos').hidden = !event.target.checked;
+          registroActualizar();
+        });
+        ['registro-ext-codigo', 'registro-ext-operador'].forEach(id=>document.getElementById(id).addEventListener('input', ()=>{
+          const estado = registroEstado(registroEmpresa);
+          estado.ext = {codigo:document.getElementById('registro-ext-codigo').value.trim(), operador:document.getElementById('registro-ext-operador').value.trim()};
+          registroGuardar(registroEmpresa);
+          registroActualizar();
+        }));
+        const ver = document.getElementById('registro-ver');
+        ver.addEventListener('click', ()=>{
+          const preview = document.getElementById('registro-preview');
+          preview.hidden = !preview.hidden;
+          ver.setAttribute('aria-expanded', String(!preview.hidden));
+          ver.textContent = preview.hidden ? 'Ver CSV ▾' : 'Ocultar CSV ▴';
+        });
+        document.getElementById('registro-descargar').addEventListener('click', ()=>{
+          if(!registroResultado) return;
+          downloadBlob(new Blob([registroResultado.texto], {type:'text/csv'}), registroResultado.nombre);
+          flash(document.getElementById('registro-estado'), 'Descargado: ' + registroResultado.nombre);
+        });
+        document.getElementById('registro-copiar').addEventListener('click', async ()=>{
+          if(!registroResultado) return;
+          const boton = document.getElementById('registro-copiar');
+          const ok = await copyTextToClipboard(registroResultado.texto);
+          flash(document.getElementById('registro-estado'), ok ? 'CSV copiado.' : 'No se pudo copiar.', ok ? 'ok' : 'error');
+          if(!ok) return;
+          clearTimeout(boton._copiadoTimer);
+          boton.classList.add('copiado');
+          boton._copiadoTimer = setTimeout(()=>boton.classList.remove('copiado'), 2500);
+        });
+      }
+      registroIniciar();
 
       selectTool('despacho');
     </script>
