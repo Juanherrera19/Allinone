@@ -161,6 +161,8 @@
       .nominacion-ver{background:none;border:none;padding:8px 0;color:var(--accent);font-weight:600;font-size:14px;text-decoration:underline;cursor:pointer}
       .nominacion-copiar{display:inline-flex;align-items:center;justify-content:center;margin-left:auto;padding:9px;box-shadow:0 2px 8px rgba(11,35,64,.3)}
       .nominacion-copiar.copiado{background:#1d7a4c}
+      .nominacion-botones{display:flex;gap:8px;margin-left:auto}
+      .nominacion-copiar-excel{gap:6px;padding:9px 12px;background:#1d6f42;font-weight:600}
       .nominacion-copiar .icono-listo,.nominacion-copiar.copiado .icono-copiar{display:none}
       .nominacion-copiar.copiado .icono-listo{display:block}
       .nominacion-icono{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -464,7 +466,10 @@
             </div>
             <div class="nominacion-acciones">
               <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-cne">Ver correo ▾</button>
-              <button id="nominacion-copy-cne" class="btn nominacion-copiar" aria-label="Copiar correo" title="Copiar correo"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+              <div class="nominacion-botones">
+                <button id="nominacion-copy-excel" class="btn nominacion-copiar nominacion-copiar-excel" aria-label="Copiar valores para el Excel" title="Copiar valores para el Excel (columna MBTUD del diario)"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Excel</span></button>
+                <button id="nominacion-copy-cne" class="btn nominacion-copiar" aria-label="Copiar correo" title="Copiar correo"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+              </div>
             </div>
             <div class="share-hint" id="nominacion-status-cne"></div>
             <div class="nominacion-preview" id="nominacion-preview-cne" hidden>—</div>
@@ -1841,6 +1846,7 @@
           : '';
         if(excede) document.getElementById('nominacion-otros').open = true;
         document.getElementById('nominacion-copy-cne').disabled = excede && !visto.checked;
+        document.getElementById('nominacion-copy-excel').disabled = excede && !visto.checked;
 
         document.getElementById('nominacion-otros-titulo').textContent = `Otros puntos (${NOMINACION_PUNTOS.length - 1}) · ${nominacionMiles(datos.otros)} MBTU`;
         document.getElementById('nominacion-totales').innerHTML =
@@ -1916,20 +1922,36 @@
           nominacionAvisarCopia('cne', await nominacionCopiarHtml(nominacionCorreoHtml(correo), nominacionCorreoTexto(correo)), 'pégalo como respuesta a CNE.');
         });
 
+        // Solo las 10 cantidades, una por linea y sin punto de miles, en el orden de las filas
+        // del diario: se pegan tal cual en la columna MBTUD sin que Excel las lea como decimales.
+        document.getElementById('nominacion-copy-excel').addEventListener('click', async ()=>{
+          const status = document.getElementById('nominacion-status-cne');
+          const datos = nominacionLeer();
+          const falta = nominacionFaltante(datos, 'cne');
+          if(falta){ flash(status, falta, 'error'); return; }
+          if(datos.gnv > NOMINACION_TOPE_GNV && !document.getElementById('nominacion-gnv-visto').checked){
+            flash(status, 'GNV supera el tope: marca "Vi el aviso" para poder copiar.', 'error');
+            return;
+          }
+          nominacionAvisarCopia('excel', await copyTextToClipboard(datos.cantidades.join('\n')) ? 'text' : '', 'pégalos en la columna MBTUD del diario, desde la fila de ESTACION ARENOSA.');
+        });
+
         nominacionActualizar();
       }
 
       // El boton se pone verde con un chulo un momento para que se note que funciono.
       function nominacionAvisarCopia(paso, modo, destino){
-        const status = document.getElementById(`nominacion-status-${paso}`);
+        const excel = paso === 'excel';
+        const status = document.getElementById(`nominacion-status-${excel ? 'cne' : paso}`);
         const boton = document.getElementById(`nominacion-copy-${paso}`);
-        if(!modo){ flash(status, 'No se pudo copiar el correo.', 'error'); return; }
-        const tabla = paso === 'gc' || modo === 'html' ? '' : ' (este navegador no deja copiar la tabla con formato)';
-        flash(status, `Correo copiado${tabla}: ${destino}`);
+        if(!modo){ flash(status, 'No se pudo copiar.', 'error'); return; }
+        const tabla = excel || paso === 'gc' || modo === 'html' ? '' : ' (este navegador no deja copiar la tabla con formato)';
+        flash(status, `${excel ? 'Valores copiados' : 'Correo copiado'}${tabla}: ${destino}`);
+        if(!boton.dataset.label) boton.dataset.label = boton.getAttribute('aria-label');
         clearTimeout(boton._copiadoTimer);
         boton.classList.add('copiado');
         boton.setAttribute('aria-label', 'Copiado');
-        boton._copiadoTimer = setTimeout(()=>{ boton.classList.remove('copiado'); boton.setAttribute('aria-label', 'Copiar correo'); }, 2500);
+        boton._copiadoTimer = setTimeout(()=>{ boton.classList.remove('copiado'); boton.setAttribute('aria-label', boton.dataset.label); }, 2500);
       }
       nominacionIniciar();
 
