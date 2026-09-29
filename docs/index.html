@@ -15,6 +15,17 @@
       nav{width:240px;background:var(--card);padding:18px;box-sizing:border-box;border-right:1px solid #e6e9ed}
       nav button, nav a{display:block;width:100%;margin:8px 0;padding:12px;border-radius:8px;border:none;background:transparent;color:var(--accent);text-align:left;cursor:pointer;text-decoration:none}
       nav button.active{background:var(--accent);color:white}
+      nav summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:7px;border-radius:6px;user-select:none}
+      nav summary::-webkit-details-marker{display:none}
+      nav summary::before{content:'';width:0;height:0;border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;transition:transform .15s}
+      nav details[open] > summary::before{transform:rotate(90deg)}
+      nav summary:hover{background:#f3f5f8}
+      nav .nav-grupo{margin-bottom:10px}
+      nav .nav-grupo > summary{padding:8px 6px;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted)}
+      nav .nav-subgrupo{margin:2px 0 6px 6px;padding-left:8px;border-left:2px solid #e6e9ed}
+      nav .nav-subgrupo > summary{padding:6px;font-size:13px;font-weight:700;color:var(--accent)}
+      nav .nav-items button,nav .nav-items a{margin:2px 0;padding:9px 12px;font-family:inherit;font-size:14px}
+      nav button.nav-pronto{color:var(--muted);opacity:.7;cursor:not-allowed}
       main{flex:1;min-width:0;padding:20px 144px 20px 20px;overflow:auto}
       .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}
       .kpi{background:var(--card);padding:16px;border-radius:10px;flex:1;border:1px solid #e6e9ed}
@@ -23,6 +34,8 @@
       .btn:disabled{opacity:.45;cursor:not-allowed}
       .btn-secondary{background:#0b5a88}
       .btn-whatsapp{background:#1fa855}
+      .btn-con-icono{display:inline-flex;align-items:center;gap:7px}
+      .btn-icono{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       .nav-ext{display:flex !important;align-items:center;gap:6px}
       .ext-icon{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
       .nav-ext:hover .ext-icon{opacity:1}
@@ -110,9 +123,8 @@
       @media (max-width:800px){
         header{padding:14px 16px}
         .layout{display:block}
-        nav{width:100%;padding:10px 12px;border-right:0;border-bottom:1px solid #e6e9ed;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+        nav{width:100%;padding:10px 12px;border-right:0;border-bottom:1px solid #e6e9ed}
         nav button,nav a{margin:0;padding:10px}
-        nav hr{display:none}
         main{padding:12px 96px 12px 12px}
         .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
         .chart-shell{height:360px}
@@ -167,15 +179,38 @@
     </header>
     <div class="layout">
       <nav>
-        <button id="btn-price-auto" hidden disabled aria-hidden="true">Precio de Bolsa (AUTO)</button>
-        <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
-        <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
-        <button id="btn-multidespacho">Multidespacho</button>
-        <button id="btn-nominacion">Nominación ATK</button>
-        <button id="btn-indicadores">Indicadores</button>
-        <a id="btn-resumen" class="nav-ext" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Resumen operativo</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
-        <a id="btn-calculadora-snt" class="nav-ext" href="https://juanherrera19.github.io/CalculadoraSNT/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Calculadora SNT</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
-        <hr style="border:none;height:1px;background:#e6e9ed;margin:12px 0">
+        <!-- Orden del menu segun ORDEN.docx. Los botones "nav-pronto" aun no tienen herramienta. -->
+        <details class="nav-grupo" open>
+          <summary>DIARIO</summary>
+          <details class="nav-subgrupo" open>
+            <summary>ATK</summary>
+            <div class="nav-items">
+              <button id="btn-registro-atk" class="nav-pronto" disabled><span>Registro operativo</span></button>
+              <button id="btn-nominacion">Nominación</button>
+            </div>
+          </details>
+          <details class="nav-subgrupo" open>
+            <summary>GEAM</summary>
+            <div class="nav-items">
+              <button id="btn-registro-geam" class="nav-pronto" disabled><span>Registro operativo</span></button>
+              <button id="btn-indicadores" class="nav-pronto" disabled><span>Indicadores</span></button>
+              <a id="btn-resumen" class="nav-ext" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Resumen operativo</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
+              <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
+              <button id="btn-contratos-venta" class="nav-pronto" disabled><span>Ejecución contratos Venta</span></button>
+              <button id="btn-contratos-compra" class="nav-pronto" disabled><span>Ejecución contratos Compra</span></button>
+              <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
+            </div>
+          </details>
+        </details>
+        <details class="nav-grupo" open>
+          <summary>HERRAMIENTAS</summary>
+          <div class="nav-items">
+            <button id="btn-price-auto" class="nav-pronto" disabled><span>Precio de Bolsa (AUTO)</span></button>
+            <button id="btn-multidespacho">Multidespacho</button>
+            <a id="btn-calculadora-snt" class="nav-ext" href="https://juanherrera19.github.io/CalculadoraSNT/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Calculadora SNT</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
+            <a id="btn-otros-reportes" class="nav-ext" href="https://benevolent-platypus-3ef2ed.netlify.app/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Otros reportes</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
+          </div>
+        </details>
       </nav>
 
       <main>
@@ -207,7 +242,7 @@
 
         <div class="card">
           <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-            <button id="download-auto-chart" class="btn">Descargar gráfica PNG</button>
+            <button id="download-auto-chart" class="btn btn-con-icono" title="Descargar gráfica PNG" aria-label="Descargar gráfica PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Gráfica PNG</span></button>
           </div>
           <div class="chart-shell"><canvas id="chart"></canvas></div>
         </div>
@@ -264,8 +299,8 @@
           <div class="card">
             <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;margin-bottom:8px">
               <span class="share-hint" id="manual-chart-status" style="margin:0;margin-right:auto"></span>
-              <button id="copy-manual-chart" class="btn btn-secondary">Copiar imagen</button>
-              <button id="download-manual-chart" class="btn">Descargar gráfica PNG</button>
+              <button id="copy-manual-chart" class="btn btn-secondary btn-con-icono" title="Copiar imagen" aria-label="Copiar imagen"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Imagen</span></button>
+              <button id="download-manual-chart" class="btn btn-con-icono" title="Descargar gráfica PNG" aria-label="Descargar gráfica PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Gráfica PNG</span></button>
             </div>
             <div class="chart-shell"><canvas id="manual-chart"></canvas></div>
           </div>
@@ -273,12 +308,12 @@
           <div class="card" style="margin-top:12px">
             <h3>Texto para compartir</h3>
             <div class="share-row">
-              <button id="manual-copy-text" class="btn">Copiar texto</button>
-              <button id="manual-share-whatsapp" class="btn btn-whatsapp">Compartir por WhatsApp</button>
+              <button id="manual-copy-text" class="btn btn-con-icono" title="Copiar texto" aria-label="Copiar texto"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Texto</span></button>
+              <button id="manual-share-whatsapp" class="btn btn-whatsapp btn-con-icono" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Por WhatsApp</span></button>
             </div>
             <pre id="manual-original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
             <div class="share-hint" id="manual-share-status"></div>
-            <div class="share-hint">En celular, <strong>Compartir por WhatsApp</strong> envía la gráfica y el texto juntos en un solo paso. En computador la gráfica se copia al portapapeles y se abre WhatsApp Web con el texto listo: pega la imagen con Ctrl+V.</div>
+            <div class="share-hint">En celular, el botón de <strong>compartir por WhatsApp</strong> envía la gráfica y el texto juntos en un solo paso. En computador la gráfica se copia al portapapeles y se abre WhatsApp Web con el texto listo: pega la imagen con Ctrl+V.</div>
           </div>
         </div>
         </section>
@@ -303,10 +338,10 @@
               <span id="despacho-status" class="muted">Estado: pendiente</span>
             </div>
             <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-              <button id="despacho-download-one" class="btn" disabled>Descargar tabla 1 PNG</button>
-              <button id="despacho-download-two" class="btn" disabled>Descargar tabla 2 PNG</button>
-              <button id="despacho-share-one" class="btn btn-whatsapp" disabled>Compartir tabla 1 por WhatsApp</button>
-              <button id="despacho-share-two" class="btn btn-whatsapp" disabled>Compartir tabla 2 por WhatsApp</button>
+              <button id="despacho-download-one" class="btn btn-con-icono" disabled title="Descargar tabla 1 PNG" aria-label="Descargar tabla 1 PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Tabla 1 PNG</span></button>
+              <button id="despacho-download-two" class="btn btn-con-icono" disabled title="Descargar tabla 2 PNG" aria-label="Descargar tabla 2 PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Tabla 2 PNG</span></button>
+              <button id="despacho-share-one" class="btn btn-whatsapp btn-con-icono" disabled title="Compartir tabla 1 por WhatsApp" aria-label="Compartir tabla 1 por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Tabla 1 por WhatsApp</span></button>
+              <button id="despacho-share-two" class="btn btn-whatsapp btn-con-icono" disabled title="Compartir tabla 2 por WhatsApp" aria-label="Compartir tabla 2 por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Tabla 2 por WhatsApp</span></button>
             </div>
             <div class="share-hint" id="despacho-share-status"></div>
             <div class="share-hint">En celular se abre el menú de compartir con la imagen de la tabla lista. En computador la imagen se copia al portapapeles y se abre WhatsApp Web: pégala con Ctrl+V.</div>
@@ -1353,7 +1388,7 @@
       async function shareDespachoTable(containerId, filename, caption, buttonId){
         const status=document.getElementById('despacho-share-status');
         const button=document.getElementById(buttonId);
-        const label=button.innerText;
+        const label=button.innerHTML; // incluye el icono
         button.disabled=true;
         button.innerText='Preparando imagen...';
         try{
@@ -1362,7 +1397,7 @@
           const fecha=new Date().toLocaleDateString('es-CO');
           await shareToWhatsApp({blob, filename, text:`${caption} — ${fecha}`, status});
         }catch(error){ flash(status, error.message, 'error'); }
-        finally{ button.disabled=false; button.innerText=label; }
+        finally{ button.disabled=false; button.innerHTML=label; }
       }
       document.getElementById('despacho-share-one').addEventListener('click',()=>shareDespachoTable('despacho-table-one','despacho-nal-ties-tabla-1.png','Despacho Nal_Ties — Tabla 1','despacho-share-one'));
       document.getElementById('despacho-share-two').addEventListener('click',()=>shareDespachoTable('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png','Despacho Nal_Ties — Tabla 2','despacho-share-two'));
