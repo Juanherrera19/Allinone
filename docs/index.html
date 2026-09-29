@@ -128,6 +128,34 @@
         .card{padding:10px}
         .multidespacho-grid{grid-template-columns:1fr}
       }
+      #nominacion-tool .nominacion-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+      #nominacion-tool label.nominacion-campo{display:flex;flex-direction:column;gap:5px;font-weight:600}
+      #nominacion-tool label.nominacion-campo small{font-weight:400;color:var(--muted)}
+      #nominacion-tool input[type=text],#nominacion-tool input[type=date],#nominacion-tool select{width:100%;padding:10px;border:1px solid #e6e9ed;border-radius:6px;background:#fff;color:var(--text);font-size:16px}
+      #nominacion-tool details{margin-top:12px}
+      #nominacion-tool summary{cursor:pointer;color:var(--accent);font-weight:600;padding:6px 0}
+      .nominacion-sugerencia{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--muted)}
+      .nominacion-sugerencia:empty{display:none}
+      .nominacion-sugerencia .btn{padding:6px 10px;font-size:13px}
+      .nominacion-totales{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0;color:var(--muted)}
+      .nominacion-totales strong{color:var(--text)}
+      .nominacion-alerta{border:2px solid var(--highlight);background:#fdecea;color:#8a1f15;border-radius:8px;padding:12px;margin:12px 0;font-weight:600;line-height:1.45}
+      .nominacion-alerta[hidden]{display:none}
+      .nominacion-alerta label{display:flex;gap:8px;align-items:center;margin-top:8px;font-weight:600;cursor:pointer}
+      .nominacion-alerta input{width:20px;height:20px;flex:none}
+      .nominacion-preview{margin-top:8px;padding:10px;border:1px solid #e6e9ed;border-radius:6px;background:#fbfcfd;font-size:13px;line-height:1.5;overflow-x:auto}
+      .nominacion-preview pre{white-space:pre-wrap;font-family:inherit;margin:0}
+      .nominacion-acciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
+      .nominacion-ver{background:none;border:none;padding:8px 0;color:var(--accent);font-weight:600;font-size:14px;text-decoration:underline;cursor:pointer}
+      .nominacion-copiar{display:inline-flex;align-items:center;gap:8px;margin-left:auto;padding:12px 20px;font-size:16px;font-weight:700;box-shadow:0 2px 8px rgba(11,35,64,.3)}
+      .nominacion-copiar.copiado{background:#1d7a4c}
+      .nominacion-icono{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      @media (max-width:480px){
+        #nominacion-tool .nominacion-grid{grid-template-columns:1fr}
+        .nominacion-acciones{gap:6px}
+        .nominacion-ver{font-size:13px}
+        .nominacion-copiar{padding:12px 12px;gap:6px}
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -144,6 +172,7 @@
         <button id="btn-price-manual">Precio de Bolsa (MANUAL)</button>
         <button id="btn-despacho" class="active">Despacho Nal_Ties (MANUAL)</button>
         <button id="btn-multidespacho">Multidespacho</button>
+        <button id="btn-nominacion">Nominación ATK</button>
         <button id="btn-indicadores">Indicadores</button>
         <a id="btn-resumen" class="nav-ext" href="https://alasli09.github.io/Resumen_Operacion/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Resumen operativo</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
         <a id="btn-calculadora-snt" class="nav-ext" href="https://juanherrera19.github.io/CalculadoraSNT/" target="_blank" rel="noopener noreferrer" title="Se abre en otra página, en una pestaña nueva"><span>Calculadora SNT</span><svg class="ext-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 4h6v6M20 4l-8.5 8.5M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span class="sr-only">(enlace externo, abre en una pestaña nueva)</span></a>
@@ -338,6 +367,73 @@
               <h3 id="multidespacho-table-title">Resultados</h3>
               <div id="multidespacho-table" class="multidespacho-table"></div>
             </div>
+          </div>
+        </section>
+
+        <section id="nominacion-tool" hidden>
+          <div class="top-row">
+            <div>
+              <h2>Nominación ATK</h2>
+              <div class="muted">Digita las cantidades y copia el correo completo, listo para pegar en la respuesta.</div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <div class="nominacion-grid" style="margin-top:0">
+              <label class="nominacion-campo">Día de gas
+                <input id="nominacion-fecha" type="date" />
+              </label>
+              <label class="nominacion-campo">Firma
+                <select id="nominacion-firma"><option value="AS">AS</option><option value="JH">JH</option></select>
+              </label>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Paso 1 · Nominación a CNE</h3>
+            <div class="muted">Texto fijo con los 21.600 MBTU para el día de mañana. No hay nada que digitar.</div>
+            <div class="nominacion-acciones">
+              <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-inicial">Ver correo ▾</button>
+              <button id="nominacion-copy-inicial" class="btn nominacion-copiar"><svg class="nominacion-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copiar correo</span></button>
+            </div>
+            <div class="share-hint" id="nominacion-status-inicial"></div>
+            <div class="nominacion-preview" id="nominacion-preview-inicial" hidden>—</div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Paso 4 · Correo a GC</h3>
+            <div class="muted">Lo que asignó CNE. Se pega como respuesta a la solicitud de GC.</div>
+            <div class="nominacion-grid">
+              <label class="nominacion-campo">Asignado por CNE (MBTU)
+                <input id="nominacion-asignado" type="text" inputmode="numeric" autocomplete="off" placeholder="Ej. 10.102" />
+              </label>
+            </div>
+            <div class="nominacion-acciones">
+              <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-gc-box">Ver correo ▾</button>
+              <button id="nominacion-copy-gc" class="btn nominacion-copiar"><svg class="nominacion-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copiar correo</span></button>
+            </div>
+            <div class="share-hint" id="nominacion-status-gc"></div>
+            <div class="nominacion-preview" id="nominacion-preview-gc-box" hidden><pre id="nominacion-preview-gc">—</pre></div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Paso 6 · Correo a CNE</h3>
+            <div class="muted">Cantidades de la renominación de GC. Se guardan en este dispositivo: solo cambia las que cambiaron.</div>
+            <div class="nominacion-grid" id="nominacion-principal"></div>
+            <details id="nominacion-otros">
+              <summary id="nominacion-otros-titulo">Otros puntos</summary>
+              <div class="nominacion-grid" id="nominacion-otros-campos"></div>
+            </details>
+            <div class="nominacion-totales" id="nominacion-totales"></div>
+            <div class="nominacion-alerta" id="nominacion-alerta" role="alert" hidden>
+              <div id="nominacion-alerta-texto"></div>
+              <label><input id="nominacion-gnv-visto" type="checkbox" /> Vi el aviso, dejar copiar</label>
+            </div>
+            <div class="nominacion-acciones">
+              <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-cne">Ver correo ▾</button>
+              <button id="nominacion-copy-cne" class="btn nominacion-copiar"><svg class="nominacion-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copiar correo</span></button>
+            </div>
+            <div class="share-hint" id="nominacion-status-cne"></div>
+            <div class="nominacion-preview" id="nominacion-preview-cne" hidden>—</div>
           </div>
         </section>
 
@@ -944,17 +1040,20 @@
         document.getElementById('manual-tool').hidden = tool !== 'manual';
         document.getElementById('despacho-tool').hidden = !despacho;
         document.getElementById('multidespacho-tool').hidden = !multidespacho;
+        document.getElementById('nominacion-tool').hidden = tool !== 'nominacion';
         document.getElementById('auto-header').hidden = !auto;
         document.getElementById('btn-price-auto').classList.toggle('active', auto);
         document.getElementById('btn-price-manual').classList.toggle('active', tool === 'manual');
         document.getElementById('btn-despacho').classList.toggle('active', despacho);
         document.getElementById('btn-multidespacho').classList.toggle('active', multidespacho);
+        document.getElementById('btn-nominacion').classList.toggle('active', tool === 'nominacion');
         if(!auto && manualData) render(manualData, 'manual');
       }
       document.getElementById('btn-price-auto').addEventListener('click', ()=>selectTool('auto'));
       document.getElementById('btn-price-manual').addEventListener('click', ()=>selectTool('manual'));
       document.getElementById('btn-despacho').addEventListener('click', ()=>selectTool('despacho'));
       document.getElementById('btn-multidespacho').addEventListener('click', ()=>selectTool('multidespacho'));
+      document.getElementById('btn-nominacion').addEventListener('click', ()=>selectTool('nominacion'));
 
       const despachoPlants = [
         {row:56,label:'Termonorte',lookup:'TERMONORTE',heat:8.09,factor:1.15},
@@ -1491,6 +1590,311 @@
         textareaId:'despacho-text', statusId:'despacho-status',
         onLoaded:processDespacho
       });
+
+      /* ---------- Nominacion ATK: correos del paso 4 (a GC) y del paso 6 (a CNE) ---------- */
+
+      // Cuadro de la nominacion tal como va en el correo. `completa` es el reparto de los 21.600
+      // del paso 1; `cantidad` es el valor inicial del paso 6. El primer punto es el que cambia
+      // casi a diario; los demas van plegados en "Otros puntos" con su ultimo valor.
+      const NOMINACION_PUNTOS = [
+        {code:'448', name:'ESTACION ARENOSA', sector:'INDUSTRIAL', completa:13250, cantidad:null},
+        {code:'448', name:'ESTACION ARENOSA GNCV', sector:'GNCV', completa:6804, cantidad:6804},
+        {code:'34', name:'MONOMEROS COLOMBO VENEZOLANOS S.A.', sector:'INDUSTRIAL', completa:500, cantidad:500},
+        {code:'20', name:'ECOPETROL POZOS COLORADOS', sector:'INDUSTRIAL', completa:500, cantidad:500},
+        {code:'186', name:'ESTACION GNC CONCEPCION', sector:'GNCV', completa:159, cantidad:159},
+        {code:'307', name:'ESTACION GNC ZUCA', sector:'GNCV', completa:89, cantidad:89},
+        {code:'295', name:'ESTACION GNC GASXI TAYRONA', sector:'GNCV', completa:92, cantidad:92},
+        {code:'424', name:'ESTACION GNV MANANTIAL', sector:'GNCV', completa:48, cantidad:48},
+        {code:'337', name:'ESTACION GNC FERROCARRIL', sector:'GNCV', completa:68, cantidad:68},
+        {code:'370', name:'ESTACION GNV LA CASTELLANA', sector:'GNCV', completa:90, cantidad:90}
+      ];
+      const NOMINACION_COLUMNAS = ['Delivery Point Code','Delivery Point','Quantity','Unit','Mercado','Sector'];
+      const NOMINACION_TOPE_GNV = 7350;
+      const NOMINACION_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+      const NOMINACION_STORAGE = 'nominacion_atk';
+      let nominacionGnvVisto = null; // GNV para el que se marco "Vi el aviso"; si cambia, se desmarca
+
+      // Punto como separador de miles sin depender del Intl del navegador (algunos no agrupan 4 cifras).
+      function nominacionMiles(value){
+        if(value === null || value === undefined) return '—';
+        return String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      }
+
+      // Solo cuentan los digitos: acepta 10102, 10.102 o 10,102. Vacio = null.
+      function nominacionNumero(text){
+        const digits = String(text || '').replace(/\D/g, '');
+        return digits ? Number(digits) : null;
+      }
+
+      function nominacionFechaLarga(iso){
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+        if(!match) return '—';
+        return `${Number(match[3])} de ${NOMINACION_MESES[Number(match[2]) - 1]} de ${match[1]}`;
+      }
+
+      // Fecha local (no UTC): en la noche de Colombia toISOString ya marca el dia siguiente.
+      function nominacionManana(){
+        const date = new Date();
+        date.setDate(date.getDate() + 1);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+      }
+
+      function nominacionCampo(index){
+        return document.getElementById(`nominacion-punto-${index}`);
+      }
+
+      function nominacionCrearCampos(){
+        NOMINACION_PUNTOS.forEach((punto, index)=>{
+          const wrapper = document.createElement('div');
+          const label = document.createElement('label');
+          label.className = 'nominacion-campo';
+          const sector = document.createElement('small');
+          sector.textContent = punto.sector === 'GNCV' ? 'GNV' : 'Industrial';
+          const input = document.createElement('input');
+          input.type = 'text';
+          input.inputMode = 'numeric';
+          input.autocomplete = 'off';
+          input.id = `nominacion-punto-${index}`;
+          label.append(punto.name, sector, input);
+          wrapper.appendChild(label);
+          if(index === 0){
+            const sugerencia = document.createElement('div');
+            sugerencia.className = 'nominacion-sugerencia';
+            sugerencia.id = 'nominacion-sugerencia';
+            wrapper.appendChild(sugerencia);
+          }
+          document.getElementById(index === 0 ? 'nominacion-principal' : 'nominacion-otros-campos').appendChild(wrapper);
+        });
+      }
+
+      function nominacionLeer(){
+        const cantidades = NOMINACION_PUNTOS.map((_, index)=>nominacionNumero(nominacionCampo(index).value));
+        const suma = incluir => NOMINACION_PUNTOS.reduce((total, punto, index)=>total + (incluir(punto, index) ? (cantidades[index] || 0) : 0), 0);
+        return {
+          fecha: document.getElementById('nominacion-fecha').value,
+          firma: document.getElementById('nominacion-firma').value,
+          asignado: nominacionNumero(document.getElementById('nominacion-asignado').value),
+          cantidades,
+          industrial: suma(punto=>punto.sector === 'INDUSTRIAL'),
+          gnv: suma(punto=>punto.sector === 'GNCV'),
+          otros: suma((_, index)=>index > 0),
+          total: suma(()=>true)
+        };
+      }
+
+      function nominacionTextoGC(datos){
+        return [
+          'Buenas tardes,',
+          'Sres. Gases del Caribe.',
+          '',
+          `La cantidad ha sido reasignada por el productor para el día ${nominacionFechaLarga(datos.fecha)} a: ${nominacionMiles(datos.asignado)} MBTU.`,
+          '',
+          'Quedamos atentos a su renominación.',
+          '',
+          'Saludos,',
+          datos.firma
+        ].join('\n');
+      }
+
+      // Correos a CNE: texto antes del cuadro, cantidades del cuadro y cierre.
+      function nominacionCorreoInicial(){
+        return {
+          intro: [
+            'Buenos días,',
+            'Sres. Canacol,',
+            '',
+            'Nominación para el día de mañana, en espera de su asignación para ajustes.:'
+          ],
+          cantidades: NOMINACION_PUNTOS.map(punto=>punto.completa),
+          cierre: ['Atentamente,', 'Equipo de nominaciones Atinkana.']
+        };
+      }
+
+      function nominacionCorreoCNE(datos){
+        return {
+          intro: [
+            'Buenas,',
+            '',
+            'Sres. Canacol,',
+            '',
+            `Según el volumen reasignado, enviamos la nominación para el día ${nominacionFechaLarga(datos.fecha)}.`,
+            '',
+            'Quedamos atentos a su confirmación.'
+          ],
+          cantidades: datos.cantidades,
+          cierre: ['Atentamente,', datos.firma]
+        };
+      }
+
+      function nominacionFilas(cantidades){
+        return NOMINACION_PUNTOS.map((punto, index)=>[punto.code, punto.name, nominacionMiles(cantidades[index]), 'MBTU', 'NO REG', punto.sector]);
+      }
+
+      // Texto plano de respaldo: el cuadro va con tabuladores (tambien se pega bien en Excel).
+      function nominacionCorreoTexto(correo){
+        const filas = [NOMINACION_COLUMNAS, ...nominacionFilas(correo.cantidades)].map(fila=>fila.join('\t'));
+        return [...correo.intro, '', ...filas, '', ...correo.cierre].join('\n');
+      }
+
+      // HTML: en Gmail y Outlook el cuadro se pega como tabla, igual al que manda GC.
+      function nominacionCorreoHtml(correo){
+        const celda = 'border:1px solid #999;padding:4px 8px';
+        const lineas = lista=>lista.map(linea=>htmlEscape(linea)).join('<br>');
+        const encabezado = NOMINACION_COLUMNAS.map(columna=>`<th style="${celda}">${htmlEscape(columna)}</th>`).join('');
+        const cuerpo = nominacionFilas(correo.cantidades).map(fila=>`<tr>${fila.map((valor, index)=>`<td style="${celda}${index === 2 ? ';text-align:right' : ''}">${htmlEscape(valor)}</td>`).join('')}</tr>`).join('');
+        return `<div>${lineas(correo.intro)}<br><br><table style="border-collapse:collapse"><thead><tr>${encabezado}</tr></thead><tbody>${cuerpo}</tbody></table><br>${lineas(correo.cierre)}</div>`;
+      }
+
+      function nominacionFaltante(datos, paso){
+        if(!datos.fecha) return 'Falta el día de gas.';
+        if(paso === 'gc') return datos.asignado === null ? 'Falta lo asignado por CNE.' : '';
+        const index = datos.cantidades.findIndex(valor=>valor === null);
+        return index >= 0 ? `Falta la cantidad de ${NOMINACION_PUNTOS[index].name}.` : '';
+      }
+
+      // Copia el correo con el cuadro como tabla; si el navegador no deja, solo el texto plano.
+      async function nominacionCopiarHtml(html, text){
+        if(navigator.clipboard && navigator.clipboard.write && typeof ClipboardItem !== 'undefined'){
+          try{
+            await navigator.clipboard.write([new ClipboardItem({
+              'text/html': new Blob([html], {type:'text/html'}),
+              'text/plain': new Blob([text], {type:'text/plain'})
+            })]);
+            return 'html';
+          }catch(e){}
+        }
+        return await copyTextToClipboard(text) ? 'text' : '';
+      }
+
+      // Recomendacion para el primer punto: lo asignado por CNE menos los otros 9. No se llena sola.
+      function nominacionSugerencia(datos){
+        const node = document.getElementById('nominacion-sugerencia');
+        node.textContent = '';
+        if(datos.asignado === null) return;
+        const valor = datos.asignado - datos.otros;
+        if(valor < 0){
+          node.textContent = `Sin sugerencia: lo asignado (${nominacionMiles(datos.asignado)}) es menor que los otros puntos (${nominacionMiles(datos.otros)}).`;
+          return;
+        }
+        if(valor === datos.cantidades[0]){
+          node.textContent = `Coincide con la sugerencia: asignado ${nominacionMiles(datos.asignado)} − otros puntos ${nominacionMiles(datos.otros)}.`;
+          return;
+        }
+        const texto = document.createElement('span');
+        texto.textContent = `Sugerencia: ${nominacionMiles(valor)} (asignado ${nominacionMiles(datos.asignado)} − otros puntos ${nominacionMiles(datos.otros)})`;
+        const usar = document.createElement('button');
+        usar.type = 'button';
+        usar.className = 'btn btn-secondary';
+        usar.textContent = `Usar ${nominacionMiles(valor)}`;
+        usar.addEventListener('click', ()=>{
+          nominacionCampo(0).value = nominacionMiles(valor);
+          nominacionActualizar();
+        });
+        node.append(texto, usar);
+      }
+
+      function nominacionActualizar(){
+        const datos = nominacionLeer();
+        nominacionSugerencia(datos);
+
+        const excede = datos.gnv > NOMINACION_TOPE_GNV;
+        const visto = document.getElementById('nominacion-gnv-visto');
+        if(visto.checked && nominacionGnvVisto !== datos.gnv){ visto.checked = false; nominacionGnvVisto = null; }
+        document.getElementById('nominacion-alerta').hidden = !excede;
+        document.getElementById('nominacion-alerta-texto').textContent = excede
+          ? `GNV suma ${nominacionMiles(datos.gnv)} MBTU y supera el tope de ${nominacionMiles(NOMINACION_TOPE_GNV)} MBTU (se pasa por ${nominacionMiles(datos.gnv - NOMINACION_TOPE_GNV)}). Revisa las cantidades antes de enviar.`
+          : '';
+        if(excede) document.getElementById('nominacion-otros').open = true;
+        document.getElementById('nominacion-copy-cne').disabled = excede && !visto.checked;
+
+        document.getElementById('nominacion-otros-titulo').textContent = `Otros puntos (${NOMINACION_PUNTOS.length - 1}) · ${nominacionMiles(datos.otros)} MBTU`;
+        document.getElementById('nominacion-totales').innerHTML =
+          `<span>Industrial: <strong>${nominacionMiles(datos.industrial)}</strong></span>` +
+          `<span>GNV: <strong${excede ? ' style="color:var(--highlight)"' : ''}>${nominacionMiles(datos.gnv)}</strong></span>` +
+          `<span>Total: <strong>${nominacionMiles(datos.total)}</strong> MBTU</span>`;
+
+        document.getElementById('nominacion-preview-inicial').innerHTML = nominacionCorreoHtml(nominacionCorreoInicial());
+        document.getElementById('nominacion-preview-gc').textContent = nominacionTextoGC(datos);
+        document.getElementById('nominacion-preview-cne').innerHTML = nominacionCorreoHtml(nominacionCorreoCNE(datos));
+
+        try{ localStorage.setItem(NOMINACION_STORAGE, JSON.stringify({firma:datos.firma, asignado:datos.asignado, cantidades:datos.cantidades})); }catch(e){}
+      }
+
+      function nominacionIniciar(){
+        nominacionCrearCampos();
+        let guardado = null;
+        try{ guardado = JSON.parse(localStorage.getItem(NOMINACION_STORAGE) || 'null'); }catch(e){}
+        const cantidades = guardado && Array.isArray(guardado.cantidades) && guardado.cantidades.length === NOMINACION_PUNTOS.length
+          ? guardado.cantidades : NOMINACION_PUNTOS.map(punto=>punto.cantidad);
+        cantidades.forEach((valor, index)=>{ nominacionCampo(index).value = typeof valor === 'number' ? nominacionMiles(valor) : ''; });
+        if(guardado && typeof guardado.asignado === 'number') document.getElementById('nominacion-asignado').value = nominacionMiles(guardado.asignado);
+        if(guardado && ['AS','JH'].includes(guardado.firma)) document.getElementById('nominacion-firma').value = guardado.firma;
+        document.getElementById('nominacion-fecha').value = nominacionManana();
+
+        const tool = document.getElementById('nominacion-tool');
+        const alCambiar = event=>{
+          if(event.target.id === 'nominacion-gnv-visto') nominacionGnvVisto = event.target.checked ? nominacionLeer().gnv : null;
+          nominacionActualizar();
+        };
+        tool.addEventListener('input', alCambiar);
+        tool.addEventListener('change', alCambiar);
+        // Al salir de un campo numerico se muestra con punto de miles (10102 -> 10.102).
+        tool.addEventListener('focusout', event=>{
+          if(event.target.inputMode !== 'numeric') return;
+          const numero = nominacionNumero(event.target.value);
+          event.target.value = numero === null ? '' : nominacionMiles(numero);
+        });
+
+        // "Ver correo" despliega la vista previa que esta debajo del boton de copiar.
+        tool.querySelectorAll('.nominacion-ver').forEach(boton=>boton.addEventListener('click', ()=>{
+          const preview = document.getElementById(boton.getAttribute('aria-controls'));
+          preview.hidden = !preview.hidden;
+          boton.setAttribute('aria-expanded', String(!preview.hidden));
+          boton.textContent = preview.hidden ? 'Ver correo ▾' : 'Ocultar correo ▴';
+        }));
+
+        document.getElementById('nominacion-copy-inicial').addEventListener('click', async ()=>{
+          const correo = nominacionCorreoInicial();
+          nominacionAvisarCopia('inicial', await nominacionCopiarHtml(nominacionCorreoHtml(correo), nominacionCorreoTexto(correo)), 'pégalo en el correo a CNE.');
+        });
+
+        document.getElementById('nominacion-copy-gc').addEventListener('click', async ()=>{
+          const datos = nominacionLeer();
+          const falta = nominacionFaltante(datos, 'gc');
+          if(falta){ flash(document.getElementById('nominacion-status-gc'), falta, 'error'); return; }
+          nominacionAvisarCopia('gc', await copyTextToClipboard(nominacionTextoGC(datos)) ? 'text' : '', 'pégalo como respuesta a la solicitud de GC.');
+        });
+
+        document.getElementById('nominacion-copy-cne').addEventListener('click', async ()=>{
+          const status = document.getElementById('nominacion-status-cne');
+          const datos = nominacionLeer();
+          const falta = nominacionFaltante(datos, 'cne');
+          if(falta){ flash(status, falta, 'error'); return; }
+          if(datos.gnv > NOMINACION_TOPE_GNV && !document.getElementById('nominacion-gnv-visto').checked){
+            flash(status, 'GNV supera el tope: marca "Vi el aviso" para poder copiar.', 'error');
+            return;
+          }
+          const correo = nominacionCorreoCNE(datos);
+          nominacionAvisarCopia('cne', await nominacionCopiarHtml(nominacionCorreoHtml(correo), nominacionCorreoTexto(correo)), 'pégalo como respuesta a CNE.');
+        });
+
+        nominacionActualizar();
+      }
+
+      // El boton cambia a "Copiado" un momento para que se note que funciono.
+      function nominacionAvisarCopia(paso, modo, destino){
+        const status = document.getElementById(`nominacion-status-${paso}`);
+        const boton = document.getElementById(`nominacion-copy-${paso}`);
+        if(!modo){ flash(status, 'No se pudo copiar el correo.', 'error'); return; }
+        const tabla = paso === 'gc' || modo === 'html' ? '' : ' (este navegador no deja copiar la tabla con formato)';
+        flash(status, `Correo copiado${tabla}: ${destino}`);
+        const etiqueta = boton.querySelector('span');
+        clearTimeout(boton._copiadoTimer);
+        etiqueta.textContent = '¡Copiado!';
+        boton.classList.add('copiado');
+        boton._copiadoTimer = setTimeout(()=>{ etiqueta.textContent = 'Copiar correo'; boton.classList.remove('copiado'); }, 2500);
+      }
+      nominacionIniciar();
 
       selectTool('despacho');
     </script>
