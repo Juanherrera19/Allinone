@@ -147,14 +147,13 @@
       .nominacion-preview pre{white-space:pre-wrap;font-family:inherit;margin:0}
       .nominacion-acciones{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}
       .nominacion-ver{background:none;border:none;padding:8px 0;color:var(--accent);font-weight:600;font-size:14px;text-decoration:underline;cursor:pointer}
-      .nominacion-copiar{display:inline-flex;align-items:center;gap:8px;margin-left:auto;padding:12px 20px;font-size:16px;font-weight:700;box-shadow:0 2px 8px rgba(11,35,64,.3)}
+      .nominacion-copiar{display:inline-flex;align-items:center;justify-content:center;margin-left:auto;padding:9px;box-shadow:0 2px 8px rgba(11,35,64,.3)}
       .nominacion-copiar.copiado{background:#1d7a4c}
-      .nominacion-icono{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      .nominacion-copiar .icono-listo,.nominacion-copiar.copiado .icono-copiar{display:none}
+      .nominacion-copiar.copiado .icono-listo{display:block}
+      .nominacion-icono{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       @media (max-width:480px){
         #nominacion-tool .nominacion-grid{grid-template-columns:1fr}
-        .nominacion-acciones{gap:6px}
-        .nominacion-ver{font-size:13px}
-        .nominacion-copiar{padding:12px 12px;gap:6px}
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -390,10 +389,10 @@
 
           <div class="card" style="margin-top:12px">
             <h3>Paso 1 · Nominación a CNE</h3>
-            <div class="muted">Texto fijo con los 21.600 MBTU para el día de mañana. No hay nada que digitar.</div>
+            <div class="muted">Los 21.600 MBTU con su reparto, para el día de gas de arriba. No hay nada que digitar.</div>
             <div class="nominacion-acciones">
               <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-inicial">Ver correo ▾</button>
-              <button id="nominacion-copy-inicial" class="btn nominacion-copiar"><svg class="nominacion-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copiar correo</span></button>
+              <button id="nominacion-copy-inicial" class="btn nominacion-copiar" aria-label="Copiar correo" title="Copiar correo"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
             </div>
             <div class="share-hint" id="nominacion-status-inicial"></div>
             <div class="nominacion-preview" id="nominacion-preview-inicial" hidden>—</div>
@@ -409,7 +408,7 @@
             </div>
             <div class="nominacion-acciones">
               <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-gc-box">Ver correo ▾</button>
-              <button id="nominacion-copy-gc" class="btn nominacion-copiar"><svg class="nominacion-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copiar correo</span></button>
+              <button id="nominacion-copy-gc" class="btn nominacion-copiar" aria-label="Copiar correo" title="Copiar correo"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
             </div>
             <div class="share-hint" id="nominacion-status-gc"></div>
             <div class="nominacion-preview" id="nominacion-preview-gc-box" hidden><pre id="nominacion-preview-gc">—</pre></div>
@@ -430,7 +429,7 @@
             </div>
             <div class="nominacion-acciones">
               <button type="button" class="nominacion-ver" aria-expanded="false" aria-controls="nominacion-preview-cne">Ver correo ▾</button>
-              <button id="nominacion-copy-cne" class="btn nominacion-copiar"><svg class="nominacion-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Copiar correo</span></button>
+              <button id="nominacion-copy-cne" class="btn nominacion-copiar" aria-label="Copiar correo" title="Copiar correo"><svg class="nominacion-icono icono-copiar" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><svg class="nominacion-icono icono-listo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
             </div>
             <div class="share-hint" id="nominacion-status-cne"></div>
             <div class="nominacion-preview" id="nominacion-preview-cne" hidden>—</div>
@@ -1697,13 +1696,13 @@
       }
 
       // Correos a CNE: texto antes del cuadro, cantidades del cuadro y cierre.
-      function nominacionCorreoInicial(){
+      function nominacionCorreoInicial(datos){
         return {
           intro: [
             'Buenos días,',
             'Sres. Canacol,',
             '',
-            'Nominación para el día de mañana, en espera de su asignación para ajustes.:'
+            `Nominación para el día ${nominacionFechaLarga(datos.fecha)}, en espera de su asignación para ajustes.:`
           ],
           cantidades: NOMINACION_PUNTOS.map(punto=>punto.completa),
           cierre: ['Atentamente,', 'Equipo de nominaciones Atinkana.']
@@ -1747,6 +1746,7 @@
 
       function nominacionFaltante(datos, paso){
         if(!datos.fecha) return 'Falta el día de gas.';
+        if(paso === 'inicial') return '';
         if(paso === 'gc') return datos.asignado === null ? 'Falta lo asignado por CNE.' : '';
         const index = datos.cantidades.findIndex(valor=>valor === null);
         return index >= 0 ? `Falta la cantidad de ${NOMINACION_PUNTOS[index].name}.` : '';
@@ -1813,7 +1813,7 @@
           `<span>GNV: <strong${excede ? ' style="color:var(--highlight)"' : ''}>${nominacionMiles(datos.gnv)}</strong></span>` +
           `<span>Total: <strong>${nominacionMiles(datos.total)}</strong> MBTU</span>`;
 
-        document.getElementById('nominacion-preview-inicial').innerHTML = nominacionCorreoHtml(nominacionCorreoInicial());
+        document.getElementById('nominacion-preview-inicial').innerHTML = nominacionCorreoHtml(nominacionCorreoInicial(datos));
         document.getElementById('nominacion-preview-gc').textContent = nominacionTextoGC(datos);
         document.getElementById('nominacion-preview-cne').innerHTML = nominacionCorreoHtml(nominacionCorreoCNE(datos));
 
@@ -1854,7 +1854,10 @@
         }));
 
         document.getElementById('nominacion-copy-inicial').addEventListener('click', async ()=>{
-          const correo = nominacionCorreoInicial();
+          const datos = nominacionLeer();
+          const falta = nominacionFaltante(datos, 'inicial');
+          if(falta){ flash(document.getElementById('nominacion-status-inicial'), falta, 'error'); return; }
+          const correo = nominacionCorreoInicial(datos);
           nominacionAvisarCopia('inicial', await nominacionCopiarHtml(nominacionCorreoHtml(correo), nominacionCorreoTexto(correo)), 'pégalo en el correo a CNE.');
         });
 
@@ -1881,18 +1884,17 @@
         nominacionActualizar();
       }
 
-      // El boton cambia a "Copiado" un momento para que se note que funciono.
+      // El boton se pone verde con un chulo un momento para que se note que funciono.
       function nominacionAvisarCopia(paso, modo, destino){
         const status = document.getElementById(`nominacion-status-${paso}`);
         const boton = document.getElementById(`nominacion-copy-${paso}`);
         if(!modo){ flash(status, 'No se pudo copiar el correo.', 'error'); return; }
         const tabla = paso === 'gc' || modo === 'html' ? '' : ' (este navegador no deja copiar la tabla con formato)';
         flash(status, `Correo copiado${tabla}: ${destino}`);
-        const etiqueta = boton.querySelector('span');
         clearTimeout(boton._copiadoTimer);
-        etiqueta.textContent = '¡Copiado!';
         boton.classList.add('copiado');
-        boton._copiadoTimer = setTimeout(()=>{ etiqueta.textContent = 'Copiar correo'; boton.classList.remove('copiado'); }, 2500);
+        boton.setAttribute('aria-label', 'Copiado');
+        boton._copiadoTimer = setTimeout(()=>{ boton.classList.remove('copiado'); boton.setAttribute('aria-label', 'Copiar correo'); }, 2500);
       }
       nominacionIniciar();
 
