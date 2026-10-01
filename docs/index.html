@@ -36,6 +36,9 @@
       .btn-whatsapp{background:#1fa855}
       .btn-con-icono{display:inline-flex;align-items:center;gap:7px}
       .btn-icono{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+      .btn-icono-relleno{fill:currentColor;stroke:none}
+      .btn-solo-iconos{gap:5px;padding:10px 12px}
+      .btn-par{display:flex;gap:6px}
       .nav-ext{display:flex !important;align-items:center;gap:6px}
       .ext-icon{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
       .nav-ext:hover .ext-icon{opacity:1}
@@ -144,8 +147,14 @@
       #nominacion-tool label.nominacion-campo{display:flex;flex-direction:column;gap:5px;font-weight:600}
       #nominacion-tool label.nominacion-campo small{font-weight:400;color:var(--muted)}
       #nominacion-tool input[type=text],#nominacion-tool input[type=date],#nominacion-tool select{width:100%;padding:10px;border:1px solid #e6e9ed;border-radius:6px;background:#fff;color:var(--text);font-size:16px}
-      #nominacion-tool details{margin-top:12px}
-      #nominacion-tool summary{cursor:pointer;color:var(--accent);font-weight:600;padding:6px 0}
+      #nominacion-tool textarea{width:100%;padding:10px;border:1px solid #e6e9ed;border-radius:6px;background:#fff;color:var(--text);font-family:inherit;font-size:16px;resize:vertical}
+      .nominacion-pegar{margin-top:12px}
+      .nominacion-cuadro{width:100%;max-width:520px;margin-top:10px;font-size:14px}
+      .nominacion-cuadro th,.nominacion-cuadro td{padding:4px 8px;border:1px solid #d5dae0}
+      .nominacion-cuadro th{background:#f3f5f8;text-align:left;font-weight:600}
+      .nominacion-cuadro .num{width:1%;text-align:right}
+      #nominacion-tool .nominacion-cuadro input[type=text]{width:100px;padding:7px 8px;text-align:right;transition:background .4s,border-color .4s}
+      #nominacion-tool .nominacion-cuadro input.pegado{background:#e7f6ee;border-color:#1d7a4c}
       .nominacion-sugerencia{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--muted)}
       .nominacion-sugerencia:empty{display:none}
       .nominacion-sugerencia .btn{padding:6px 10px;font-size:13px}
@@ -168,6 +177,9 @@
       .nominacion-icono{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
       @media (max-width:480px){
         #nominacion-tool .nominacion-grid{grid-template-columns:1fr}
+        .nominacion-cuadro{font-size:13px}
+        .nominacion-cuadro th,.nominacion-cuadro td{padding:4px 6px}
+        #nominacion-tool .nominacion-cuadro input[type=text]{width:84px;padding:6px}
       }
       .registro-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
       .registro-grid[hidden]{display:none}
@@ -201,6 +213,10 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   </head>
   <body>
+    <!-- Iconos que se repiten: se usan con <use href="#..."> -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+      <symbol id="icono-whatsapp" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></symbol>
+    </svg>
     <header>
       <div class="brand">All-in-One — Monitor Precio de Bolsa</div>
     </header>
@@ -336,7 +352,7 @@
             <h3>Texto para compartir</h3>
             <div class="share-row">
               <button id="manual-copy-text" class="btn btn-con-icono" title="Copiar texto" aria-label="Copiar texto"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg><span>Texto</span></button>
-              <button id="manual-share-whatsapp" class="btn btn-whatsapp btn-con-icono" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Por WhatsApp</span></button>
+              <button id="manual-share-whatsapp" class="btn btn-whatsapp btn-con-icono btn-solo-iconos" title="Compartir por WhatsApp" aria-label="Compartir por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><svg class="btn-icono btn-icono-relleno" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icono-whatsapp"/></svg></button>
             </div>
             <pre id="manual-original-text" style="white-space:pre-wrap;font-family:Consolas,monospace;line-height:1.5;margin:0">—</pre>
             <div class="share-hint" id="manual-share-status"></div>
@@ -364,11 +380,16 @@
               <button id="despacho-process" class="btn">Procesar</button>
               <span id="despacho-status" class="muted">Estado: pendiente</span>
             </div>
-            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
-              <button id="despacho-download-one" class="btn btn-con-icono" disabled title="Descargar tabla 1 PNG" aria-label="Descargar tabla 1 PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Tabla 1 PNG</span></button>
-              <button id="despacho-download-two" class="btn btn-con-icono" disabled title="Descargar tabla 2 PNG" aria-label="Descargar tabla 2 PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Tabla 2 PNG</span></button>
-              <button id="despacho-share-one" class="btn btn-whatsapp btn-con-icono" disabled title="Compartir tabla 1 por WhatsApp" aria-label="Compartir tabla 1 por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Tabla 1 por WhatsApp</span></button>
-              <button id="despacho-share-two" class="btn btn-whatsapp btn-con-icono" disabled title="Compartir tabla 2 por WhatsApp" aria-label="Compartir tabla 2 por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span>Tabla 2 por WhatsApp</span></button>
+            <!-- Cada boton de compartir va junto al de descargar de su tabla: sin texto no se distinguirian. -->
+            <div style="margin-top:10px;display:flex;gap:8px 16px;flex-wrap:wrap">
+              <div class="btn-par">
+                <button id="despacho-download-one" class="btn btn-con-icono" disabled title="Descargar tabla 1 PNG" aria-label="Descargar tabla 1 PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Tabla 1 PNG</span></button>
+                <button id="despacho-share-one" class="btn btn-whatsapp btn-con-icono btn-solo-iconos" disabled title="Compartir tabla 1 por WhatsApp" aria-label="Compartir tabla 1 por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><svg class="btn-icono btn-icono-relleno" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icono-whatsapp"/></svg></button>
+              </div>
+              <div class="btn-par">
+                <button id="despacho-download-two" class="btn btn-con-icono" disabled title="Descargar tabla 2 PNG" aria-label="Descargar tabla 2 PNG"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span>Tabla 2 PNG</span></button>
+                <button id="despacho-share-two" class="btn btn-whatsapp btn-con-icono btn-solo-iconos" disabled title="Compartir tabla 2 por WhatsApp" aria-label="Compartir tabla 2 por WhatsApp"><svg class="btn-icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><svg class="btn-icono btn-icono-relleno" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#icono-whatsapp"/></svg></button>
+              </div>
             </div>
             <div class="share-hint" id="despacho-share-status"></div>
             <div class="share-hint">En celular se abre el menú de compartir con la imagen de la tabla lista. En computador la imagen se copia al portapapeles y se abre WhatsApp Web: pégala con Ctrl+V.</div>
@@ -478,12 +499,16 @@
 
           <div class="card" style="margin-top:12px">
             <h3>Paso 6 · Correo a CNE</h3>
-            <div class="muted">Cantidades de la renominación de GC. Se guardan en este dispositivo: solo cambia las que cambiaron.</div>
-            <div class="nominacion-grid" id="nominacion-principal"></div>
-            <details id="nominacion-otros">
-              <summary id="nominacion-otros-titulo">Otros puntos</summary>
-              <div class="nominacion-grid" id="nominacion-otros-campos"></div>
-            </details>
+            <div class="muted">Cantidades de la renominación de GC: pega la tabla del correo o digítalas. Se guardan en este dispositivo.</div>
+            <label class="nominacion-campo nominacion-pegar">Pegar la tabla del correo de GC
+              <textarea id="nominacion-pegar" rows="2" autocomplete="off" spellcheck="false" placeholder="Pega aquí la tabla completa del correo"></textarea>
+            </label>
+            <div class="share-hint" id="nominacion-pegar-estado"></div>
+            <div class="nominacion-sugerencia" id="nominacion-sugerencia"></div>
+            <table class="nominacion-cuadro">
+              <thead><tr><th scope="col">Delivery Point</th><th scope="col" class="num">Quantity</th></tr></thead>
+              <tbody id="nominacion-cuadro"></tbody>
+            </table>
             <div class="nominacion-totales" id="nominacion-totales"></div>
             <div class="nominacion-alerta" id="nominacion-alerta" role="alert" hidden>
               <div id="nominacion-alerta-texto"></div>
@@ -1473,16 +1498,15 @@
       async function shareDespachoTable(containerId, filename, caption, buttonId){
         const status=document.getElementById('despacho-share-status');
         const button=document.getElementById(buttonId);
-        const label=button.innerHTML; // incluye el icono
         button.disabled=true;
-        button.innerText='Preparando imagen...';
+        flash(status, 'Preparando imagen...', 'muted'); // el boton solo tiene iconos: el aviso va abajo
         try{
           const canvas=await renderDespachoCanvas(containerId);
           const blob=await canvasToBlob(canvas);
           const fecha=new Date().toLocaleDateString('es-CO');
           await shareToWhatsApp({blob, filename, text:`${caption} — ${fecha}`, status});
         }catch(error){ flash(status, error.message, 'error'); }
-        finally{ button.disabled=false; button.innerHTML=label; }
+        finally{ button.disabled=false; }
       }
       document.getElementById('despacho-share-one').addEventListener('click',()=>shareDespachoTable('despacho-table-one','despacho-nal-ties-tabla-1.png','Despacho Nal_Ties — Tabla 1','despacho-share-one'));
       document.getElementById('despacho-share-two').addEventListener('click',()=>shareDespachoTable('despacho-table-two','despacho-nal-ties-tabla-2-con-leyenda.png','Despacho Nal_Ties — Tabla 2','despacho-share-two'));
@@ -1714,7 +1738,7 @@
 
       // Cuadro de la nominacion tal como va en el correo. `completa` es el reparto de los 21.600
       // del paso 1; `cantidad` es el valor inicial del paso 6. El primer punto es el que cambia
-      // casi a diario; los demas van plegados en "Otros puntos" con su ultimo valor.
+      // casi a diario (tiene sugerencia); en pantalla van en el mismo orden del cuadro del correo.
       const NOMINACION_PUNTOS = [
         {code:'448', name:'ESTACION ARENOSA', sector:'INDUSTRIAL', completa:13250, cantidad:null},
         {code:'448', name:'ESTACION ARENOSA GNCV', sector:'GNCV', completa:6804, cantidad:6804},
@@ -1762,28 +1786,71 @@
         return document.getElementById(`nominacion-punto-${index}`);
       }
 
+      // Una fila por punto, igual al cuadro del correo: nombre y casilla de la cantidad.
       function nominacionCrearCampos(){
+        const cuerpo = document.getElementById('nominacion-cuadro');
         NOMINACION_PUNTOS.forEach((punto, index)=>{
-          const wrapper = document.createElement('div');
+          const fila = document.createElement('tr');
+          const nombre = document.createElement('td');
           const label = document.createElement('label');
-          label.className = 'nominacion-campo';
-          const sector = document.createElement('small');
-          sector.textContent = punto.sector === 'GNCV' ? 'GNV' : 'Industrial';
+          label.htmlFor = `nominacion-punto-${index}`;
+          label.textContent = punto.name;
+          nombre.appendChild(label);
+          const cantidad = document.createElement('td');
+          cantidad.className = 'num';
           const input = document.createElement('input');
           input.type = 'text';
           input.inputMode = 'numeric';
           input.autocomplete = 'off';
           input.id = `nominacion-punto-${index}`;
-          label.append(punto.name, sector, input);
-          wrapper.appendChild(label);
-          if(index === 0){
-            const sugerencia = document.createElement('div');
-            sugerencia.className = 'nominacion-sugerencia';
-            sugerencia.id = 'nominacion-sugerencia';
-            wrapper.appendChild(sugerencia);
-          }
-          document.getElementById(index === 0 ? 'nominacion-principal' : 'nominacion-otros-campos').appendChild(wrapper);
+          cantidad.appendChild(input);
+          fila.append(nombre, cantidad);
+          cuerpo.appendChild(fila);
         });
+      }
+
+      // Tabla pegada del correo de GC (Code, Delivery Point, Quantity, ...): por cada punto busca su
+      // nombre seguido de la cantidad. Sirve con tabuladores, saltos de linea o espacios entre celdas.
+      // Devuelve, por punto, todas las cantidades que encontro (mas de una si pegaron dos tablas).
+      function nominacionLeerTabla(texto){
+        const plano = String(texto || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+        return NOMINACION_PUNTOS.map(punto=>{
+          const nombre = punto.name.toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean).join('[^A-Z0-9]*');
+          // "ESTACION ARENOSA" no toma la fila "ESTACION ARENOSA GNCV": exige la cantidad justo despues.
+          const patron = new RegExp(`(?:^|[^A-Z0-9])${nombre}[^A-Z0-9]+(\\d{1,3}(?:[.,]\\d{3})+|\\d+)(?!\\d)`, 'g');
+          return [...plano.matchAll(patron)].map(match=>Number(match[1].replace(/[.,]/g, '')));
+        });
+      }
+
+      function nominacionPegarTabla(){
+        const area = document.getElementById('nominacion-pegar');
+        const estado = document.getElementById('nominacion-pegar-estado');
+        const aviso = texto=>{ clearTimeout(estado._flashTimer); estado.textContent = texto; estado.style.color = 'var(--highlight)'; };
+        if(!area.value.trim()) return;
+        const faltan = [];
+        const repetidos = [];
+        nominacionLeerTabla(area.value).forEach((valores, index)=>{
+          const punto = NOMINACION_PUNTOS[index];
+          if(!valores.length){ faltan.push(punto.name); return; }
+          if(new Set(valores).size > 1) repetidos.push(punto.name);
+          const input = nominacionCampo(index);
+          input.value = nominacionMiles(valores[0]);
+          input.classList.add('pegado');
+          clearTimeout(input._pegadoTimer);
+          input._pegadoTimer = setTimeout(()=>input.classList.remove('pegado'), 1500);
+        });
+        const llenas = NOMINACION_PUNTOS.length - faltan.length;
+        if(!llenas){ aviso('No encontré la tabla en lo que pegaste. Copia la tabla completa del correo de GC, con los nombres de los puntos.'); return; }
+        if(faltan.length || repetidos.length){
+          const partes = [faltan.length ? `Se llenaron ${llenas} de ${NOMINACION_PUNTOS.length} cantidades.` : `Se llenaron las ${llenas} cantidades.`];
+          if(faltan.length) partes.push(`No encontré: ${faltan.join(', ')} (quedan con el valor anterior).`);
+          if(repetidos.length) partes.push(`Venía más de una tabla con valores distintos para ${repetidos.join(', ')}: tomé la primera.`);
+          aviso(partes.join(' ') + ' Revisa antes de copiar.');
+          return;
+        }
+        // Vacio para la siguiente tabla, cuando el navegador termine de pegar (puede avisar en varios eventos).
+        setTimeout(()=>{ area.value = ''; });
+        flash(estado, `Listo: se llenaron las ${llenas} cantidades con la tabla pegada.`);
       }
 
       function nominacionLeer(){
@@ -1889,19 +1956,20 @@
       // Recomendacion para el primer punto: lo asignado por CNE menos los otros 9. No se llena sola.
       function nominacionSugerencia(datos){
         const node = document.getElementById('nominacion-sugerencia');
+        const punto = NOMINACION_PUNTOS[0].name;
         node.textContent = '';
         if(datos.asignado === null) return;
         const valor = datos.asignado - datos.otros;
         if(valor < 0){
-          node.textContent = `Sin sugerencia: lo asignado (${nominacionMiles(datos.asignado)}) es menor que los otros puntos (${nominacionMiles(datos.otros)}).`;
+          node.textContent = `Sin sugerencia para ${punto}: lo asignado (${nominacionMiles(datos.asignado)}) es menor que los otros puntos (${nominacionMiles(datos.otros)}).`;
           return;
         }
         if(valor === datos.cantidades[0]){
-          node.textContent = `Coincide con la sugerencia: asignado ${nominacionMiles(datos.asignado)} − otros puntos ${nominacionMiles(datos.otros)}.`;
+          node.textContent = `${punto} coincide con la sugerencia: asignado ${nominacionMiles(datos.asignado)} − otros puntos ${nominacionMiles(datos.otros)}.`;
           return;
         }
         const texto = document.createElement('span');
-        texto.textContent = `Sugerencia: ${nominacionMiles(valor)} (asignado ${nominacionMiles(datos.asignado)} − otros puntos ${nominacionMiles(datos.otros)})`;
+        texto.textContent = `Sugerencia para ${punto}: ${nominacionMiles(valor)} (asignado ${nominacionMiles(datos.asignado)} − otros puntos ${nominacionMiles(datos.otros)})`;
         const usar = document.createElement('button');
         usar.type = 'button';
         usar.className = 'btn btn-secondary';
@@ -1924,11 +1992,9 @@
         document.getElementById('nominacion-alerta-texto').textContent = excede
           ? `GNV suma ${nominacionMiles(datos.gnv)} MBTU y supera el tope de ${nominacionMiles(NOMINACION_TOPE_GNV)} MBTU (se pasa por ${nominacionMiles(datos.gnv - NOMINACION_TOPE_GNV)}). Revisa las cantidades antes de enviar.`
           : '';
-        if(excede) document.getElementById('nominacion-otros').open = true;
         document.getElementById('nominacion-copy-cne').disabled = excede && !visto.checked;
         document.getElementById('nominacion-copy-excel').disabled = excede && !visto.checked;
 
-        document.getElementById('nominacion-otros-titulo').textContent = `Otros puntos (${NOMINACION_PUNTOS.length - 1}) · ${nominacionMiles(datos.otros)} MBTU`;
         document.getElementById('nominacion-totales').innerHTML =
           `<span>Industrial: <strong>${nominacionMiles(datos.industrial)}</strong></span>` +
           `<span>GNV: <strong${excede ? ' style="color:var(--highlight)"' : ''}>${nominacionMiles(datos.gnv)}</strong></span>` +
@@ -1959,6 +2025,18 @@
         };
         tool.addEventListener('input', alCambiar);
         tool.addEventListener('change', alCambiar);
+        // Pegar reemplaza lo que hubiera en el cuadro: si no, quedarian dos tablas. Lo que entre por
+        // 'input' (teclado del celular) se lee antes de que llegue a la seccion, que recalcula despues.
+        const pegar = document.getElementById('nominacion-pegar');
+        pegar.addEventListener('paste', event=>{
+          const texto = event.clipboardData ? event.clipboardData.getData('text/plain') : '';
+          if(!texto) return;
+          event.preventDefault();
+          pegar.value = texto;
+          nominacionPegarTabla();
+          nominacionActualizar();
+        });
+        pegar.addEventListener('input', nominacionPegarTabla);
         // Al salir de un campo numerico se muestra con punto de miles (10102 -> 10.102).
         tool.addEventListener('focusout', event=>{
           if(event.target.inputMode !== 'numeric') return;
@@ -2071,7 +2149,7 @@
       // Hoja PUNTOS SNT-FUENTE: [codigo punto SNT, descripcion, codigo tramo]. Solo se usa si aparece un
       // punto que no esta en la Tabla10, como punto de entrada (proceso 4), igual que los de la Tabla10.
       const REGISTRO_SNT = [[375,"ACORDEÓN",173],[425,"AGUAS VIVAS",173],[436,"ALBOKA",173],[378,"ARANDALA",173],[475,"ARANDALA CIÉNAGA DE ORO",173],[476,"ARANDALA PORQUERO",173],[94,"ARIANNA",173],[379,"ARRECIFE",173],[39,"BALLENA",110],[42,"BARRANQUILLA",169],[253,"BLOQUE ESPERANZA (Campo Mayor)",173],[254,"BLOQUE ESPERANZA (Prueba Extensa)",173],[429,"BLOQUE VIM 21",173],[255,"BLOQUE VIM 5",173],[498,"BONGA",115],[75,"BONGA MAMEY",115],[260,"BREMEN JOBO",163],[307,"BREVA-1",173],[493,"BRUJO",173],[28,"BUENOS AIRES",141],[233,"BULLERENGUE",166],[110,"CAÑAFLECHA",173],[263,"CAÑAHUATE",173],[300,"CAÑANDONGA",173],[77,"CARAMELO",116],[43,"CARTAGENA",166],[30,"CHICORAL",142],[130,"CHUCHUPA",110],[236,"CLARINETE",173],[437,"CLAXON",173],[435,"CORNAMUSA",173],[237,"CORRALES",153],[53,"CUPIAGUA",133],[496,"CUPIAGUA EN RECETOR",133],[12,"CUSIANA",133],[517,"ESTACIÓN BALLENA",110],[34,"FLOREÑA",148],[439,"FRESA",173],[234,"GCARIBE CAMPOS MENORES",116],[19,"GIBRALTAR",135],[473,"HOBO-HUILA",191],[243,"HOCOL",115],[489,"ISTANBUL",116],[45,"JOBO",173],[157,"KATANA",173],[40,"LA CRECIENTE",115],[303,"LA ESTANCIA",116],[41,"LA MAMI",111],[440,"LULO",173],[492,"MÁGICO",173],[173,"MAMEY",115],[46,"MAMONAL",150],[433,"MARIA CONCHITA",116],[434,"MARÍA CONCHITA PK 33+130",116],[381,"MERECUMBE",111],[89,"NELSON",173],[251,"NELSON CIÉNAGA DE ORO",173],[250,"NELSON PORQUERO",173],[249,"NÍSPERO - TROMBÓN",173],[252,"OBOE",173],[376,"OCARINA",173],[232,"PALMER",173],[301,"PANDERETA",173],[497,"PAUTO SUR",133],[519,"PLANTA APIAY",131],[523,"PLANTA CUPIAGUA",133],[524,"PLANTA CUSIANA",133],[529,"PLANTA GIBRALTAR",135],[531,"PLANTA ORIPAYA",140],[532,"PLANTA SARDINATA",140],[438,"PROMIGAS_E",116],[26,"SARDINATA",140],[441,"SAXOFÓN",173],[477,"SAXOFÓN CIÉNAGA DE ORO",191],[478,"SAXOFÓN PORQUERO",173],[495,"SINU-9",114],[244,"SPEC",166],[31,"TANE/CACOTA",143],[304,"TOPOSI",116],[261,"TORONJA",173],[479,"TORONJA CIÉNAGA DE ORO",173],[480,"TORONJA PORQUERO",173],[248,"TROMBÓN",173],[88,"TUCURINCA",111],[2,"VASCONIA",126]];
-      const REGISTRO_OPERADOR = '234262'; // CODIGO OPERADOR SEGAS de la hoja ETT
+      const REGISTRO_OPERADOR = {ATK:'234312', GEAM:'234262'}; // CODIGO OPERADOR SEGAS de cada empresa (hoja ETT)
       const REGISTRO_FUENTE = {ATK:'el DIARIO ATINKANA NOMINACIÓN', GEAM:'la OPERATIVIDAD 2026'};
       const registroMemoria = {ATK:null, GEAM:null};
       const registroFuentes = {ATK:null, GEAM:null}; // Excel diario adjunto: solo en memoria (puede pesar)
@@ -2348,8 +2426,10 @@
         document.getElementById('registro-fuente-estado').textContent = fuente ? fuente.resumen : '';
         document.getElementById('registro-fuente-file').value = '';
         const ext = estado.ext || {};
+        // Antes ATK traia por defecto el codigo de GEAM: si quedo guardado ese, se cambia por el de ATK.
+        const operador = ext.operador && !(emp === 'ATK' && ext.operador === REGISTRO_OPERADOR.GEAM) ? ext.operador : REGISTRO_OPERADOR[emp];
         document.getElementById('registro-ext-codigo').value = ext.codigo ?? '0';
-        document.getElementById('registro-ext-operador').value = ext.operador ?? REGISTRO_OPERADOR;
+        document.getElementById('registro-ext-operador').value = operador;
         registroPintarTabla();
         registroActualizar();
       }
