@@ -1,0 +1,326 @@
+{
+  "version": "1.0",
+  "descripcion": "Configuración de Contratos de Venta y Compra para Reporte de Ejecución (SEGAS / BMC)",
+  "reglas": {
+    "distribucion_cantidad": {
+      "MAUREL": 0.61,
+      "MKMS": 0.39
+    },
+    "distribucion_uf_gc_surti": {
+      "CARTAGENA CONEXION": {
+        "nit": "890400869",
+        "nombre": "SURTIDORA DE GAS DEL CARIBE S.A. (SURTIGAS)",
+        "porcentaje": 0.5,
+        "cod_punto_salida": 992
+      },
+      "LA MAMI CONEXION": {
+        "nit": "890101691",
+        "nombre": "GASES DEL CARIBE S.A.",
+        "porcentaje": 0.5,
+        "cod_punto_salida": 993
+      }
+    },
+    "distribucion_uf_epm": {
+      "LA MAMI CONEXION": {
+        "nit": "890904996",
+        "nombre": "EMPRESAS PÚBLICAS DE MEDELLÍN (EPM)",
+        "porcentaje": 1.0,
+        "cod_punto_salida": 993
+      }
+    },
+    "valores_uf_defecto": {
+      "cod_demanda": 2,
+      "desc_demanda": "No Regulado",
+      "cod_sector_consumo": 2,
+      "desc_sector_consumo": "Industrial",
+      "cod_mercado_relevante": 0
+    }
+  },
+  "contratos_venta": [
+    {
+      "id_interno": "V1",
+      "operacion": 121786,
+      "id": 168440,
+      "punto_entrega": "JOBO",
+      "cod_punto_entrega": 45,
+      "cantidad_contrato": 5000,
+      "precio": 11.15,
+      "cliente_asociado": "EPM",
+      "regla_calculo": "EPM",
+      "activo": true
+    },
+    {
+      "id_interno": "V2",
+      "operacion": 124595,
+      "id": 172100,
+      "punto_entrega": "JOBO",
+      "cod_punto_entrega": 45,
+      "cantidad_contrato": 4000,
+      "precio": 7.82,
+      "cliente_asociado": "GASCARIBE/SURTIGAS",
+      "regla_calculo": "GC_SURTI_50",
+      "activo": true
+    },
+    {
+      "id_interno": "V3",
+      "operacion": 124596,
+      "id": 172101,
+      "punto_entrega": "JOBO",
+      "cod_punto_entrega": 45,
+      "cantidad_contrato": 4000,
+      "precio": 7.82,
+      "cliente_asociado": "GASCARIBE/SURTIGAS",
+      "regla_calculo": "GC_SURTI_50",
+      "activo": true
+    }
+  ],
+  "contratos_compra": [
+    {
+      "id_interno": "C1",
+      "id": 173076,
+      "empresa": "MAUREL",
+      "operacion": 103123,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 4000,
+      "cantidad_defecto": 4000,
+      "precio": 6.13,
+      "grupo": "GC_SURTI",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890101691",
+          "nombre": "GASES DEL CARIBE",
+          "cantidad": 3900
+        },
+        {
+          "punto_salida": "CARTAGENA CONEXION",
+          "cod_punto_salida": 992,
+          "nit": "890400869",
+          "nombre": "SURTIGAS",
+          "cantidad": 100
+        }
+      ]
+    },
+    {
+      "id_interno": "C2",
+      "id": 173077,
+      "empresa": "MKMS",
+      "operacion": 103123,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 1100,
+      "cantidad_defecto": 1100,
+      "precio": 6.13,
+      "grupo": "GC_SURTI",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890101691",
+          "nombre": "GASES DEL CARIBE",
+          "cantidad": 1100
+        }
+      ]
+    },
+    {
+      "id_interno": "C3",
+      "id": 173079,
+      "empresa": "MAUREL",
+      "operacion": 103340,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 600,
+      "cantidad_defecto": 600,
+      "precio": 6.13,
+      "grupo": "GC_SURTI",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "CARTAGENA CONEXION",
+          "cod_punto_salida": 992,
+          "nit": "890400869",
+          "nombre": "SURTIGAS",
+          "cantidad": 600
+        }
+      ]
+    },
+    {
+      "id_interno": "C4",
+      "id": 173080,
+      "empresa": "MKMS",
+      "operacion": 103340,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 2800,
+      "cantidad_defecto": 2800,
+      "precio": 6.13,
+      "grupo": "GC_SURTI",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "CARTAGENA CONEXION",
+          "cod_punto_salida": 992,
+          "nit": "890400869",
+          "nombre": "SURTIGAS",
+          "cantidad": 2800
+        }
+      ]
+    },
+    {
+      "id_interno": "C5",
+      "id": 173082,
+      "empresa": "MAUREL",
+      "operacion": 103340,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 1500,
+      "cantidad_defecto": 1500,
+      "precio": 6.13,
+      "grupo": "GC_SURTI",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "CARTAGENA CONEXION",
+          "cod_punto_salida": 992,
+          "nit": "890400869",
+          "nombre": "SURTIGAS",
+          "cantidad": 1500
+        }
+      ]
+    },
+    {
+      "id_interno": "C6",
+      "id": 173066,
+      "empresa": "MAUREL",
+      "operacion": 103120,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 2000,
+      "cantidad_defecto": 2000,
+      "precio": 9.27,
+      "grupo": "EPM",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890904996",
+          "nombre": "EPM",
+          "cantidad": 2000
+        }
+      ]
+    },
+    {
+      "id_interno": "C7",
+      "id": 173067,
+      "empresa": "MKMS",
+      "operacion": 103120,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 550,
+      "cantidad_defecto": 550,
+      "precio": 9.27,
+      "grupo": "EPM",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890904996",
+          "nombre": "EPM",
+          "cantidad": 550
+        }
+      ]
+    },
+    {
+      "id_interno": "C8",
+      "id": 173070,
+      "empresa": "MKMS",
+      "operacion": 103230,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 1400,
+      "cantidad_defecto": 1400,
+      "precio": 9.27,
+      "grupo": "EPM",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890904996",
+          "nombre": "EPM",
+          "cantidad": 1400
+        }
+      ]
+    },
+    {
+      "id_interno": "C9",
+      "id": 173072,
+      "empresa": "MAUREL",
+      "operacion": 103230,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 750,
+      "cantidad_defecto": 750,
+      "precio": 9.27,
+      "grupo": "EPM",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890904996",
+          "nombre": "EPM",
+          "cantidad": 750
+        }
+      ]
+    },
+    {
+      "id_interno": "C10",
+      "id": 173069,
+      "empresa": "MAUREL",
+      "operacion": 103230,
+      "punto_entrega": "sinu-9",
+      "cod_punto_entrega": 495,
+      "cantidad_capacidad": 300,
+      "cantidad_defecto": 300,
+      "precio": 9.27,
+      "grupo": "EPM",
+      "tipo_demanda": 2,
+      "sector_consumo": 2,
+      "cod_mercado_rel": 0,
+      "ufs": [
+        {
+          "punto_salida": "LA MAMI CONEXION",
+          "cod_punto_salida": 993,
+          "nit": "890904996",
+          "nombre": "EPM",
+          "cantidad": 300
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+/* Estilos para el Gestor Universal de Facturas y Notas de Crédito - GitHub Pages */
+
+/* Contenedor de tabla con scroll lateral y vertical siempre visible y prominente */
+.table-scroll-container {
+  max-height: 72vh;
+  overflow-y: scroll !important;
+  overflow-x: auto !important;
+  scrollbar-gutter: stable both-edges;
+  position: relative;
+  border-radius: 0.75rem;
+}
+
+/* Barra de scroll lateral visible permanentemente */
+.table-scroll-container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Estilos de tabla compacta para que quepan las 16 columnas en pantalla */
+.universal-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11px;
+}
+
+.universal-table th {
+  position: relative;
+  background-color: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  padding: 8px 6px;
+  border-bottom: 2px solid #cbd5e1;
+  border-right: 1px solid #e2e8f0;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.universal-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #e2e8f0;
+  border-right: 1px solid #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+/* Resizer handle para arrastrar y cambiar tamaño de columnas */
+.resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  cursor: col-resize;
+  user-select: none;
+  height: 100%;
+  z-index: 10;
+}
+
+.resizer:hover,
+.resizing {
+  background-color: #3b82f6;
+}
+
+/* Reglas de Colores solicitadas:
+   1. Notas de crédito con letras rojas
+   2. Facturas que contienen notas crédito con celda amarilla
+*/
+.row-nota-credito {
+  color: #dc2626 !important;
+  font-weight: 600;
+  background-color: #fef2f2 !important;
+}
+
+.row-nota-credito td {
+  color: #dc2626 !important;
+}
+
+.cell-has-nc {
+  background-color: #fef08a !important;
+  color: #854d0e !important;
+  font-weight: 800 !important;
+  border: 1px solid #facc15 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+}
+
+/* Hover de filas */
+.universal-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+.row-nota-credito:hover {
+  background-color: #fee2e2 !important;
+}
+
+/* Inputs de tabla */
+.table-input-name {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 4px;
+  width: 100%;
+}
+.table-input-name:focus {
+  background-color: #ffffff;
+  outline: 2px solid #3b82f6;
+  border-color: #3b82f6;
+}
+
+/* Scrollbars personalizados para las listas de filtros desplegables */
+#listDropdownAnios::-webkit-scrollbar,
+#listDropdownMeses::-webkit-scrollbar,
+#listDropdownClientes::-webkit-scrollbar,
+#listDropdownContratos::-webkit-scrollbar,
+#listDropdownConceptos::-webkit-scrollbar {
+  width: 6px;
+}
+#listDropdownAnios::-webkit-scrollbar-thumb,
+#listDropdownMeses::-webkit-scrollbar-thumb,
+#listDropdownClientes::-webkit-scrollbar-thumb,
+#listDropdownContratos::-webkit-scrollbar-thumb,
+#listDropdownConceptos::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 4px;
+}
+#listDropdownAnios::-webkit-scrollbar-thumb:hover,
+#listDropdownMeses::-webkit-scrollbar-thumb:hover,
+#listDropdownClientes::-webkit-scrollbar-thumb:hover,
+#listDropdownContratos::-webkit-scrollbar-thumb:hover,
+#listDropdownConceptos::-webkit-scrollbar-thumb:hover {
+  background-color: #94a3b8;
+}

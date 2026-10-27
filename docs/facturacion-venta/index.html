@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor Universal de Facturas y Notas de Crédito</title>
+  
+  <!-- Estilos y Tipografía -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Librerías Cliente para GitHub Pages (100% en Navegador) -->
+  <!-- SheetJS: Lectura y Generación de Excel con Múltiples Hojas -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- PDF-Lib: División, Manipulación y Creación de PDFs en el Navegador -->
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <!-- PDF.js: Extracción de texto y análisis de PDFs en el Navegador -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+  <!-- JSZip: Empaquetado y Compresión de Archivos ZIP en el Navegador -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Contenido Principal -->
+  <main class="max-w-[98%] mx-auto px-2 sm:px-4 py-5 flex-1 w-full space-y-5">
+
+    <!-- Pestañas de Modalidad de Carga -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="flex border-b border-slate-200 bg-slate-50/70">
+        <button id="tabModePdf" onclick="switchMode('pdf')" class="flex-1 py-3 px-4 font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 border-b-2 border-blue-600 bg-white text-blue-700 transition">
+          <i data-lucide="file-stack" class="w-4 h-4"></i>
+          <span>Modalidad 1: PDF Mensual Unido (Facturas + NC)</span>
+        </button>
+        <button id="tabModeZip" onclick="switchMode('zip')" class="flex-1 py-3 px-4 font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
+          <i data-lucide="archive" class="w-4 h-4"></i>
+          <span>Modalidad 2: Archivo ZIP / PDFs Separados</span>
+        </button>
+        <button id="tabModeExcel" onclick="switchMode('excel')" class="flex-1 py-3 px-4 font-medium text-xs sm:text-sm flex items-center justify-center space-x-2 border-b-2 border-transparent text-slate-600 hover:text-slate-900 transition">
+          <svg class="w-4 h-4 fill-current text-emerald-600" viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.75 3.5 22 3.75 22 4.08V19.92Q22 20.25 21.75 20.5 21.5 20.75H7.83Q7.5 20.75 7.25 20.5 7 20.25 7 19.92V17H2.83Q2.5 17 2.25 16.75 2 16.5 2 16.17V7.83Q2 7.5 2.25 7.25 2.5 7 2.83 7H7V4.08Q7 3.75 7.25 3.5 7.5 3.25 7.83 3.25M7 13H5.5L4.5 11.2 3.5 13H2V7.5H3.5L4.5 9.3 5.5 7.5H7M15.5 15.5H19V8.5H15.5M10.5 15.5H14V8.5H10.5M8.5 15.5V19.25H20.5V4.75H8.5V8.5H9.5V15.5Z"/></svg>
+          <span>Modalidad 3: Archivo Excel (.xlsx) / Plantilla</span>
+        </button>
+      </div>
+
+      <div class="p-5">
+        <!-- Subida Modalidad 1: PDF Unido -->
+        <div id="sectionPdfUpload" class="space-y-3">
+          <p class="text-xs text-slate-600"><strong>Sube el archivo PDF consolidado del mes.</strong> El sistema dividirá el PDF en documentos independientes de una o varias páginas, desglosará cada línea de ítem y cargará el panel analítico.</p>
+
+          <div id="dropZonePdf" class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-slate-50/50 hover:bg-blue-50/30 rounded-xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center">
+            <input type="file" id="inputPdfFile" accept="application/pdf" class="hidden">
+            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2">
+              <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs font-semibold text-slate-800">Haz clic para seleccionar el PDF del mes o arrástralo aquí</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Soporta documentos de cualquier número de páginas (.pdf)</p>
+            <div id="pdfSelectedInfo" class="mt-3 hidden px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800 font-medium flex items-center space-x-2">
+              <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+              <span id="pdfFileName">archivo.pdf</span>
+              <span id="pdfFileSize" class="text-blue-500">(0 MB)</span>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button id="btnProcessPdf" disabled onclick="startProcessingPdf()" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs sm:text-sm flex items-center space-x-2 shadow-sm transition">
+              <i data-lucide="scissors" class="w-4 h-4"></i>
+              <span>Dividir Documentos y Extraer Datos</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Subida Modalidad 2: ZIP o Múltiples PDFs -->
+        <div id="sectionZipUpload" class="hidden space-y-3">
+          <p class="text-xs text-slate-600"><strong>Sube un archivo .ZIP o múltiples PDFs ya separados.</strong> El sistema extraerá las líneas de ítems y generará la tabla interactiva y los reportes.</p>
+
+          <div id="dropZoneZip" class="border-2 border-dashed border-slate-300 hover:border-purple-500 bg-slate-50/50 hover:bg-purple-50/30 rounded-xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center">
+            <input type="file" id="inputZipFile" accept=".zip,application/pdf" multiple class="hidden">
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mb-2">
+              <i data-lucide="folder-archive" class="w-6 h-6"></i>
+            </div>
+            <p class="text-xs font-semibold text-slate-800">Haz clic para seleccionar un archivo .ZIP o varios PDFs</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Archivos individuales o comprimidos (.zip, .pdf)</p>
+            <div id="zipSelectedInfo" class="mt-3 hidden px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-800 font-medium flex items-center space-x-2">
+              <i data-lucide="check-circle" class="w-4 h-4 text-purple-600"></i>
+              <span id="zipFileName">paquete.zip</span>
+              <span id="zipFileSize" class="text-purple-500">(0 MB)</span>
+            </div>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button id="btnProcessZip" disabled onclick="startProcessingZip()" class="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs sm:text-sm flex items-center space-x-2 shadow-sm transition">
+              <i data-lucide="table" class="w-4 h-4"></i>
+              <span>Extraer Datos y Construir Tabla</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Subida Modalidad 3: Archivo Excel (.xlsx) / Plantilla -->
+        <div id="sectionExcelUpload" class="hidden space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-emerald-50/50 rounded-xl border border-emerald-200/80">
+            <p class="text-xs text-slate-700 flex-1 min-w-[280px]">
+              <strong>Sube tu archivo personal de Excel (.xlsx).</strong> Se procesarán exclusivamente las 16 columnas oficiales (omitiendo automáticamente columnas personales como <em>PROCEDENCIA, TRM, AÑO, MES, CLASIFICACION</em>) para alimentar el dashboard, los filtros y la aplicación de Notas de Crédito.
+            </p>
+            <button type="button" onclick="downloadTemplateExcelClient()" class="inline-flex items-center space-x-2 px-3 py-1.5 bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-400 rounded-lg text-xs font-semibold shadow-xs transition" title="Descargar plantilla con las 16 columnas exactas y ejemplos">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-700"></i>
+              <span>Descargar Plantilla Excel (.xlsx)</span>
+            </button>
+          </div>
+
+          <div id="dropZoneExcel" class="border-2 border-dashed border-slate-300 hover:border-emerald-500 bg-slate-50/50 hover:bg-emerald-50/30 rounded-xl p-6 text-center transition cursor-pointer flex flex-col items-center justify-center">
+            <input type="file" id="inputExcelFile" accept=".xlsx,.xls,.xlsm" class="hidden">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mb-2">
+              <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.75 3.5 22 3.75 22 4.08V19.92Q22 20.25 21.75 20.5 21.5 20.75H7.83Q7.5 20.75 7.25 20.5 7 20.25 7 19.92V17H2.83Q2.5 17 2.25 16.75 2 16.5 2 16.17V7.83Q2 7.5 2.25 7.25 2.5 7 2.83 7H7V4.08Q7 3.75 7.25 3.5 7.5 3.25 7.83 3.25M7 13H5.5L4.5 11.2 3.5 13H2V7.5H3.5L4.5 9.3 5.5 7.5H7M15.5 15.5H19V8.5H15.5M10.5 15.5H14V8.5H10.5M8.5 15.5V19.25H20.5V4.75H8.5V8.5H9.5V15.5Z"/></svg>
+            </div>
+            <p class="text-xs font-semibold text-slate-800">Haz clic para seleccionar tu archivo Excel (.xlsx) o arrástralo aquí</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Soporta libros de Excel con una o múltiples hojas (.xlsx, .xls, .xlsm)</p>
+            <div id="excelSelectedInfo" class="mt-3 hidden px-3 py-1.5 bg-emerald-50 border border-emerald-300 rounded-lg text-xs text-emerald-900 font-medium flex items-center space-x-2">
+              <svg class="w-4 h-4 fill-current text-emerald-600" viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.75 3.5 22 3.75 22 4.08V19.92Q22 20.25 21.75 20.5 21.5 20.75H7.83Q7.5 20.75 7.25 20.5 7 20.25 7 19.92V17H2.83Q2.5 17 2.25 16.75 2 16.5 2 16.17V7.83Q2 7.5 2.25 7.25 2.5 7 2.83 7H7V4.08Q7 3.75 7.25 3.5 7.5 3.25 7.83 3.25M7 13H5.5L4.5 11.2 3.5 13H2V7.5H3.5L4.5 9.3 5.5 7.5H7M15.5 15.5H19V8.5H15.5M10.5 15.5H14V8.5H10.5M8.5 15.5V19.25H20.5V4.75H8.5V8.5H9.5V15.5Z"/></svg>
+              <span id="excelFileName">archivo.xlsx</span>
+              <span id="excelFileSize" class="text-emerald-600 font-mono">(0 MB)</span>
+            </div>
+          </div>
+
+          <!-- Selector de Hoja de Trabajo (visible tras inspeccionar el archivo) -->
+          <div id="excelSheetSelectorContainer" class="hidden p-3.5 bg-emerald-50/60 rounded-xl border border-emerald-200 flex flex-wrap items-center justify-between gap-3 animate-in fade-in duration-150">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="layers" class="w-4 h-4 text-emerald-700"></i>
+              <label for="selectExcelSheet" class="text-xs font-bold text-slate-800">Seleccionar Hoja a procesar:</label>
+            </div>
+            <div class="flex-1 max-w-xs">
+              <select id="selectExcelSheet" class="w-full px-3 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-xs">
+              </select>
+            </div>
+            <span class="text-[11px] text-emerald-700 font-medium">Hoja <strong>2026</strong> preseleccionada automáticamente si está presente.</span>
+          </div>
+
+          <div class="flex justify-end pt-1">
+            <button id="btnProcessExcel" disabled onclick="startProcessingExcel()" class="px-5 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-xs sm:text-sm flex items-center space-x-2 shadow-sm transition">
+              <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+              <span>Cargar y Analizar Excel</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Progreso y Estado de Carga -->
+        <div id="progressSection" class="hidden mt-4 pt-3 border-t border-slate-200">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
+            <div class="flex items-center space-x-2">
+              <div class="w-3.5 h-3.5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <span id="progressStatusText">Procesando documentos...</span>
+            </div>
+            <span id="progressPercentText" class="text-blue-600">0%</span>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+            <div id="progressBar" class="bg-blue-600 h-2 rounded-full transition-all duration-300 w-0"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sección de Resultados y Dashboard -->
+    <div id="resultsSection" class="hidden space-y-4">
+
+      <!-- DASHBOARD: 4 Tarjetas KPI -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center space-x-3">
+          <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center font-bold shrink-0">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Archivos / Líneas</p>
+            <p id="statTotalDocs" class="text-lg font-bold text-slate-900">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center space-x-3">
+          <div class="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center font-bold shrink-0">
+            <i data-lucide="file-text" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Facturas de Venta</p>
+            <p id="statFacturas" class="text-lg font-bold text-emerald-700">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center space-x-3">
+          <div class="w-10 h-10 bg-red-100 text-red-700 rounded-xl flex items-center justify-center font-bold shrink-0">
+            <i data-lucide="file-minus" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Notas de Crédito</p>
+            <p id="statNC" class="text-lg font-bold text-red-700">0</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex items-center space-x-3 bg-gradient-to-r from-amber-50/50 to-white">
+          <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold shrink-0">
+            <i data-lucide="coins" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold text-amber-800 uppercase tracking-wider">VALOR TOTAL</p>
+            <p id="statTotalMonto" class="text-base font-extrabold text-slate-900 tracking-tight">$0</p>
+            <p class="text-[10px] text-slate-500 font-medium">Facturas &minus; Notas Crédito</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD: Conteo por Conceptos y Gráfico Pastel de Clientes -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Tarjeta de Desglose por Conceptos -->
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-3">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+                <i data-lucide="tag" class="w-4 h-4 text-blue-600"></i>
+                <span>Distribución por Conceptos</span>
+              </h3>
+              <span id="badgeTotalConceptos" class="text-[11px] font-semibold text-slate-500">0 facturas</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 rounded-lg bg-blue-50/80 border border-blue-200">
+                <p class="text-[11px] text-blue-700 font-semibold">Suministro</p>
+                <p id="cntSuministro" class="text-lg font-bold text-blue-900 mt-0.5">0</p>
+                <p class="text-[10px] text-blue-600">Facturas Únicas</p>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-cyan-50/80 border border-cyan-200">
+                <p class="text-[11px] text-cyan-700 font-semibold">Transporte</p>
+                <p id="cntTransporte" class="text-lg font-bold text-cyan-900 mt-0.5">0</p>
+                <p class="text-[10px] text-cyan-600">Facturas Únicas</p>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-indigo-50/80 border border-indigo-200">
+                <p class="text-[11px] text-indigo-700 font-semibold">Gestor del Mercado</p>
+                <p id="cntGestor" class="text-lg font-bold text-indigo-900 mt-0.5">0</p>
+                <p class="text-[10px] text-indigo-600">Facturas Únicas</p>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
+                <p class="text-[11px] text-slate-600 font-semibold">Otros (Prima / etc.)</p>
+                <p id="cntOtros" class="text-lg font-bold text-slate-800 mt-0.5">0</p>
+                <p class="text-[10px] text-slate-500">Facturas Únicas</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Leyenda colores:</span>
+            <span class="inline-flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-red-500"></span><strong class="text-red-600">Rojo: NC</strong></span>
+            <span class="inline-flex items-center space-x-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span><strong class="text-amber-800">Amarillo: Con NC</strong></span>
+          </div>
+        </div>
+
+        <!-- Tarjeta Gráfico Pastel de Clientes -->
+        <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-sm lg:col-span-2 flex flex-col justify-between">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
+              <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-600"></i>
+              <span>Participación % por Clientes (Facturación Neta)</span>
+            </h3>
+            <span class="text-[10px] text-slate-400 font-mono">Top Clientes</span>
+          </div>
+
+          <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="w-full md:w-56 h-48 flex items-center justify-center">
+              <canvas id="clientPieChart"></canvas>
+            </div>
+            <div id="clientLegendList" class="flex-1 max-h-44 overflow-y-auto space-y-1 text-xs pr-1 divide-y divide-slate-100">
+              <!-- Leyenda generada dinámicamente -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BANNER DE ESTADO DE APLICACIÓN DE NC -->
+      <div id="bannerNCStatus" class="hidden p-3 rounded-xl border flex items-center justify-between transition-all">
+        <div class="flex items-center space-x-2.5 text-xs">
+          <span id="iconNCBanner" class="p-1 rounded-full"></span>
+          <span id="textNCBanner" class="font-medium"></span>
+        </div>
+        <button onclick="toggleApplyNC()" class="text-xs font-semibold px-2.5 py-1 rounded-lg border bg-white shadow-sm hover:bg-slate-50 transition">
+          <span id="btnToggleNCLabel">Revertir a Tabla Completa</span>
+        </button>
+      </div>
+
+      <!-- BARRA DE FILTROS AVANZADOS -->
+      <div class="bg-white rounded-xl p-3 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+          <div class="flex items-center space-x-1.5 text-xs font-bold text-slate-800">
+            <i data-lucide="filter" class="w-4 h-4 text-blue-600"></i>
+            <span>Filtros de Búsqueda</span>
+          </div>
+
+          <!-- Botones de Acción de Exportación y Aplicación NC -->
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Botón Aplicar NC -->
+            <button id="btnApplyNC" onclick="toggleApplyNC()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition">
+              <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+              <span id="lblBtnApplyNC">Aplicar NC (Anular / Descuento)</span>
+            </button>
+
+            <!-- Botón Tabla completa.xlsx con icono Excel -->
+            <button onclick="downloadCompleteExcel()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition" title="Exportar la tabla íntegra original">
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.75 3.5 22 3.75 22 4.08V19.92Q22 20.25 21.75 20.5 21.5 20.75H7.83Q7.5 20.75 7.25 20.5 7 20.25 7 19.92V17H2.83Q2.5 17 2.25 16.75 2 16.5 2 16.17V7.83Q2 7.5 2.25 7.25 2.5 7 2.83 7H7V4.08Q7 3.75 7.25 3.5 7.5 3.25 7.83 3.25M7 13H5.5L4.5 11.2 3.5 13H2V7.5H3.5L4.5 9.3 5.5 7.5H7M15.5 15.5H19V8.5H15.5M10.5 15.5H14V8.5H10.5M8.5 15.5V19.25H20.5V4.75H8.5V8.5H9.5V15.5Z"/></svg>
+              <span>Tabla completa.xlsx</span>
+            </button>
+
+            <!-- Botón Tabla procesada.xlsx con icono Excel -->
+            <button onclick="downloadProcessedExcel()" class="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition" title="Exportar según filtros y NC aplicadas con hoja de auditoría">
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M21.17 3.25Q21.5 3.25 21.75 3.5 22 3.75 22 4.08V19.92Q22 20.25 21.75 20.5 21.5 20.75H7.83Q7.5 20.75 7.25 20.5 7 20.25 7 19.92V17H2.83Q2.5 17 2.25 16.75 2 16.5 2 16.17V7.83Q2 7.5 2.25 7.25 2.5 7 2.83 7H7V4.08Q7 3.75 7.25 3.5 7.5 3.25 7.83 3.25M7 13H5.5L4.5 11.2 3.5 13H2V7.5H3.5L4.5 9.3 5.5 7.5H7M15.5 15.5H19V8.5H15.5M10.5 15.5H14V8.5H10.5M8.5 15.5V19.25H20.5V4.75H8.5V8.5H9.5V15.5Z"/></svg>
+              <span>Tabla procesada.xlsx</span>
+            </button>
+
+            <!-- Descargar ZIP: visible solo en Modalidad 1 -->
+            <button id="btnDownloadZip" onclick="downloadZip()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg flex items-center space-x-1.5 shadow-sm transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Descargar ZIP con PDFs</span>
+            </button>
+
+            <!-- Reiniciar -->
+            <button onclick="resetApp()" class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition" title="Procesar nuevo archivo">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controles de Filtros Avanzados -->
+        <div class="space-y-2.5">
+          <!-- Fila 1: Filtros Cronológicos (Años Múltiples, Meses Múltiples, Desde, Hasta) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+            <!-- 1. Multi-Select Años -->
+            <div class="relative" id="dropdownContainerAnios">
+              <button type="button" onclick="toggleMultiSelectDropdown('Anios')" class="w-full px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-semibold text-slate-800 flex items-center justify-between shadow-2xs transition" id="btnDropdownAnios">
+                <span class="flex items-center space-x-1.5 truncate">
+                  <i data-lucide="calendar" class="w-3.5 h-3.5 text-blue-600 shrink-0"></i>
+                  <span id="labelDropdownAnios" class="truncate">Años: Todos</span>
+                </span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1"></i>
+              </button>
+              
+              <!-- Panel desplegable Años -->
+              <div id="panelDropdownAnios" class="hidden absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-2.5 space-y-2 text-xs animate-in fade-in duration-100">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span class="font-bold text-slate-800 text-[11px]">Años</span>
+                  <div class="space-x-1.5 text-[10px]">
+                    <button type="button" onclick="selectAllInDropdown('Anios', true)" class="text-blue-600 hover:underline font-semibold">Todos</button>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" onclick="selectAllInDropdown('Anios', false)" class="text-slate-500 hover:underline">Ninguno</button>
+                  </div>
+                </div>
+                <div id="listDropdownAnios" class="max-h-48 overflow-y-auto space-y-1 text-[11px] pr-1 divide-y divide-slate-50">
+                  <!-- Generado dinámicamente -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Multi-Select Meses -->
+            <div class="relative" id="dropdownContainerMeses">
+              <button type="button" onclick="toggleMultiSelectDropdown('Meses')" class="w-full px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-semibold text-slate-800 flex items-center justify-between shadow-2xs transition" id="btnDropdownMeses">
+                <span class="flex items-center space-x-1.5 truncate">
+                  <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
+                  <span id="labelDropdownMeses" class="truncate">Meses: Todos</span>
+                </span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1"></i>
+              </button>
+              
+              <!-- Panel desplegable Meses -->
+              <div id="panelDropdownMeses" class="hidden absolute top-full left-0 mt-1 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-2.5 space-y-2 text-xs animate-in fade-in duration-100">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span class="font-bold text-slate-800 text-[11px]">Meses</span>
+                  <div class="space-x-1.5 text-[10px]">
+                    <button type="button" onclick="selectAllInDropdown('Meses', true)" class="text-blue-600 hover:underline font-semibold">Todos</button>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" onclick="selectAllInDropdown('Meses', false)" class="text-slate-500 hover:underline">Ninguno</button>
+                  </div>
+                </div>
+                <div id="listDropdownMeses" class="max-h-48 overflow-y-auto space-y-1 text-[11px] pr-1 divide-y divide-slate-50">
+                  <!-- Generado dinámicamente -->
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Rango Desde -->
+            <div class="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
+              <span class="text-slate-500 font-medium text-[11px] shrink-0">Desde:</span>
+              <input type="date" id="filterFechaDesde" onchange="applyFilters()" class="w-full bg-transparent font-mono text-[11px] focus:outline-none cursor-pointer">
+            </div>
+
+            <!-- 4. Rango Hasta -->
+            <div class="flex items-center space-x-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 shadow-2xs">
+              <span class="text-slate-500 font-medium text-[11px] shrink-0">Hasta:</span>
+              <input type="date" id="filterFechaHasta" onchange="applyFilters()" class="w-full bg-transparent font-mono text-[11px] focus:outline-none cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Fila 2: Filtros de Selección Múltiple con Validación de Datos -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+            <!-- Multi-Select Clientes -->
+            <div class="relative" id="dropdownContainerClientes">
+              <button type="button" onclick="toggleMultiSelectDropdown('Clientes')" class="w-full px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-semibold text-slate-800 flex items-center justify-between shadow-2xs transition" id="btnDropdownClientes">
+                <span class="flex items-center space-x-1.5 truncate">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-blue-600 shrink-0"></i>
+                  <span id="labelDropdownClientes" class="truncate">Clientes: Todos</span>
+                </span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1"></i>
+              </button>
+              
+              <!-- Panel desplegable Clientes -->
+              <div id="panelDropdownClientes" class="hidden absolute top-full left-0 mt-1 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-2.5 space-y-2 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span class="font-bold text-slate-800 text-[11px]">Clientes (Validación)</span>
+                  <div class="space-x-1.5 text-[10px]">
+                    <button type="button" onclick="selectAllInDropdown('Clientes', true)" class="text-blue-600 hover:underline font-semibold">Todos</button>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" onclick="selectAllInDropdown('Clientes', false)" class="text-slate-500 hover:underline">Ninguno</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input type="text" id="searchDropdownClientes" oninput="filterDropdownList('Clientes')" placeholder="Buscar cliente..." class="w-full pl-7 pr-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2"></i>
+                </div>
+                <div id="listDropdownClientes" class="max-h-48 overflow-y-auto space-y-1 text-[11px] pr-1 divide-y divide-slate-50">
+                  <!-- Generado dinámicamente -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-Select Contratos -->
+            <div class="relative" id="dropdownContainerContratos">
+              <button type="button" onclick="toggleMultiSelectDropdown('Contratos')" class="w-full px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-semibold text-slate-800 flex items-center justify-between shadow-2xs transition" id="btnDropdownContratos">
+                <span class="flex items-center space-x-1.5 truncate">
+                  <i data-lucide="file-signature" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
+                  <span id="labelDropdownContratos" class="truncate">Contratos: Todos</span>
+                </span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1"></i>
+              </button>
+              
+              <!-- Panel desplegable Contratos -->
+              <div id="panelDropdownContratos" class="hidden absolute top-full left-0 mt-1 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-2.5 space-y-2 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span class="font-bold text-slate-800 text-[11px]">Contratos (Validación)</span>
+                  <div class="space-x-1.5 text-[10px]">
+                    <button type="button" onclick="selectAllInDropdown('Contratos', true)" class="text-blue-600 hover:underline font-semibold">Todos</button>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" onclick="selectAllInDropdown('Contratos', false)" class="text-slate-500 hover:underline">Ninguno</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input type="text" id="searchDropdownContratos" oninput="filterDropdownList('Contratos')" placeholder="Buscar contrato..." class="w-full pl-7 pr-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2"></i>
+                </div>
+                <div id="listDropdownContratos" class="max-h-48 overflow-y-auto space-y-1 text-[11px] pr-1 divide-y divide-slate-50">
+                  <!-- Generado dinámicamente -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-Select Conceptos -->
+            <div class="relative" id="dropdownContainerConceptos">
+              <button type="button" onclick="toggleMultiSelectDropdown('Conceptos')" class="w-full px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-lg text-[11px] font-semibold text-slate-800 flex items-center justify-between shadow-2xs transition" id="btnDropdownConceptos">
+                <span class="flex items-center space-x-1.5 truncate">
+                  <i data-lucide="tag" class="w-3.5 h-3.5 text-emerald-600 shrink-0"></i>
+                  <span id="labelDropdownConceptos" class="truncate">Conceptos: Todos</span>
+                </span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0 ml-1"></i>
+              </button>
+              
+              <!-- Panel desplegable Conceptos -->
+              <div id="panelDropdownConceptos" class="hidden absolute top-full left-0 mt-1 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 p-2.5 space-y-2 text-xs">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                  <span class="font-bold text-slate-800 text-[11px]">Conceptos (Validación)</span>
+                  <div class="space-x-1.5 text-[10px]">
+                    <button type="button" onclick="selectAllInDropdown('Conceptos', true)" class="text-blue-600 hover:underline font-semibold">Todos</button>
+                    <span class="text-slate-300">|</span>
+                    <button type="button" onclick="selectAllInDropdown('Conceptos', false)" class="text-slate-500 hover:underline">Ninguno</button>
+                  </div>
+                </div>
+                <div class="relative">
+                  <input type="text" id="searchDropdownConceptos" oninput="filterDropdownList('Conceptos')" placeholder="Buscar concepto..." class="w-full pl-7 pr-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                  <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2"></i>
+                </div>
+                <div id="listDropdownConceptos" class="max-h-48 overflow-y-auto space-y-1 text-[11px] pr-1 divide-y divide-slate-50">
+                  <!-- Generado dinámicamente -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fila 3: Filtro Rápido por Tipo y Botón de Limpiar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-slate-500 font-medium text-[11px]">Tipo:</span>
+              <button id="qfAll" onclick="setQuickTypeFilter('ALL')" class="px-2 py-0.5 rounded bg-slate-900 text-white font-medium text-[11px] transition shadow-xs">Todos</button>
+              <button id="qfFC" onclick="setQuickTypeFilter('FACTURA')" class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium text-[11px] transition">Solo Facturas</button>
+              <button id="qfNC" onclick="setQuickTypeFilter('NOTA DE CREDITO')" class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium text-[11px] transition">Solo Notas Crédito</button>
+            </div>
+
+            <button onclick="clearAllFilters()" class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold flex items-center space-x-1 transition">
+              <i data-lucide="filter-x" class="w-3.5 h-3.5"></i>
+              <span>Restablecer Filtros</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABLA PRINCIPAL DE 16 COLUMNAS CON RESIZERS Y SCROLL VISIBLE -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
+          <div class="flex items-center space-x-2">
+            <i data-lucide="list" class="w-4 h-4 text-slate-600"></i>
+            <span class="text-xs font-bold text-slate-800">Visualización Contable</span>
+            <span id="showingCountText" class="text-xs text-slate-500 font-medium">Mostrando 0 de 0 líneas</span>
+          </div>
+
+          <div class="flex items-center space-x-2 text-[11px] text-slate-500">
+            <span class="flex items-center space-x-1">
+              <span class="inline-block w-2.5 h-2.5 bg-red-100 border border-red-300 rounded-xs"></span>
+              <span>Letra Roja: Nota Crédito</span>
+            </span>
+            <span class="flex items-center space-x-1">
+              <span class="inline-block w-2.5 h-2.5 bg-amber-200 border border-amber-400 rounded-xs"></span>
+              <span>Celda Amarilla: Factura con NC</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Contenedor con Scroll Lateral y Vertical Permanente -->
+        <div class="table-scroll-container">
+          <table class="universal-table" id="documentsTable">
+            <thead>
+              <tr>
+                <th style="width: 130px;" class="cursor-pointer select-none hover:bg-slate-200 transition group" onclick="toggleSort('FACTURA')" title="Ordenar por Factura (A-Z / 1-9 y viceversa)">
+                  <div class="flex items-center justify-between">
+                    <span>FACTURA</span>
+                    <span id="sortIconFactura" class="text-slate-400 group-hover:text-blue-600 text-xs ml-1 font-mono">↕</span>
+                  </div>
+                </th>
+                <th style="width: 85px;" class="cursor-pointer select-none hover:bg-slate-200 transition group" onclick="toggleSort('FECHA FACTURA')" title="Ordenar por Fecha (Antigua a Reciente y viceversa)">
+                  <div class="flex items-center justify-between">
+                    <span>FECHA FACTURA</span>
+                    <span id="sortIconFecha" class="text-blue-600 text-xs ml-1 font-mono">▲</span>
+                  </div>
+                </th>
+                <th style="width: 85px;">PERIODO</th>
+                <th style="width: 200px;">CLIENTE</th>
+                <th style="width: 105px;">NITCLIENTE</th>
+                <th style="width: 190px;">CONCEPTO</th>
+                <th style="width: 85px;">PTO ENTREGA</th>
+                <th style="width: 80px;" class="text-right">CANTIDAD</th>
+                <th style="width: 105px;" class="text-right">VALOR UNITARIO</th>
+                <th style="width: 120px;" class="text-right">VALOR TOTAL</th>
+                <th style="width: 90px;">TRM FACTURA</th>
+                <th style="width: 95px;">TIPO</th>
+                <th style="width: 130px;">OBSERVACIONES</th>
+                <th style="width: 170px;">CONTRATO</th>
+                <th style="width: 100px;">NOTA CREDITO</th>
+                <th style="width: 100px;">NOTA</th>
+                <th style="width: 55px;" class="text-center">DOC</th>
+              </tr>
+            </thead>
+            <tbody id="documentsTableBody" class="divide-y divide-slate-100 font-mono text-[11px]">
+              <!-- Filas generadas dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal de Vista Previa de PDF -->
+  <div id="previewModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] flex flex-col overflow-hidden animate-in fade-in duration-200">
+      <div class="px-6 py-3 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-blue-400"></i>
+          <div>
+            <h4 id="modalDocTitle" class="text-xs sm:text-sm font-bold text-white">Vista Previa de Documento</h4>
+            <p id="modalDocSubtitle" class="text-[10px] text-slate-400">Documento individual</p>
+          </div>
+        </div>
+        <button onclick="closePreviewModal()" class="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex-1 bg-slate-100 p-2">
+        <iframe id="pdfPreviewFrame" src="" class="w-full h-full rounded-lg border border-slate-300 bg-white"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de Notificaciones -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 z-50 hidden transition-all duration-300">
+    <div id="toastContent" class="px-4 py-2.5 rounded-xl shadow-lg border text-xs font-semibold flex items-center space-x-2">
+      <span id="toastIcon"></span>
+      <span id="toastMessage">Operación realizada</span>
+    </div>
+  </div>
+
+  <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+    Gestor Inteligente de Facturas y Notas de Crédito &bull; Herramienta Web Universal (GitHub Pages)
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
