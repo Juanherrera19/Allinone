@@ -135,87 +135,64 @@
       nav button.nav-pronto { color: var(--muted); opacity: .6; cursor: not-allowed }
       nav button.nav-pronto:hover { transform: none; background: transparent; box-shadow: none }
       .nav-toggle-bar {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         margin-bottom: 14px;
-        padding-bottom: 12px;
+        padding-bottom: 10px;
         border-bottom: 1px solid #e2e8f0;
       }
+      .nav-toggle-title {
+        font-family: inherit;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        user-select: none;
+      }
       .nav-toggle-btn {
-        min-width: 0 !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
-        gap: 4px;
-        padding: 6px 3px !important;
-        font-family: inherit !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.2px !important;
-        border-radius: 7px !important;
+        width: 36px !important;
+        height: 32px !important;
+        padding: 0 !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+        color: #0284c7 !important;
         cursor: pointer;
         margin: 0 !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        white-space: nowrap;
         user-select: none;
-        overflow: hidden;
-      }
-      #btn-nav-expand-all {
-        background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%) !important;
-        border: 1px solid #bbf7d0 !important;
-        color: #166534 !important;
-        box-shadow: 0 1px 3px rgba(22, 101, 52, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-      }
-      #btn-nav-expand-all .nav-toggle-icon {
-        color: #16a34a;
-        width: 14px;
-        height: 14px;
-        flex: none;
-        transition: transform 0.2s ease;
-      }
-      #btn-nav-expand-all:hover {
-        background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%) !important;
-        border-color: #86efac !important;
-        color: #14532d !important;
-        box-shadow: 0 4px 10px rgba(22, 163, 74, 0.22) !important;
-        transform: translateY(-1px) !important;
-      }
-      #btn-nav-expand-all:hover .nav-toggle-icon {
-        transform: translateY(1.5px);
-      }
-      #btn-nav-expand-all:active {
-        transform: translateY(0) !important;
-        box-shadow: 0 1px 2px rgba(22, 163, 74, 0.15) !important;
-      }
-      #btn-nav-collapse-all {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #334155 !important;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04) !important;
       }
-      #btn-nav-collapse-all .nav-toggle-icon {
-        color: #64748b;
-        width: 14px;
-        height: 14px;
-        flex: none;
-        transition: transform 0.2s ease;
-      }
-      #btn-nav-collapse-all:hover {
-        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
-        border-color: #94a3b8 !important;
-        color: #0f172a !important;
-        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.14) !important;
+      .nav-toggle-btn:hover {
+        background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+        border-color: #0284c7 !important;
+        color: #0369a1 !important;
+        box-shadow: 0 3px 8px rgba(2, 132, 199, 0.22) !important;
         transform: translateY(-1px) !important;
       }
-      #btn-nav-collapse-all:hover .nav-toggle-icon {
-        transform: translateY(-1.5px);
+      .nav-toggle-btn:active {
+        transform: scale(0.95) !important;
       }
-      #btn-nav-collapse-all:active {
-        transform: translateY(0) !important;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1) !important;
+      .nav-toggle-btn.expanded {
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%) !important;
+        color: #475569 !important;
+        border-color: #cbd5e1 !important;
+      }
+      .nav-toggle-btn.expanded:hover {
+        background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%) !important;
+        border-color: #94a3b8 !important;
+        color: #0f172a !important;
+      }
+      .nav-toggle-btn .nav-toggle-icon {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        transition: transform 0.2s ease;
       }
       main { flex: 1; min-width: 0; padding: 20px 24px; overflow: auto }
       /* Empty State */
@@ -1691,6 +1668,144 @@
           grid-template-columns: 1fr !important;
           gap: 8px !important;
         }
+        /* Multidespacho móvil adaptado sin desbordamientos */
+        .multidespacho-grid {
+          grid-template-columns: 1fr !important;
+          gap: 14px !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+        }
+        .multidespacho-grid label,
+        .multidespacho-field {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+          margin: 0 !important;
+        }
+        .multidespacho-grid input[type="text"],
+        .multidespacho-grid input[type="number"],
+        .multidespacho-grid input[type="date"],
+        .multidespacho-grid input[type="file"],
+        .multidespacho-grid select {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+          font-size: 16px !important;
+          min-height: 44px !important;
+          padding: 10px 12px !important;
+          border-radius: 8px !important;
+          border: 1px solid #cbd5e1 !important;
+          background: #ffffff !important;
+        }
+        #multidespacho-year {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+        }
+        #multidespacho-start,
+        #multidespacho-end {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+        }
+        #multidespacho-zip {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+          font-size: 13px !important;
+          padding: 8px 10px !important;
+          min-height: 44px !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          white-space: nowrap !important;
+          display: block !important;
+        }
+        #multidespacho-zip::file-selector-button,
+        #multidespacho-zip::-webkit-file-upload-button {
+          padding: 6px 12px !important;
+          font-size: 12.5px !important;
+          border-radius: 6px !important;
+          border: 1px solid #cbd5e1 !important;
+          background: #ffffff !important;
+          color: #0b2340 !important;
+          font-weight: 600 !important;
+          margin-right: 8px !important;
+          cursor: pointer;
+        }
+        .field-header {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          flex-wrap: wrap !important;
+          gap: 6px !important;
+          width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+          margin-bottom: 5px !important;
+        }
+        .field-title {
+          font-size: 13.5px !important;
+          font-weight: 700 !important;
+          color: #1e293b !important;
+          min-width: 0 !important;
+        }
+        .field-actions {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          flex-wrap: wrap !important;
+          flex-shrink: 0 !important;
+        }
+        .btn-micro {
+          padding: 4px 10px !important;
+          font-size: 12px !important;
+          min-height: 28px !important;
+          border-radius: 6px !important;
+          white-space: nowrap !important;
+        }
+        .multidespacho-grid select[multiple] {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          box-sizing: border-box !important;
+          min-height: 125px !important;
+          padding: 6px !important;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
+        }
+        .multidespacho-grid select[multiple] option {
+          padding: 8px 10px !important;
+          border-radius: 6px !important;
+          font-size: 13.5px !important;
+          white-space: normal !important;
+          word-break: break-word !important;
+        }
+        .multidespacho-actions-bar {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: stretch !important;
+          gap: 8px !important;
+          width: 100% !important;
+          margin-top: 14px !important;
+        }
+        .multidespacho-actions-bar .btn {
+          width: 100% !important;
+          justify-content: center !important;
+          min-height: 44px !important;
+        }
+        #multidespacho-status {
+          width: 100% !important;
+          justify-content: center !important;
+          box-sizing: border-box !important;
+          text-align: center !important;
+          min-height: 40px !important;
+        }
         .kpis {
           grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
           gap: 8px !important;
@@ -1932,13 +2047,10 @@
 
         <!-- Botones para expandir y plegar todo el menú -->
         <div class="nav-toggle-bar">
-          <button type="button" class="nav-toggle-btn" id="btn-nav-expand-all" onclick="navToggleAll(true)" title="Expandir todas las secciones">
-            <svg class="nav-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
-            <span>Expandir todo</span>
-          </button>
-          <button type="button" class="nav-toggle-btn" id="btn-nav-collapse-all" onclick="navToggleAll(false)" title="Plegar todas las secciones">
-            <svg class="nav-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
-            <span>Plegar todo</span>
+          <span class="nav-toggle-title">Secciones</span>
+          <button type="button" class="nav-toggle-btn" id="btn-nav-toggle-all" onclick="navToggleAll()" title="Expandir todo" aria-label="Expandir o plegar todas las secciones">
+            <svg id="nav-toggle-icon-down" class="nav-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+            <svg id="nav-toggle-icon-up" class="nav-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
           </button>
         </div>
 
@@ -2432,21 +2544,19 @@
 
               <div class="multidespacho-grid">
 
-                <label>Archivo ZIP
-
+                <label class="multidespacho-field">
+                  <span class="field-title">Archivo ZIP</span>
                   <input id="multidespacho-zip" type="file" accept=".zip,application/zip" />
-
                 </label>
 
-                <label>Año de la información
-
+                <label class="multidespacho-field">
+                  <span class="field-title">Año de la información</span>
                   <input id="multidespacho-year" type="number" min="2000" max="2100" step="1" value="2026" />
-
                 </label>
 
-                <label>
+                <label class="multidespacho-field">
                   <div class="field-header">
-                    <span>Planta</span>
+                    <span class="field-title">Planta</span>
                     <div class="field-actions">
                       <button type="button" class="btn-micro" onclick="multidespachoSelectAllPlants(true)" title="Seleccionar todas las plantas">Todas</button>
                       <button type="button" class="btn-micro" onclick="multidespachoSelectAllPlants(false)" title="Limpiar selección">Limpiar</button>
@@ -2455,21 +2565,19 @@
                   <select id="multidespacho-plant" multiple><option value="" selected>Todas las plantas</option></select>
                 </label>
 
-                <label>Fecha inicial
-
+                <label class="multidespacho-field">
+                  <span class="field-title">Fecha inicial</span>
                   <input id="multidespacho-start" type="date" />
-
                 </label>
 
-                <label>Fecha final
-
+                <label class="multidespacho-field">
+                  <span class="field-title">Fecha final</span>
                   <input id="multidespacho-end" type="date" />
-
                 </label>
 
-                <label>
+                <label class="multidespacho-field">
                   <div class="field-header">
-                    <span>Métrica</span>
+                    <span class="field-title">Métrica</span>
                     <div class="field-actions">
                       <button type="button" class="btn-micro" onclick="multidespachoSelectAllMetrics(true)" title="Seleccionar ambas métricas">Ambas</button>
                       <button type="button" class="btn-micro" onclick="multidespachoSelectMetricOnly('total')" title="Solo Despacho">Total</button>
@@ -2477,18 +2585,14 @@
                     </div>
                   </div>
                   <select id="multidespacho-metric" multiple>
-
                     <option value="total" selected>Despacho Diario Total (MWh)</option>
-
                     <option value="gas" selected>Consumo Gas día (Mbtu)</option>
-
                   </select>
-
                 </label>
 
               </div>
 
-              <div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <div class="multidespacho-actions-bar" style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
 
                 <button id="multidespacho-process" class="btn btn-con-icono"><svg class="btn-icono" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Procesar ZIP</span></button>
 
@@ -5034,10 +5138,30 @@
         document.title = (cfg.title && tool && tool !== 'none') ? 'All-in-One — ' + cfg.title : 'All-in-One';
       }
 
-      function navToggleAll(open){
-        document.querySelectorAll('nav details').forEach(d => {
-          d.open = open;
+      let navAllExpanded = false;
+      function navToggleAll(forceState) {
+        const details = document.querySelectorAll('nav details');
+        const anyOpen = Array.from(details).some(d => d.open);
+        const newState = typeof forceState === 'boolean' ? forceState : !anyOpen;
+        navAllExpanded = newState;
+        details.forEach(d => {
+          d.open = newState;
         });
+        updateNavToggleButton(newState);
+      }
+
+      function updateNavToggleButton(expanded) {
+        const btn = document.getElementById('btn-nav-toggle-all');
+        const iconDown = document.getElementById('nav-toggle-icon-down');
+        const iconUp = document.getElementById('nav-toggle-icon-up');
+        if (!btn) return;
+        btn.classList.toggle('expanded', expanded);
+        btn.title = expanded ? 'Plegar todo' : 'Expandir todo';
+        btn.setAttribute('aria-label', expanded ? 'Plegar todo' : 'Expandir todo');
+        if (iconDown && iconUp) {
+          iconDown.style.display = expanded ? 'none' : 'block';
+          iconUp.style.display = expanded ? 'block' : 'none';
+        }
       }
 
       function toggleMobileMenu(forceState) {
@@ -5150,6 +5274,14 @@
         link.addEventListener('click', () => {
           if (typeof window !== 'undefined' && window.innerWidth <= 800) toggleMobileMenu(false);
         });
+
+      // Sincronizar icono del botón de toggle cuando el usuario abre/cierra detalles manualmente
+      document.querySelectorAll('nav details').forEach(d => {
+        d.addEventListener('toggle', () => {
+          const anyOpen = Array.from(document.querySelectorAll('nav details')).some(el => el.open);
+          updateNavToggleButton(anyOpen);
+        });
+      });
       });
 
 
