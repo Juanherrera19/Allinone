@@ -3821,7 +3821,7 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
               <div class="cb-kpi-card" style="background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border:1px solid #cbd5e1; border-radius:12px; padding:16px; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                 <div>
                   <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">GAS COMBUSTIBLE</div>
-                  <div style="font-size:11px; color:#64748b; margin-top:2px;">MMSCF × 1,000</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px;">KPC (MMSCF × 1,000)</div>
                   <div id="cb-gas-comb-val-1000" style="font-size:28px; font-weight:800; color:#0f172a; margin:8px 0 4px 0; font-family:monospace, inherit;">—</div>
                   <div id="cb-gas-comb-val-orig" style="font-size:11.5px; color:#64748b;">Original: — MMSCF</div>
                 </div>
@@ -3836,8 +3836,8 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
               <!-- 2. KPI HOCOL ARRECIFE (CORIOLIS) (EN EL MEDIO) -->
               <div class="cb-kpi-card" style="background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border:1px solid #cbd5e1; border-radius:12px; padding:16px; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                 <div>
-                  <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">HOCOL ARRECIFE (CORIOLIS)</div>
-                  <div style="font-size:11px; color:#64748b; margin-top:2px;">TOTAL MMSCF × 1,000</div>
+                  <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">CANTIDAD ENTREGADA - HOCOL ARRECIFE</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px;">KPC (TOTAL MMSCF × 1,000)</div>
                   <div id="cb-hocol-val-1000" style="font-size:28px; font-weight:800; color:#0f172a; margin:8px 0 4px 0; font-family:monospace, inherit;">—</div>
                   <div id="cb-hocol-val-orig" style="font-size:11.5px; color:#64748b;">Original: — MMSCF</div>
                 </div>
@@ -3852,8 +3852,8 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
               <!-- 3. KPI ETC (CORIOLIS) (A LA DERECHA) -->
               <div class="cb-kpi-card" style="background:linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border:1px solid #cbd5e1; border-radius:12px; padding:16px; position:relative; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
                 <div>
-                  <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">ETC (CORIOLIS)</div>
-                  <div style="font-size:11px; color:#64748b; margin-top:2px;">TOTAL MMSCF × 1,000</div>
+                  <div style="font-size:11.5px; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px;">CANTIDAD TOMADA - ETC (CORIOLIS)</div>
+                  <div style="font-size:11px; color:#64748b; margin-top:2px;">KPC (TOTAL MMSCF × 1,000)</div>
                   <div id="cb-etc-val-1000" style="font-size:28px; font-weight:800; color:#0f172a; margin:8px 0 4px 0; font-family:monospace, inherit;">—</div>
                   <div id="cb-etc-val-orig" style="font-size:11.5px; color:#64748b;">Original: — MMSCF</div>
                 </div>
@@ -3890,7 +3890,7 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
                     <span id="cb-desb-dia-tag" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; background:#e2e8f0; color:#475569;">HOCOL − ETC</span>
                   </div>
                   <div id="cb-desbalance-dia-val" style="font-size:26px; font-weight:800; color:#0f172a; margin:8px 0 2px 0; font-family:monospace, inherit;">—</div>
-                  <div style="font-size:11px; color:#64748b;">MSCF (×1,000)</div>
+                  <div style="font-size:11px; color:#64748b;">KPC (×1,000)</div>
                   
                   <div style="display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;">
                     <span id="cb-desbalance-dia-pct-badge" style="background:#e2e8f0; color:#334155; padding:3px 9px; border-radius:6px; font-weight:700; font-size:12px;">% Desbalance: —</span>
@@ -3899,8 +3899,8 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
                 </div>
 
                 <div style="margin-top:14px; padding-top:10px; border-top:1px dashed #cbd5e1; font-size:12px; color:#64748b; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
-                  <span>HOCOL: <b id="cb-desb-hocol-dia" style="color:#0f172a;">—</b></span>
-                  <span>ETC: <b id="cb-desb-etc-dia" style="color:#0f172a;">—</b></span>
+                  <span>Entregada: <b id="cb-desb-hocol-dia" style="color:#0f172a;">—</b></span>
+                  <span>Tomada: <b id="cb-desb-etc-dia" style="color:#0f172a;">—</b></span>
                 </div>
               </div>
 
@@ -3912,7 +3912,7 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
                     <span id="cb-desb-mes-tag" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; background:#e2e8f0; color:#475569;">Fila TOTAL (×1,000)</span>
                   </div>
                   <div id="cb-desbalance-mes-val" style="font-size:26px; font-weight:800; color:#0f172a; margin:8px 0 2px 0; font-family:monospace, inherit;">—</div>
-                  <div style="font-size:11px; color:#64748b;">MSCF Acumulado mes</div>
+                  <div style="font-size:11px; color:#64748b;">KPC Acumulado mes</div>
                   
                   <div style="display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;">
                     <span id="cb-desbalance-mes-pct-badge" style="background:#e2e8f0; color:#334155; padding:3px 9px; border-radius:6px; font-weight:700; font-size:12px;">% Mes: —</span>
@@ -3921,8 +3921,8 @@ main { flex: 1; min-width: 0; padding: 20px 144px 20px 20px; overflow: auto }
                 </div>
 
                 <div style="margin-top:14px; padding-top:10px; border-top:1px dashed #cbd5e1; font-size:12px; color:#64748b; display:flex; justify-content:space-between; flex-wrap:wrap; gap:6px;">
-                  <span>Total HOCOL: <b id="cb-desb-hocol-mes" style="color:#0f172a;">—</b></span>
-                  <span>Total ETC: <b id="cb-desb-etc-mes" style="color:#0f172a;">—</b></span>
+                  <span>Total Entregada: <b id="cb-desb-hocol-mes" style="color:#0f172a;">—</b></span>
+                  <span>Total Tomada: <b id="cb-desb-etc-mes" style="color:#0f172a;">—</b></span>
                 </div>
               </div>
             </div>
@@ -10515,24 +10515,24 @@ const TGI_TEMPLATE_ROWS = [
           whatsAppMsg = '⚠️ *ALERTA DE DESBALANCE - BLOQUE VIM 8 (ARRECIFE)*\n' +
             '📅 *Fecha:* ' + fechaEspanol + '\n\n' +
             'El día de hoy hubo un desbalance mayor del 1% a tener en cuenta:\n' +
-            '• *HOCOL Arrecife:* ' + hocolDiaFmt + ' MSCF\n' +
-            '• *ETC:* ' + etcDiaFmt + ' MSCF\n' +
-            '• *Desbalance del día:* ' + desbDiaFmt + ' MSCF (' + pctDiaFmt + '%)\n\n' +
+            '• *Cantidad Entregada (KPC):* ' + hocolDiaFmt + ' KPC\n' +
+            '• *Cantidad Tomada (KPC):* ' + etcDiaFmt + ' KPC\n' +
+            '• *Desbalance del día:* ' + desbDiaFmt + ' KPC (' + pctDiaFmt + '%)\n\n' +
             'Esto *' + verboAfecto + '* el desbalance total del mes:\n' +
-            '• *Total acumulado HOCOL:* ' + hocolMesFmt + ' MSCF\n' +
-            '• *Total acumulado ETC:* ' + etcMesFmt + ' MSCF\n' +
-            '• *Desbalance total mes:* ' + desbMesFmt + ' MSCF (' + pctMesFmt + '%)';
+            '• *Total acumulado entregado (KPC):* ' + hocolMesFmt + ' KPC\n' +
+            '• *Total acumulado tomado (KPC):* ' + etcMesFmt + ' KPC\n' +
+            '• *Desbalance total mes:* ' + desbMesFmt + ' KPC (' + pctMesFmt + '%)';
         } else {
           whatsAppMsg = '✅ *CONTROL DE DESBALANCE - BLOQUE VIM 8 (ARRECIFE)*\n' +
             '📅 *Fecha:* ' + fechaEspanol + '\n\n' +
             'El día de hoy el desbalance se encuentra dentro del límite normal (≤ 1.0%):\n' +
-            '• *HOCOL Arrecife:* ' + hocolDiaFmt + ' MSCF\n' +
-            '• *ETC:* ' + etcDiaFmt + ' MSCF\n' +
-            '• *Desbalance del día:* ' + desbDiaFmt + ' MSCF (' + pctDiaFmt + '%)\n\n' +
+            '• *Cantidad Entregada (KPC):* ' + hocolDiaFmt + ' KPC\n' +
+            '• *Cantidad Tomada (KPC):* ' + etcDiaFmt + ' KPC\n' +
+            '• *Desbalance del día:* ' + desbDiaFmt + ' KPC (' + pctDiaFmt + '%)\n\n' +
             'Estado del desbalance total del mes:\n' +
-            '• *Total acumulado HOCOL:* ' + hocolMesFmt + ' MSCF\n' +
-            '• *Total acumulado ETC:* ' + etcMesFmt + ' MSCF\n' +
-            '• *Desbalance total mes:* ' + desbMesFmt + ' MSCF (' + pctMesFmt + '%) (*no afectó*)';
+            '• *Total acumulado entregado (KPC):* ' + hocolMesFmt + ' KPC\n' +
+            '• *Total acumulado tomado (KPC):* ' + etcMesFmt + ' KPC\n' +
+            '• *Desbalance total mes:* ' + desbMesFmt + ' KPC (' + pctMesFmt + '%) (*no afectó*)';
         }
 
         if (observacionDia) {
@@ -10706,8 +10706,8 @@ const TGI_TEMPLATE_ROWS = [
             desbDiaStatusText.style.color = extracted.esAlarmaDia ? '#dc2626' : '#16a34a';
             desbDiaStatusText.style.fontWeight = '700';
           }
-          if (desbHocolDia) desbHocolDia.textContent = extracted.hocolDiaFmt + ' MSCF';
-          if (desbEtcDia) desbEtcDia.textContent = extracted.etcDiaFmt + ' MSCF';
+          if (desbHocolDia) desbHocolDia.textContent = extracted.hocolDiaFmt + ' KPC';
+          if (desbEtcDia) desbEtcDia.textContent = extracted.etcDiaFmt + ' KPC';
 
           if (desbMesVal) desbMesVal.textContent = extracted.desbMesFmt;
           if (desbMesPctBadge) {
@@ -10724,8 +10724,8 @@ const TGI_TEMPLATE_ROWS = [
             desbMesStatusText.textContent = extracted.afectoMes ? '⚠️ Afectó desbalance mes (> 1%)' : '✅ No afectó desbalance mes (≤ 1%)';
             desbMesStatusText.style.color = extracted.afectoMes ? '#dc2626' : '#16a34a';
           }
-          if (desbHocolMes) desbHocolMes.textContent = extracted.hocolMesFmt + ' MSCF';
-          if (desbEtcMes) desbEtcMes.textContent = extracted.etcMesFmt + ' MSCF';
+          if (desbHocolMes) desbHocolMes.textContent = extracted.hocolMesFmt + ' KPC';
+          if (desbEtcMes) desbEtcMes.textContent = extracted.etcMesFmt + ' KPC';
 
           // Badge General Header
           if (desbBadge) {
